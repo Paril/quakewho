@@ -377,7 +377,7 @@ G_SetStats
 void G_SetStats (edict_t *ent)
 {
 	gitem_t		*item;
-	int			index, cells;
+	int			index, cells = 0;
 	int			power_armor_type;
 
 	//
@@ -412,7 +412,7 @@ void G_SetStats (edict_t *ent)
 		{	// ran out of cells for power armor
 			ent->flags &= ~FL_POWER_ARMOR;
 			gi.sound(ent, CHAN_ITEM, gi.soundindex("misc/power2.wav"), 1, ATTN_NORM, 0);
-			power_armor_type = 0;;
+			power_armor_type = 0;
 		}
 	}
 

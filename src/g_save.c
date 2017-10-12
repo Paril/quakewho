@@ -710,7 +710,7 @@ void ReadLevel (char *filename)
 
 	// check function pointer base address
 	fread (&base, sizeof(base), 1, f);
-#ifdef _WIN32
+#if defined(_WIN32)
 	if (base != (void *)InitGame)
 	{
 		fclose (f);

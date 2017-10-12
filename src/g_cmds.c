@@ -872,7 +872,7 @@ void Cmd_Say_f (edict_t *ent, qboolean team, qboolean arg0)
 void Cmd_PlayerList_f(edict_t *ent)
 {
 	int i;
-	char st[80];
+	char str[80];
 	char text[1400];
 	edict_t *e2;
 
@@ -882,19 +882,19 @@ void Cmd_PlayerList_f(edict_t *ent)
 		if (!e2->inuse)
 			continue;
 
-		Com_sprintf(st, sizeof(st), "%02d:%02d %4d %3d %s%s\n",
+		Com_sprintf(str, sizeof(str), "%02d:%02d %4d %3d %s%s\n",
 			(level.framenum - e2->client->resp.enterframe) / 600,
 			((level.framenum - e2->client->resp.enterframe) % 600)/10,
 			e2->client->ping,
 			e2->client->resp.score,
 			e2->client->pers.netname,
 			e2->client->resp.spectator ? " (spectator)" : "");
-		if (strlen(text) + strlen(st) > sizeof(text) - 50) {
+		if (strlen(text) + strlen(str) > sizeof(text) - 50) {
 			sprintf(text+strlen(text), "And more...\n");
 			gi.cprintf(ent, PRINT_HIGH, "%s", text);
 			return;
 		}
-		strcat(text, st);
+		strcat(text, str);
 	}
 	gi.cprintf(ent, PRINT_HIGH, "%s", text);
 }

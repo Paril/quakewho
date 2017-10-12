@@ -604,7 +604,7 @@ void SpawnEntities (char *mapname, char *entities, char *spawnpoint)
 
 	gi.dprintf ("%i entities inhibited\n", inhibit);
 
-#ifdef DEBUG
+#if defined(DEBUG)
 	i = 1;
 	ent = EDICT_NUM(i);
 	while (i < globals.num_edicts) {
