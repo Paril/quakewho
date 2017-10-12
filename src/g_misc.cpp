@@ -1577,16 +1577,16 @@ void SP_target_character (edict_t *self)
 void target_string_use (edict_t *self, edict_t *other, edict_t *activator)
 {
 	edict_t *e;
-	int		n, l;
+	int		n;
 	char	c;
 
-	l = strlen(self->message);
+	size_t l = strlen(self->message);
 	for (e = self->teammaster; e; e = e->teamchain)
 	{
 		if (!e->count)
 			continue;
 		n = e->count - 1;
-		if (n > l)
+		if (n > (int) l)
 		{
 			e->s.frame = 12;
 			continue;
@@ -1768,7 +1768,7 @@ void SP_func_clock (edict_t *self)
 
 	func_clock_reset (self);
 
-	self->message = gi.TagMalloc (CLOCK_MESSAGE_SIZE, TAG_LEVEL);
+	self->message = (char *) gi.TagMalloc (CLOCK_MESSAGE_SIZE, TAG_LEVEL);
 
 	self->think = func_clock_think;
 

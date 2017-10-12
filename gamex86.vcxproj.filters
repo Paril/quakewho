@@ -1,84 +1,240 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="src\g_ai.c" />
-    <ClCompile Include="src\g_chase.c" />
-    <ClCompile Include="src\g_cmds.c" />
-    <ClCompile Include="src\g_combat.c" />
-    <ClCompile Include="src\g_func.c" />
-    <ClCompile Include="src\g_items.c" />
-    <ClCompile Include="src\g_main.c" />
-    <ClCompile Include="src\g_misc.c" />
-    <ClCompile Include="src\g_monster.c" />
-    <ClCompile Include="src\g_phys.c" />
-    <ClCompile Include="src\g_save.c" />
-    <ClCompile Include="src\g_spawn.c" />
-    <ClCompile Include="src\g_svcmds.c" />
-    <ClCompile Include="src\g_target.c" />
-    <ClCompile Include="src\g_trigger.c" />
-    <ClCompile Include="src\g_turret.c" />
-    <ClCompile Include="src\g_utils.c" />
-    <ClCompile Include="src\g_weapon.c" />
-    <ClCompile Include="src\m_actor.c" />
-    <ClCompile Include="src\m_berserk.c" />
-    <ClCompile Include="src\m_boss2.c" />
-    <ClCompile Include="src\m_boss3.c" />
-    <ClCompile Include="src\m_boss31.c" />
-    <ClCompile Include="src\m_boss32.c" />
-    <ClCompile Include="src\m_brain.c" />
-    <ClCompile Include="src\m_chick.c" />
-    <ClCompile Include="src\m_flash.c" />
-    <ClCompile Include="src\m_flipper.c" />
-    <ClCompile Include="src\m_float.c" />
-    <ClCompile Include="src\m_flyer.c" />
-    <ClCompile Include="src\m_gladiator.c" />
-    <ClCompile Include="src\m_gunner.c" />
-    <ClCompile Include="src\m_hover.c" />
-    <ClCompile Include="src\m_infantry.c" />
-    <ClCompile Include="src\m_insane.c" />
-    <ClCompile Include="src\m_medic.c" />
-    <ClCompile Include="src\m_move.c" />
-    <ClCompile Include="src\m_mutant.c" />
-    <ClCompile Include="src\m_parasite.c" />
-    <ClCompile Include="src\m_soldier.c" />
-    <ClCompile Include="src\m_supertank.c" />
-    <ClCompile Include="src\m_tank.c" />
-    <ClCompile Include="src\p_client.c" />
-    <ClCompile Include="src\p_hud.c" />
-    <ClCompile Include="src\p_trail.c" />
-    <ClCompile Include="src\p_view.c" />
-    <ClCompile Include="src\p_weapon.c" />
-    <ClCompile Include="src\q_shared.c" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="src\g_local.h" />
-    <ClInclude Include="src\game.h" />
-    <ClInclude Include="src\m_actor.h" />
-    <ClInclude Include="src\m_berserk.h" />
-    <ClInclude Include="src\m_boss2.h" />
-    <ClInclude Include="src\m_boss31.h" />
-    <ClInclude Include="src\m_boss32.h" />
-    <ClInclude Include="src\m_brain.h" />
-    <ClInclude Include="src\m_chick.h" />
-    <ClInclude Include="src\m_flipper.h" />
-    <ClInclude Include="src\m_float.h" />
-    <ClInclude Include="src\m_flyer.h" />
-    <ClInclude Include="src\m_gladiator.h" />
-    <ClInclude Include="src\m_gunner.h" />
-    <ClInclude Include="src\m_hover.h" />
-    <ClInclude Include="src\m_infantry.h" />
-    <ClInclude Include="src\m_insane.h" />
-    <ClInclude Include="src\m_medic.h" />
-    <ClInclude Include="src\m_mutant.h" />
-    <ClInclude Include="src\m_parasite.h" />
-    <ClInclude Include="src\m_player.h" />
-    <ClInclude Include="src\m_rider.h" />
-    <ClInclude Include="src\m_soldier.h" />
-    <ClInclude Include="src\m_supertank.h" />
-    <ClInclude Include="src\m_tank.h" />
-    <ClInclude Include="src\q_shared.h" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="src\game.def" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="src">
+      <UniqueIdentifier>{2b4115b2-12de-4fe1-8346-227ef381fc8d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="inc">
+      <UniqueIdentifier>{e1810386-02c0-4fff-8105-8a6b8bdd92a7}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\g_ai.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\g_chase.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\g_cmds.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\g_combat.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\g_func.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\g_items.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\g_main.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\g_misc.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\g_monster.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\g_phys.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\g_save.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\g_spawn.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\g_svcmds.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\g_target.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\g_trigger.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\g_turret.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\g_utils.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\g_weapon.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\m_actor.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\m_berserk.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\m_boss2.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\m_boss3.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\m_boss31.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\m_boss32.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\m_brain.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\m_chick.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\m_flash.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\m_flipper.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\m_float.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\m_flyer.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\m_gladiator.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\m_gunner.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\m_hover.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\m_infantry.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\m_insane.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\m_medic.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\m_move.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\m_mutant.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\m_parasite.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\m_soldier.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\m_supertank.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\m_tank.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\p_client.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\p_hud.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\p_trail.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\p_view.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\p_weapon.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\q_shared.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\g_local.h">
+      <Filter>inc</Filter>
+    </ClInclude>
+    <ClInclude Include="src\game.h">
+      <Filter>inc</Filter>
+    </ClInclude>
+    <ClInclude Include="src\m_actor.h">
+      <Filter>inc</Filter>
+    </ClInclude>
+    <ClInclude Include="src\m_berserk.h">
+      <Filter>inc</Filter>
+    </ClInclude>
+    <ClInclude Include="src\m_boss2.h">
+      <Filter>inc</Filter>
+    </ClInclude>
+    <ClInclude Include="src\m_boss31.h">
+      <Filter>inc</Filter>
+    </ClInclude>
+    <ClInclude Include="src\m_boss32.h">
+      <Filter>inc</Filter>
+    </ClInclude>
+    <ClInclude Include="src\m_brain.h">
+      <Filter>inc</Filter>
+    </ClInclude>
+    <ClInclude Include="src\m_chick.h">
+      <Filter>inc</Filter>
+    </ClInclude>
+    <ClInclude Include="src\m_flipper.h">
+      <Filter>inc</Filter>
+    </ClInclude>
+    <ClInclude Include="src\m_float.h">
+      <Filter>inc</Filter>
+    </ClInclude>
+    <ClInclude Include="src\m_flyer.h">
+      <Filter>inc</Filter>
+    </ClInclude>
+    <ClInclude Include="src\m_gladiator.h">
+      <Filter>inc</Filter>
+    </ClInclude>
+    <ClInclude Include="src\m_gunner.h">
+      <Filter>inc</Filter>
+    </ClInclude>
+    <ClInclude Include="src\m_hover.h">
+      <Filter>inc</Filter>
+    </ClInclude>
+    <ClInclude Include="src\m_infantry.h">
+      <Filter>inc</Filter>
+    </ClInclude>
+    <ClInclude Include="src\m_insane.h">
+      <Filter>inc</Filter>
+    </ClInclude>
+    <ClInclude Include="src\m_medic.h">
+      <Filter>inc</Filter>
+    </ClInclude>
+    <ClInclude Include="src\m_mutant.h">
+      <Filter>inc</Filter>
+    </ClInclude>
+    <ClInclude Include="src\m_parasite.h">
+      <Filter>inc</Filter>
+    </ClInclude>
+    <ClInclude Include="src\m_player.h">
+      <Filter>inc</Filter>
+    </ClInclude>
+    <ClInclude Include="src\m_rider.h">
+      <Filter>inc</Filter>
+    </ClInclude>
+    <ClInclude Include="src\m_soldier.h">
+      <Filter>inc</Filter>
+    </ClInclude>
+    <ClInclude Include="src\m_supertank.h">
+      <Filter>inc</Filter>
+    </ClInclude>
+    <ClInclude Include="src\m_tank.h">
+      <Filter>inc</Filter>
+    </ClInclude>
+    <ClInclude Include="src\q_shared.h">
+      <Filter>inc</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

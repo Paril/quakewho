@@ -692,11 +692,11 @@ Cmd_Players_f
 */
 void Cmd_Players_f (edict_t *ent)
 {
-	int		i;
-	int		count;
+	size_t		i;
+	size_t	count;
 	char	small[64];
 	char	large[1280];
-	int		index[256];
+	size_t	index[256];
 
 	count = 0;
 	for (i = 0 ; i < maxclients->value ; i++)
@@ -837,7 +837,7 @@ void Cmd_Say_f (edict_t *ent, qboolean team, qboolean arg0)
         }
         i = cl->flood_whenhead - flood_msgs->value + 1;
         if (i < 0)
-            i = (sizeof(cl->flood_when)/sizeof(cl->flood_when[0])) + i;
+            i = (int) (sizeof(cl->flood_when)/sizeof(cl->flood_when[0])) + i;
 		if (cl->flood_when[i] && 
 			level.time - cl->flood_when[i] < flood_persecond->value) {
 			cl->flood_locktill = level.time + flood_waitdelay->value;
@@ -846,7 +846,7 @@ void Cmd_Say_f (edict_t *ent, qboolean team, qboolean arg0)
             return;
         }
 		cl->flood_whenhead = (cl->flood_whenhead + 1) %
-			(sizeof(cl->flood_when)/sizeof(cl->flood_when[0]));
+			(int) (sizeof(cl->flood_when)/sizeof(cl->flood_when[0]));
 		cl->flood_when[cl->flood_whenhead] = level.time;
 	}
 

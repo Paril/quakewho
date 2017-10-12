@@ -481,7 +481,6 @@ void CrossProduct (vec3_t v1, vec3_t v2, vec3_t cross)
 	cross[2] = v1[0]*v2[1] - v1[1]*v2[0];
 }
 
-double sqrt(double x);
 
 vec_t VectorLength(vec3_t v)
 {
@@ -597,7 +596,7 @@ void COM_FileBase (char *in, char *out)
 	else
 	{
 		s--;
-		strncpy (out,s2+1, s-s2);
+		strncpy (out,s2+1, (size_t) (s-s2));
 		out[s-s2] = 0;
 	}
 }
@@ -618,7 +617,7 @@ void COM_FilePath (char *in, char *out)
 	while (s != in && *s != '/')
 		s--;
 
-	strncpy (out,in, s-in);
+	strncpy (out,in, (size_t) (s-in));
 	out[s-in] = 0;
 }
 
@@ -677,8 +676,8 @@ short   ShortSwap (short l)
 {
 	byte    b1,b2;
 
-	b1 = l&255;
-	b2 = (l>>8)&255;
+	b1 = (byte) (l&255);
+	b2 = (byte) ((l>>8)&255);
 
 	return (b1<<8) + b2;
 }
@@ -692,10 +691,10 @@ int    LongSwap (int l)
 {
 	byte    b1,b2,b3,b4;
 
-	b1 = l&255;
-	b2 = (l>>8)&255;
-	b3 = (l>>16)&255;
-	b4 = (l>>24)&255;
+	b1 = (byte) (l&255);
+	b2 = (byte) ((l>>8)&255);
+	b3 = (byte) ((l>>16)&255);
+	b4 = (byte) ((l>>24)&255);
 
 	return ((int)b1<<24) + ((int)b2<<16) + ((int)b3<<8) + b4;
 }
@@ -944,17 +943,16 @@ int Q_strcasecmp (char *s1, char *s2)
 
 
 
-void Com_sprintf (char *dest, int size, char *fmt, ...)
+void Com_sprintf (char *dest, size_t size, char *fmt, ...)
 {
-	int		len;
 	va_list		argptr;
 	char	bigbuffer[0x10000];
 
 	va_start (argptr,fmt);
-	len = vsprintf (bigbuffer,fmt,argptr);
+	int len = vsprintf (bigbuffer,fmt,argptr);
 	va_end (argptr);
-	if (len >= size)
-		Com_Printf ("Com_sprintf: overflow of %i in %i\n", len, size);
+	if ((size_t) len >= size)
+		Com_Printf ("Com_sprintf: overflow of %i in %u\n", len, size);
 	strncpy (dest, bigbuffer, size-1);
 }
 

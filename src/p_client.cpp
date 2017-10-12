@@ -168,7 +168,7 @@ void SP_info_player_coop(edict_t *self)
 The deathmatch intermission point will be at one of these
 Use 'angles' instead of 'angle', so you can set pitch or roll as well as yaw.  'pitch yaw roll'
 */
-void SP_info_player_intermission(void)
+void SP_info_player_intermission(edict_t *ent)
 {
 }
 
@@ -1316,7 +1316,7 @@ void ClientBegin (edict_t *ent)
 
 	// if there is already a body waiting for us (a loadgame), just
 	// take it, otherwise spawn one from scratch
-	if (ent->inuse == true)
+	if (ent->inuse)
 	{
 		// the client has cleared the client side viewangles upon
 		// connecting to the server, which is different than the
@@ -1558,7 +1558,7 @@ unsigned CheckBlock (void *b, int c)
 	v = 0;
 	for (i=0 ; i<c ; i++)
 		v+= ((byte *)b)[i];
-	return v;
+	return (unsigned) v;
 }
 void PrintPmove (pmove_t *pm)
 {

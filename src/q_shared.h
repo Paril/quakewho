@@ -25,17 +25,17 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #pragma warning(disable : 4244)
 #pragma warning(disable : 4242)
 
-#include <assert.h>
-#include <math.h>
-#include <stdio.h>
-#include <stdarg.h>
-#include <string.h>
-#include <stdlib.h>
-#include <time.h>
-#include <stdint.h>
+#include <cassert>
+#include <cmath>
+#include <cstdio>
+#include <cstdarg>
+#include <cstring>
+#include <cstdlib>
+#include <ctime>
+#include <cstdint>
 
 typedef unsigned char 		byte;
-typedef enum {false, true}	qboolean;
+typedef int	qboolean;
 
 
 #ifndef NULL
@@ -192,7 +192,7 @@ void COM_DefaultExtension (char *path, char *extension);
 char *COM_Parse (char **data_p);
 // data is an in/out parm, returns a parsed out token
 
-void Com_sprintf (char *dest, int size, char *fmt, ...);
+void Com_sprintf (char *dest, size_t size, char *fmt, ...);
 
 void Com_PageInMemory (byte *buffer, int size);
 

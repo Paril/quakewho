@@ -54,9 +54,11 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <DisableSpecificWarnings>4820;4100;4706;4710;4711</DisableSpecificWarnings>
+      <DisableSpecificWarnings>4820;4100;4706;4710;4711;4514;4061;4365;4838;4738</DisableSpecificWarnings>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <MinimalRebuild>false</MinimalRebuild>
+      <DiagnosticsFormat>Caret</DiagnosticsFormat>
+      <ErrorReporting>Send</ErrorReporting>
     </ClCompile>
     <Link>
       <ModuleDefinitionFile>src\game.def</ModuleDefinitionFile>
@@ -71,8 +73,10 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <DisableSpecificWarnings>4820;4100;4706;4710;4711</DisableSpecificWarnings>
+      <DisableSpecificWarnings>4820;4100;4706;4710;4711;4514;4061;4365;4838;4738</DisableSpecificWarnings>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <DiagnosticsFormat>Caret</DiagnosticsFormat>
+      <ErrorReporting>Send</ErrorReporting>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -81,54 +85,57 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\g_ai.c" />
-    <ClCompile Include="src\g_chase.c" />
-    <ClCompile Include="src\g_cmds.c" />
-    <ClCompile Include="src\g_combat.c" />
-    <ClCompile Include="src\g_func.c" />
-    <ClCompile Include="src\g_items.c" />
-    <ClCompile Include="src\g_main.c" />
-    <ClCompile Include="src\g_misc.c" />
-    <ClCompile Include="src\g_monster.c" />
-    <ClCompile Include="src\g_phys.c" />
-    <ClCompile Include="src\g_save.c" />
-    <ClCompile Include="src\g_spawn.c" />
-    <ClCompile Include="src\g_svcmds.c" />
-    <ClCompile Include="src\g_target.c" />
-    <ClCompile Include="src\g_trigger.c" />
-    <ClCompile Include="src\g_turret.c" />
-    <ClCompile Include="src\g_utils.c" />
-    <ClCompile Include="src\g_weapon.c" />
-    <ClCompile Include="src\m_actor.c" />
-    <ClCompile Include="src\m_berserk.c" />
-    <ClCompile Include="src\m_boss2.c" />
-    <ClCompile Include="src\m_boss3.c" />
-    <ClCompile Include="src\m_boss31.c" />
-    <ClCompile Include="src\m_boss32.c" />
-    <ClCompile Include="src\m_brain.c" />
-    <ClCompile Include="src\m_chick.c" />
-    <ClCompile Include="src\m_flash.c" />
-    <ClCompile Include="src\m_flipper.c" />
-    <ClCompile Include="src\m_float.c" />
-    <ClCompile Include="src\m_flyer.c" />
-    <ClCompile Include="src\m_gladiator.c" />
-    <ClCompile Include="src\m_gunner.c" />
-    <ClCompile Include="src\m_hover.c" />
-    <ClCompile Include="src\m_infantry.c" />
-    <ClCompile Include="src\m_insane.c" />
-    <ClCompile Include="src\m_medic.c" />
-    <ClCompile Include="src\m_move.c" />
-    <ClCompile Include="src\m_mutant.c" />
-    <ClCompile Include="src\m_parasite.c" />
-    <ClCompile Include="src\m_soldier.c" />
-    <ClCompile Include="src\m_supertank.c" />
-    <ClCompile Include="src\m_tank.c" />
-    <ClCompile Include="src\p_client.c" />
-    <ClCompile Include="src\p_hud.c" />
-    <ClCompile Include="src\p_trail.c" />
-    <ClCompile Include="src\p_view.c" />
-    <ClCompile Include="src\p_weapon.c" />
-    <ClCompile Include="src\q_shared.c" />
+    <None Include="src\game.def" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\g_ai.cpp" />
+    <ClCompile Include="src\g_chase.cpp" />
+    <ClCompile Include="src\g_cmds.cpp" />
+    <ClCompile Include="src\g_combat.cpp" />
+    <ClCompile Include="src\g_func.cpp" />
+    <ClCompile Include="src\g_items.cpp" />
+    <ClCompile Include="src\g_main.cpp" />
+    <ClCompile Include="src\g_misc.cpp" />
+    <ClCompile Include="src\g_monster.cpp" />
+    <ClCompile Include="src\g_phys.cpp" />
+    <ClCompile Include="src\g_save.cpp" />
+    <ClCompile Include="src\g_spawn.cpp" />
+    <ClCompile Include="src\g_svcmds.cpp" />
+    <ClCompile Include="src\g_target.cpp" />
+    <ClCompile Include="src\g_trigger.cpp" />
+    <ClCompile Include="src\g_turret.cpp" />
+    <ClCompile Include="src\g_utils.cpp" />
+    <ClCompile Include="src\g_weapon.cpp" />
+    <ClCompile Include="src\m_actor.cpp" />
+    <ClCompile Include="src\m_berserk.cpp" />
+    <ClCompile Include="src\m_boss2.cpp" />
+    <ClCompile Include="src\m_boss3.cpp" />
+    <ClCompile Include="src\m_boss31.cpp" />
+    <ClCompile Include="src\m_boss32.cpp" />
+    <ClCompile Include="src\m_brain.cpp" />
+    <ClCompile Include="src\m_chick.cpp" />
+    <ClCompile Include="src\m_flash.cpp" />
+    <ClCompile Include="src\m_flipper.cpp" />
+    <ClCompile Include="src\m_float.cpp" />
+    <ClCompile Include="src\m_flyer.cpp" />
+    <ClCompile Include="src\m_gladiator.cpp" />
+    <ClCompile Include="src\m_gunner.cpp" />
+    <ClCompile Include="src\m_hover.cpp" />
+    <ClCompile Include="src\m_infantry.cpp" />
+    <ClCompile Include="src\m_insane.cpp" />
+    <ClCompile Include="src\m_medic.cpp" />
+    <ClCompile Include="src\m_move.cpp" />
+    <ClCompile Include="src\m_mutant.cpp" />
+    <ClCompile Include="src\m_parasite.cpp" />
+    <ClCompile Include="src\m_soldier.cpp" />
+    <ClCompile Include="src\m_supertank.cpp" />
+    <ClCompile Include="src\m_tank.cpp" />
+    <ClCompile Include="src\p_client.cpp" />
+    <ClCompile Include="src\p_hud.cpp" />
+    <ClCompile Include="src\p_trail.cpp" />
+    <ClCompile Include="src\p_view.cpp" />
+    <ClCompile Include="src\p_weapon.cpp" />
+    <ClCompile Include="src\q_shared.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\game.h" />
@@ -157,9 +164,6 @@
     <ClInclude Include="src\m_supertank.h" />
     <ClInclude Include="src\m_tank.h" />
     <ClInclude Include="src\q_shared.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="src\game.def" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

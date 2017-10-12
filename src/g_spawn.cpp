@@ -319,11 +319,11 @@ ED_NewString
 char *ED_NewString (char *string)
 {
 	char	*newb, *new_p;
-	int		i,l;
+	size_t 	i,l;
 	
 	l = strlen(string) + 1;
 
-	newb = gi.TagMalloc (l, TAG_LEVEL);
+	newb = (char *) gi.TagMalloc ((int) l, TAG_LEVEL);
 
 	new_p = newb;
 
@@ -394,7 +394,7 @@ void ED_ParseField (char *key, char *value, edict_t *ent)
 				((float *)(b+f->ofs))[1] = v;
 				((float *)(b+f->ofs))[2] = 0;
 				break;
-			case F_IGNORE:
+			default:
 				break;
 			}
 			return;
