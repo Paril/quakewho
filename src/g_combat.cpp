@@ -168,11 +168,11 @@ dflags		these flags are used to control how T_Damage works
 	DAMAGE_NO_PROTECTION	kills godmode, armor, everything
 ============
 */
-static int CheckPowerArmor (edict_t *ent, vec3_t point, vec3_t normal, int damage, int dflags)
+static int CheckPowerArmor (edict_t *ent, vec3_t point, vec3_t normal, int damage, damageflag_t dflags)
 {
 	gclient_t	*client;
 	int			save;
-	int			power_armor_type;
+	powerarmor_t	power_armor_type;
 	int			index = 0;
 	int			damagePerCell;
 	int			pa_te_type;
@@ -252,7 +252,7 @@ static int CheckPowerArmor (edict_t *ent, vec3_t point, vec3_t normal, int damag
 	return save;
 }
 
-static int CheckArmor (edict_t *ent, vec3_t point, vec3_t normal, int damage, int te_sparks, int dflags)
+static int CheckArmor (edict_t *ent, vec3_t point, vec3_t normal, int damage, int te_sparks, damageflag_t dflags)
 {
 	gclient_t	*client;
 	int			save;
@@ -374,7 +374,7 @@ bool CheckTeamDamage (edict_t *targ, edict_t *attacker)
 	return false;
 }
 
-void T_Damage (edict_t *targ, edict_t *inflictor, edict_t *attacker, vec3_t dir, vec3_t point, vec3_t normal, int damage, int knockback, int dflags, int mod)
+void T_Damage (edict_t *targ, edict_t *inflictor, edict_t *attacker, vec3_t dir, vec3_t point, vec3_t normal, int damage, int knockback, damageflag_t dflags, meansofdeath_t mod)
 {
 	gclient_t	*client;
 	int			take;
@@ -544,7 +544,7 @@ void T_Damage (edict_t *targ, edict_t *inflictor, edict_t *attacker, vec3_t dir,
 T_RadiusDamage
 ============
 */
-void T_RadiusDamage (edict_t *inflictor, edict_t *attacker, float damage, edict_t *ignore, float radius, int mod)
+void T_RadiusDamage (edict_t *inflictor, edict_t *attacker, float damage, edict_t *ignore, float radius, meansofdeath_t mod)
 {
 	float	points;
 	edict_t	*ent = NULL;

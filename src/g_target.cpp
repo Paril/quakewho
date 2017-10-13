@@ -281,7 +281,7 @@ void use_target_changelevel (edict_t *self, edict_t *other, edict_t *activator)
 	// if noexit, do a ton of damage to other
 	if (deathmatch->value && !( (int)dmflags->value & DF_ALLOW_EXIT) && other != world)
 	{
-		T_Damage (other, self, self, vec3_origin, other->s.origin, vec3_origin, 10 * other->max_health, 1000, 0, MOD_EXIT);
+		T_Damage (other, self, self, vec3_origin, other->s.origin, vec3_origin, 10 * other->max_health, 1000, DAMAGE_NONE, MOD_EXIT);
 		return;
 	}
 
@@ -450,7 +450,7 @@ Once this trigger is touched/used, any trigger_crosslevel_target with the same t
 */
 void trigger_crosslevel_trigger_use (edict_t *self, edict_t *other, edict_t *activator)
 {
-	game.serverflags |= self->spawnflags;
+	game.serverflags |= (serverflags_t) self->spawnflags;
 	G_FreeEdict (self);
 }
 

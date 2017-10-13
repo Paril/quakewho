@@ -1,4 +1,4 @@
-/*
+﻿/*
 Copyright (C) 1997-2001 Id Software, Inc.
 
 This program is free software; you can redistribute it and/or
@@ -38,7 +38,7 @@ template<typename T>
 inline constexpr T bit(const T &place) { return 1u << place; }
 
 // type used for interop, but shouldn't be used by game. Use bool.
-typedef int	qboolean;
+typedef int32_t	qboolean;
 
 // this exists elsewhere
 struct edict_t;
@@ -46,57 +46,52 @@ struct edict_t;
 typedef uint8_t byte;
 
 // angle indexes
-#define	PITCH				0		// up / down
-#define	YAW					1		// left / right
-#define	ROLL				2		// fall over
+enum
+{
+	PITCH,		// up / down
+	YAW,		// left / right
+	ROLL		// fall over
+};
 
-#define	MAX_STRING_CHARS	1024	// max length of a string passed to Cmd_TokenizeString
-#define	MAX_STRING_TOKENS	80		// max tokens resulting from Cmd_TokenizeString
-#define	MAX_TOKEN_CHARS		128		// max length of an individual token
+const size_t	MAX_STRING_CHARS	= 1024;	// max length of a string passed to Cmd_TokenizeString
+const size_t	MAX_STRING_TOKENS	= 80;		// max tokens resulting from Cmd_TokenizeString
+const size_t	MAX_TOKEN_CHARS		= 128;		// max length of an individual token
 
-#define	MAX_QPATH			64		// max length of a quake game pathname
-#define	MAX_OSPATH			128		// max length of a filesystem pathname
+const size_t	MAX_QPATH			= 64;		// max length of a quake game pathname
+const size_t	MAX_OSPATH			= 128;		// max length of a filesystem pathname
 
 //
 // per-level limits
 //
-#define	MAX_CLIENTS			256		// absolute limit
-#define	MAX_EDICTS			1024	// must change protocol to increase more
-#define	MAX_LIGHTSTYLES		256
-#define	MAX_MODELS			256		// these are sent over the net as bytes
-#define	MAX_SOUNDS			256		// so they cannot be blindly increased
-#define	MAX_IMAGES			256
-#define	MAX_ITEMS			256
-#define MAX_GENERAL			(MAX_CLIENTS*2)	// general config strings
+const size_t	MAX_CLIENTS			= 256;		// absolute limit
+const size_t	MAX_EDICTS			= 1024;	    // must change protocol to increase more
+const size_t	MAX_LIGHTSTYLES		= 256;
+const size_t	MAX_MODELS			= 256;		// these are sent over the net as bytes
+const size_t	MAX_SOUNDS			= 256;		// so they cannot be blindly increased
+const size_t	MAX_IMAGES			= 256;
+const size_t	MAX_ITEMS			= 256;
+const size_t	MAX_GENERAL			= (MAX_CLIENTS * 2);	// general config strings
 
 
 // game print flags
-#define	PRINT_LOW			0		// pickup messages
-#define	PRINT_MEDIUM		1		// death messages
-#define	PRINT_HIGH			2		// critical messages
-#define	PRINT_CHAT			3		// chat messages
-
-
-
-#define	ERR_FATAL			0		// exit the entire game with a popup window
-#define	ERR_DROP			1		// print to console and disconnect from game
-#define	ERR_DISCONNECT		2		// don't kill server
-
-#define	PRINT_ALL			0
-#define PRINT_DEVELOPER		1		// only print when "developer 1"
-#define PRINT_ALERT			2		
-
+enum printflags_t
+{
+	PRINT_LOW,		// pickup messages
+	PRINT_MEDIUM,	// death messages
+	PRINT_HIGH,		// critical messages
+	PRINT_CHAT		// chat messages
+};
 
 // destination class for gi.multicast()
-typedef enum
+enum multicast_t
 {
-MULTICAST_ALL,
-MULTICAST_PHS,
-MULTICAST_PVS,
-MULTICAST_ALL_R,
-MULTICAST_PHS_R,
-MULTICAST_PVS_R
-} multicast_t;
+	MULTICAST_ALL,
+	MULTICAST_PHS,
+	MULTICAST_PVS,
+	MULTICAST_ALL_R,
+	MULTICAST_PHS_R,
+	MULTICAST_PVS_R
+};
 
 
 /*
@@ -109,23 +104,14 @@ MATHLIB
 
 typedef float vec_t;
 typedef vec_t vec3_t[3];
-typedef vec_t vec5_t[5];
-
-typedef	int	fixed4_t;
-typedef	int	fixed8_t;
-typedef	int	fixed16_t;
 
 #ifndef M_PI
-#define M_PI		3.14159265358979323846	// matches value in gcc v2 math.h
+ constexpr float M_PI = 3.141592653589793238462643383279502884e+00;
 #endif
 
-struct cplane_s;
+struct cplane_t;
 
 extern vec3_t vec3_origin;
-
-#define	nanmask (255<<23)
-
-#define	IS_NAN(x) (((*(int *)&x)&nanmask)==nanmask)
 
 #define DotProduct(x,y)			(x[0]*y[0]+x[1]*y[1]+x[2]*y[2])
 #define VectorSubtract(a,b,c)	(c[0]=a[0]-b[0],c[1]=a[1]-b[1],c[2]=a[2]-b[2])
@@ -158,25 +144,9 @@ void R_ConcatRotations (float in1[3][3], float in2[3][3], float out[3][3]);
 void R_ConcatTransforms (float in1[3][4], float in2[3][4], float out[3][4]);
 
 void AngleVectors (vec3_t angles, vec3_t forward, vec3_t right, vec3_t up);
-int BoxOnPlaneSide (vec3_t emins, vec3_t emaxs, struct cplane_s *plane);
+int BoxOnPlaneSide (vec3_t emins, vec3_t emaxs, cplane_t *plane);
 float	anglemod(float a);
 float LerpAngle (float a1, float a2, float frac);
-
-#define BOX_ON_PLANE_SIDE(emins, emaxs, p)	\
-	(((p)->type < 3)?						\
-	(										\
-		((p)->dist <= (emins)[(p)->type])?	\
-			1								\
-		:									\
-		(									\
-			((p)->dist >= (emaxs)[(p)->type])?\
-				2							\
-			:								\
-				3							\
-		)									\
-	)										\
-	:										\
-		BoxOnPlaneSide( (emins), (emaxs), (p)))
 
 void ProjectPointOnPlane( vec3_t dst, const vec3_t p, const vec3_t normal );
 void PerpendicularVector( vec3_t dst, const vec3_t src );
@@ -222,9 +192,9 @@ char	*va(char *format, ...);
 //
 // key / value info strings
 //
-#define	MAX_INFO_KEY		64
-#define	MAX_INFO_VALUE		64
-#define	MAX_INFO_STRING		512
+const size_t	MAX_INFO_KEY		= 64;
+const size_t	MAX_INFO_VALUE		= 64;
+const size_t	MAX_INFO_STRING		= 512;
 
 char *Info_ValueForKey (char *s, char *key);
 void Info_RemoveKey (char *s, char *key);
@@ -238,15 +208,6 @@ SYSTEM SPECIFIC
 
 ==============================================================
 */
-
-extern	int	curtime;		// time returned by last Sys_Milliseconds
-
-// directory searching
-#define SFF_ARCH    0x01
-#define SFF_HIDDEN  0x02
-#define SFF_RDONLY  0x04
-#define SFF_SUBDIR  0x08
-#define SFF_SYSTEM  0x10
 
 // this is only here so the functions in q_shared.c and q_shwin.c can link
 void Sys_Error (char *error, ...);
@@ -272,7 +233,7 @@ CVARS (console variables)
 #define	CVAR_LATCH		16	// save changes until server restart
 
 // nothing outside the Cvar_*() functions should modify these fields!
-typedef struct cvar_s
+struct cvar_t
 {
 	char		*name;
 	char		*string;
@@ -281,7 +242,7 @@ typedef struct cvar_s
 	qboolean	modified;	// set each time the cvar is changed
 	float		value;
 	struct cvar_s *next;
-} cvar_t;
+};
 #endif		// CVAR
 
 /*
@@ -354,53 +315,45 @@ COLLISION DETECTION
 
 // gi.BoxEdicts() can return a list of either solid or trigger entities
 // FIXME: eliminate AREA_ distinction?
-#define	AREA_SOLID		1
-#define	AREA_TRIGGERS	2
-
+enum areatype_t
+{
+	AREA_SOLID		= 1,
+	AREA_TRIGGERS	= 2
+};
 
 // plane_t structure
 // !!! if this is changed, it must be changed in asm code too !!!
-typedef struct cplane_s
+struct cplane_t
 {
 	vec3_t	normal;
 	float	dist;
 	byte	type;			// for fast side tests
 	byte	signbits;		// signx + (signy<<1) + (signz<<1)
 	byte	pad[2];
-} cplane_t;
+};
 
-// structure offset for asm code
-#define CPLANE_NORMAL_X			0
-#define CPLANE_NORMAL_Y			4
-#define CPLANE_NORMAL_Z			8
-#define CPLANE_DIST				12
-#define CPLANE_TYPE				16
-#define CPLANE_SIGNBITS			17
-#define CPLANE_PAD0				18
-#define CPLANE_PAD1				19
-
-typedef struct cmodel_s
+struct cmodel_t
 {
 	vec3_t		mins, maxs;
 	vec3_t		origin;		// for sounds or lights
 	int			headnode;
-} cmodel_t;
+};
 
-typedef struct csurface_s
+struct csurface_t
 {
 	char		name[16];
 	int			flags;
 	int			value;
-} csurface_t;
+};
 
-typedef struct mapsurface_s  // used internally due to name len probs //ZOID
+struct mapsurface_t  // used internally due to name len probs //ZOID
 {
 	csurface_t	c;
 	char		rname[32];
-} mapsurface_t;
+};
 
 // a trace is returned when a box is swept through the world
-typedef struct
+struct trace_t
 {
 	qboolean	allsolid;	// if true, plane is not valid
 	qboolean	startsolid;	// if true, the initial point was in a solid area
@@ -410,13 +363,13 @@ typedef struct
 	csurface_t	*surface;	// surface hit
 	int			contents;	// contents on other side of surface hit
 	edict_t		*ent;		// not set by CM_*() functions
-} trace_t;
+};
 
 
 
 // pmove_state_t is the information necessary for client side movement
 // prediction
-typedef enum 
+enum pmtype_t
 {
 	// can accelerate and turn
 	PM_NORMAL,
@@ -425,58 +378,69 @@ typedef enum
 	PM_DEAD,
 	PM_GIB,		// different bounding box
 	PM_FREEZE
-} pmtype_t;
+};
 
 // pmove->pm_flags
-#define	PMF_DUCKED			1
-#define	PMF_JUMP_HELD		2
-#define	PMF_ON_GROUND		4
-#define	PMF_TIME_WATERJUMP	8	// pm_time is waterjump
-#define	PMF_TIME_LAND		16	// pm_time is time before rejump
-#define	PMF_TIME_TELEPORT	32	// pm_time is non-moving time
-#define PMF_NO_PREDICTION	64	// temporarily disables prediction (used for grappling hook)
+enum pmflags_t : uint8_t
+{
+	PMF_DUCKED			= bit(0),
+	PMF_JUMP_HELD		= bit(1),
+	PMF_ON_GROUND		= bit(2),
+	PMF_TIME_WATERJUMP	= bit(3),	// pm_time is waterjump
+	PMF_TIME_LAND		= bit(4),	// pm_time is time before rejump
+	PMF_TIME_TELEPORT	= bit(5),	// pm_time is non-moving time
+	PMF_NO_PREDICTION	= bit(6),	// temporarily disables prediction (used for grappling hook)
+};
+
+MAKE_BITFLAGS(pmflags_t);
 
 // this structure needs to be communicated bit-accurate
 // from the server to the client to guarantee that
 // prediction stays in sync, so no floats are used.
 // if any part of the game code modifies this struct, it
 // will result in a prediction error of some degree.
-typedef struct
+struct pmove_state_t
 {
 	pmtype_t	pm_type;
 
 	short		origin[3];		// 12.3
 	short		velocity[3];	// 12.3
-	byte		pm_flags;		// ducked, jump_held, etc
+	pmflags_t	pm_flags;		// ducked, jump_held, etc
 	byte		pm_time;		// each unit = 8 ms
 	short		gravity;
 	short		delta_angles[3];	// add to command angles to get view direction
 									// changed by spawns, rotating objects, and teleporters
-} pmove_state_t;
+};
 
 
 //
 // button bits
 //
-#define	BUTTON_ATTACK		1
-#define	BUTTON_USE			2
-#define	BUTTON_ANY			128			// any key whatsoever
+enum button_t : uint8_t
+{
+	BUTTON_NONE		= 0,
+	BUTTON_ATTACK	= bit(0),
+	BUTTON_USE		= bit(1),
+	BUTTON_ANY		= 0x80			// any key whatsoever
+};
 
+MAKE_BITFLAGS(button_t);
 
 // usercmd_t is sent to the server each client frame
-typedef struct usercmd_s
+struct usercmd_t
 {
-	byte	msec;
-	byte	buttons;
-	short	angles[3];
-	short	forwardmove, sidemove, upmove;
-	byte	impulse;		// remove?
-	byte	lightlevel;		// light level the player is standing on
-} usercmd_t;
+	byte		msec;
+	button_t	buttons;
+	short		angles[3];
+	short		forwardmove, sidemove, upmove;
+	byte		impulse;		// remove?
+	byte		lightlevel;		// light level the player is standing on
+};
 
 
-#define	MAXTOUCH	32
-typedef struct
+const int	MAXTOUCH	= 32;
+
+struct pmove_t
 {
 	// state (in / out)
 	pmove_state_t	s;
@@ -501,7 +465,7 @@ typedef struct
 	// callbacks to test the world
 	trace_t		(*trace) (vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end);
 	int			(*pointcontents) (vec3_t point);
-} pmove_t;
+};
 
 
 // entity_state_t->effects
@@ -856,7 +820,7 @@ extern	vec3_t monster_flash_offset [];
 // at a location seperate from any existing entity.
 // Temporary entity messages are explicitly constructed
 // and broadcast.
-typedef enum
+enum temp_event_t : uint8_t
 {
 	TE_GUNSHOT,
 	TE_BLOOD,
@@ -916,7 +880,7 @@ typedef enum
 	TE_EXPLOSION1_NP,
 	TE_FLECHETTE
 //ROGUE
-} temp_event_t;
+};
 
 #define SPLASH_UNKNOWN		0
 #define SPLASH_SPARKS		1
@@ -1076,7 +1040,7 @@ ROGUE - VERSIONS
 // ertity events are for effects that take place reletive
 // to an existing entities origin.  Very network efficient.
 // All muzzle flashes really should be converted to events...
-typedef enum
+enum entity_event_t
 {
 	EV_NONE,
 	EV_ITEM_RESPAWN,
@@ -1086,13 +1050,13 @@ typedef enum
 	EV_FALLFAR,
 	EV_PLAYER_TELEPORT,
 	EV_OTHER_TELEPORT
-} entity_event_t;
+};
 
 
 // entity_state_t is the information conveyed from the server
 // in an update message about entities that the client will
 // need to render in some way
-typedef struct entity_state_s
+struct entity_state_t
 {
 	int		number;			// edict index
 
@@ -1109,10 +1073,10 @@ typedef struct entity_state_s
 							// 8*(bits 5-9) is z down distance, 8(bits10-15) is z up
 							// gi.linkentity sets this properly
 	int		sound;			// for looping sounds, to guarantee shutoff
-	int		event;			// impulse events -- muzzle flashes, footsteps, etc
+	entity_event_t event;	// impulse events -- muzzle flashes, footsteps, etc
 							// events only go out for a single frame, they
 							// are automatically cleared each frame
-} entity_state_t;
+};
 
 //==============================================
 
@@ -1121,7 +1085,7 @@ typedef struct entity_state_s
 // to rendered a view.  There will only be 10 player_state_t sent each second,
 // but the number of pmove_state_t changes will be reletive to client
 // frame rates
-typedef struct
+struct player_state_t
 {
 	pmove_state_t	pmove;		// for prediction
 
@@ -1144,15 +1108,4 @@ typedef struct
 	int			rdflags;		// refdef flags
 
 	short		stats[MAX_STATS];		// fast status bar updates
-} player_state_t;
-
-
-// ==================
-// PGM 
-#define VIDREF_GL		1
-#define VIDREF_SOFT		2
-#define VIDREF_OTHER	3
-
-extern int vidref_val;
-// PGM
-// ==================
+};

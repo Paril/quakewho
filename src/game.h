@@ -101,12 +101,12 @@ struct edict_t
 struct game_import_t
 {
 	// special messages
-	void	(*bprintf) (int printlevel, char *fmt, ...);
+	void	(*bprintf) (printflags_t printlevel, char *fmt, ...);
 	void	(*dprintf) (char *fmt, ...);
-	void	(*cprintf) (edict_t *ent, int printlevel, char *fmt, ...);
+	void	(*cprintf) (edict_t *ent, printflags_t printlevel, char *fmt, ...);
 	void	(*centerprintf) (edict_t *ent, char *fmt, ...);
 	void	(*sound) (edict_t *ent, int channel, int soundindex, float volume, float attenuation, float timeofs);
-	void	(*positioned_sound) (vec3_t origin, edict_t *ent, int channel, int soundinedex, float volume, float attenuation, float timeofs);
+	void	(*positioned_sound) (const vec3_t origin, edict_t *ent, int channel, int soundinedex, float volume, float attenuation, float timeofs);
 
 	// config strings hold all the index strings, the lightstyles,
 	// and misc data like the sky definition and cdtrack.
@@ -124,10 +124,10 @@ struct game_import_t
 	void	(*setmodel) (edict_t *ent, char *name);
 
 	// collision detection
-	trace_t	(*trace) (vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end, edict_t *passent, int contentmask);
+	trace_t	(*trace) (const vec3_t start, const vec3_t mins, const vec3_t maxs, const vec3_t end, edict_t *passent, int contentmask);
 	int		(*pointcontents) (vec3_t point);
-	qboolean	(*inPVS) (vec3_t p1, vec3_t p2);
-	qboolean	(*inPHS) (vec3_t p1, vec3_t p2);
+	qboolean	(*inPVS) (const vec3_t p1, const vec3_t p2);
+	qboolean	(*inPHS) (const vec3_t p1, const vec3_t p2);
 	void		(*SetAreaPortalState) (int portalnum, qboolean open);
 	qboolean	(*AreasConnected) (int area1, int area2);
 
@@ -136,11 +136,11 @@ struct game_import_t
 	// solidity changes, it must be relinked.
 	void	(*linkentity) (edict_t *ent);
 	void	(*unlinkentity) (edict_t *ent);		// call before removing an interactive edict
-	int		(*BoxEdicts) (vec3_t mins, vec3_t maxs, edict_t **list,	int maxcount, int areatype);
+	int		(*BoxEdicts) (const vec3_t mins, const vec3_t maxs, edict_t **list,	int maxcount, areatype_t areatype);
 	void	(*Pmove) (pmove_t *pmove);		// player movement code common with client prediction
 
 	// network messaging
-	void	(*multicast) (vec3_t origin, multicast_t to);
+	void	(*multicast) (const vec3_t origin, multicast_t to);
 	void	(*unicast) (edict_t *ent, qboolean reliable);
 	void	(*WriteChar) (int c);
 	void	(*WriteByte) (int c);
@@ -148,8 +148,8 @@ struct game_import_t
 	void	(*WriteLong) (int c);
 	void	(*WriteFloat) (float f);
 	void	(*WriteString) (char *s);
-	void	(*WritePosition) (vec3_t pos);	// some fractional bits
-	void	(*WriteDir) (vec3_t pos);		// single byte encoded, very coarse
+	void	(*WritePosition) (const vec3_t pos);	// some fractional bits
+	void	(*WriteDir) (const vec3_t pos);		// single byte encoded, very coarse
 	void	(*WriteAngle) (float f);
 
 	// managed memory allocation

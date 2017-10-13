@@ -210,7 +210,7 @@ bool IsNeutral (edict_t *ent)
 
 void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 {
-	int			mod;
+	meansofdeath_t mod;
 	char		*message;
 	char		*message2;
 	bool		ff;
@@ -227,6 +227,8 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 
 		switch (mod)
 		{
+		default:
+			break;
 		case MOD_SUICIDE:
 			message = "suicides";
 			break;
@@ -315,6 +317,8 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 		{
 			switch (mod)
 			{
+			default:
+				break;
 			case MOD_BLASTER:
 				message = "was blasted by";
 				break;
@@ -1417,7 +1421,7 @@ void ClientUserinfoChanged (edict_t *ent, char *userinfo)
 	s = Info_ValueForKey (userinfo, "hand");
 	if (strlen(s))
 	{
-		ent->client->pers.hand = atoi(s);
+		ent->client->pers.hand = (handedness_t) atoi(s);
 	}
 
 	// save off the userinfo in case we want to check something later
@@ -1718,7 +1722,7 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 	{
 		if (client->resp.spectator) {
 
-			client->latched_buttons = 0;
+			client->latched_buttons = BUTTON_NONE;
 
 			if (client->chase_target) {
 				client->chase_target = NULL;
@@ -1800,7 +1804,7 @@ void ClientBeginServerFrame (edict_t *ent)
 				(deathmatch->value && ((int)dmflags->value & DF_FORCE_RESPAWN) ) )
 			{
 				respawn(ent);
-				client->latched_buttons = 0;
+				client->latched_buttons = BUTTON_NONE;
 			}
 		}
 		return;
@@ -1811,5 +1815,5 @@ void ClientBeginServerFrame (edict_t *ent)
 		if (!visible (ent, PlayerTrail_LastSpot() ) )
 			PlayerTrail_Add (ent->s.old_origin);
 
-	client->latched_buttons = 0;
+	client->latched_buttons = BUTTON_NONE;
 }

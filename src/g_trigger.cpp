@@ -467,7 +467,7 @@ void hurt_use (edict_t *self, edict_t *other, edict_t *activator)
 
 void hurt_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf)
 {
-	int		dflags;
+	damageflag_t		dflags;
 
 	if (!other->takedamage)
 		return;
@@ -489,7 +489,7 @@ void hurt_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *sur
 	if (self->spawnflags & 8)
 		dflags = DAMAGE_NO_PROTECTION;
 	else
-		dflags = 0;
+		dflags = DAMAGE_NONE;
 	T_Damage (other, self, self, vec3_origin, other->s.origin, vec3_origin, self->dmg, self->dmg, dflags, MOD_TRIGGER_HURT);
 }
 

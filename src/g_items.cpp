@@ -685,7 +685,7 @@ bool Pickup_Armor (edict_t *ent, edict_t *other)
 
 //======================================================================
 
-int PowerArmorType (edict_t *ent)
+powerarmor_t PowerArmorType (edict_t *ent)
 {
 	if (!ent->client)
 		return POWER_ARMOR_NONE;
@@ -778,7 +778,7 @@ void Touch_Item (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf
 
 		// show icon and name on status bar
 		other->client->ps.stats[STAT_PICKUP_ICON] = gi.imageindex(ent->item->icon);
-		other->client->ps.stats[STAT_PICKUP_STRING] = CS_ITEMS+ITEM_INDEX(ent->item);
+		other->client->ps.stats[STAT_PICKUP_STRING] = (int16_t) (CS_ITEMS + ITEM_INDEX(ent->item));
 		other->client->pickup_msg_time = level.time + 3.0;
 
 		// change selected item
@@ -1158,7 +1158,7 @@ gitem_t	itemlist[] =
 		0,
 		NULL,
 		IT_ARMOR,
-		0,
+		WEAP_NONE,
 		&bodyarmor_info,
 		ARMOR_BODY,
 /* precache */ ""
@@ -1181,7 +1181,7 @@ gitem_t	itemlist[] =
 		0,
 		NULL,
 		IT_ARMOR,
-		0,
+		WEAP_NONE,
 		&combatarmor_info,
 		ARMOR_COMBAT,
 /* precache */ ""
@@ -1204,7 +1204,7 @@ gitem_t	itemlist[] =
 		0,
 		NULL,
 		IT_ARMOR,
-		0,
+		WEAP_NONE,
 		&jacketarmor_info,
 		ARMOR_JACKET,
 /* precache */ ""
@@ -1227,7 +1227,7 @@ gitem_t	itemlist[] =
 		0,
 		NULL,
 		IT_ARMOR,
-		0,
+		WEAP_NONE,
 		NULL,
 		ARMOR_SHARD,
 /* precache */ ""
@@ -1251,7 +1251,7 @@ gitem_t	itemlist[] =
 		60,
 		NULL,
 		IT_ARMOR,
-		0,
+		WEAP_NONE,
 		NULL,
 		0,
 /* precache */ ""
@@ -1274,7 +1274,7 @@ gitem_t	itemlist[] =
 		60,
 		NULL,
 		IT_ARMOR,
-		0,
+		WEAP_NONE,
 		NULL,
 		0,
 /* precache */ "misc/power2.wav misc/power1.wav"
@@ -1560,7 +1560,7 @@ always owned, never in the world
 		10,
 		NULL,
 		IT_AMMO,
-		0,
+		WEAP_NONE,
 		NULL,
 		AMMO_SHELLS,
 /* precache */ ""
@@ -1583,7 +1583,7 @@ always owned, never in the world
 		50,
 		NULL,
 		IT_AMMO,
-		0,
+		WEAP_NONE,
 		NULL,
 		AMMO_BULLETS,
 /* precache */ ""
@@ -1606,7 +1606,7 @@ always owned, never in the world
 		50,
 		NULL,
 		IT_AMMO,
-		0,
+		WEAP_NONE,
 		NULL,
 		AMMO_CELLS,
 /* precache */ ""
@@ -1629,7 +1629,7 @@ always owned, never in the world
 		5,
 		NULL,
 		IT_AMMO,
-		0,
+		WEAP_NONE,
 		NULL,
 		AMMO_ROCKETS,
 /* precache */ ""
@@ -1652,7 +1652,7 @@ always owned, never in the world
 		10,
 		NULL,
 		IT_AMMO,
-		0,
+		WEAP_NONE,
 		NULL,
 		AMMO_SLUGS,
 /* precache */ ""
@@ -1679,7 +1679,7 @@ always owned, never in the world
 		60,
 		NULL,
 		IT_POWERUP,
-		0,
+		WEAP_NONE,
 		NULL,
 		0,
 /* precache */ "items/damage.wav items/damage2.wav items/damage3.wav"
@@ -1702,7 +1702,7 @@ always owned, never in the world
 		300,
 		NULL,
 		IT_POWERUP,
-		0,
+		WEAP_NONE,
 		NULL,
 		0,
 /* precache */ "items/protect.wav items/protect2.wav items/protect4.wav"
@@ -1725,7 +1725,7 @@ always owned, never in the world
 		60,
 		NULL,
 		IT_POWERUP,
-		0,
+		WEAP_NONE,
 		NULL,
 		0,
 /* precache */ ""
@@ -1748,7 +1748,7 @@ always owned, never in the world
 		60,
 		NULL,
 		IT_STAY_COOP|IT_POWERUP,
-		0,
+		WEAP_NONE,
 		NULL,
 		0,
 /* precache */ "items/airout.wav"
@@ -1771,7 +1771,7 @@ always owned, never in the world
 		60,
 		NULL,
 		IT_STAY_COOP|IT_POWERUP,
-		0,
+		WEAP_NONE,
 		NULL,
 		0,
 /* precache */ "items/airout.wav"
@@ -1794,8 +1794,8 @@ Special item that gives +2 to maximum health
 /* width */		2,
 		60,
 		NULL,
-		0,
-		0,
+		IT_NONE,
+		WEAP_NONE,
 		NULL,
 		0,
 /* precache */ ""
@@ -1818,8 +1818,8 @@ gives +1 to maximum health
 /* width */		2,
 		60,
 		NULL,
-		0,
-		0,
+		IT_NONE,
+		WEAP_NONE,
 		NULL,
 		0,
 /* precache */ ""
@@ -1841,8 +1841,8 @@ gives +1 to maximum health
 /* width */		2,
 		60,
 		NULL,
-		0,
-		0,
+		IT_NONE,
+		WEAP_NONE,
 		NULL,
 		0,
 /* precache */ ""
@@ -1864,8 +1864,8 @@ gives +1 to maximum health
 /* width */		2,
 		180,
 		NULL,
-		0,
-		0,
+		IT_NONE,
+		WEAP_NONE,
 		NULL,
 		0,
 /* precache */ ""
@@ -1892,7 +1892,7 @@ key for computer centers
 		0,
 		NULL,
 		IT_STAY_COOP|IT_KEY,
-		0,
+		WEAP_NONE,
 		NULL,
 		0,
 /* precache */ ""
@@ -1916,7 +1916,7 @@ warehouse circuits
 		0,
 		NULL,
 		IT_STAY_COOP|IT_KEY,
-		0,
+		WEAP_NONE,
 		NULL,
 		0,
 /* precache */ ""
@@ -1940,7 +1940,7 @@ key for the entrance of jail3
 		0,
 		NULL,
 		IT_STAY_COOP|IT_KEY,
-		0,
+		WEAP_NONE,
 		NULL,
 		0,
 /* precache */ ""
@@ -1964,7 +1964,7 @@ key for the city computer
 		0,
 		NULL,
 		IT_STAY_COOP|IT_KEY,
-		0,
+		WEAP_NONE,
 		NULL,
 		0,
 /* precache */ ""
@@ -1988,7 +1988,7 @@ security pass for the security level
 		0,
 		NULL,
 		IT_STAY_COOP|IT_KEY,
-		0,
+		WEAP_NONE,
 		NULL,
 		0,
 /* precache */ ""
@@ -2012,7 +2012,7 @@ normal door key - blue
 		0,
 		NULL,
 		IT_STAY_COOP|IT_KEY,
-		0,
+		WEAP_NONE,
 		NULL,
 		0,
 /* precache */ ""
@@ -2036,7 +2036,7 @@ normal door key - red
 		0,
 		NULL,
 		IT_STAY_COOP|IT_KEY,
-		0,
+		WEAP_NONE,
 		NULL,
 		0,
 /* precache */ ""
@@ -2060,7 +2060,7 @@ tank commander's head
 		0,
 		NULL,
 		IT_STAY_COOP|IT_KEY,
-		0,
+		WEAP_NONE,
 		NULL,
 		0,
 /* precache */ ""
@@ -2084,7 +2084,7 @@ tank commander's head
 		0,
 		NULL,
 		IT_STAY_COOP|IT_KEY,
-		0,
+		WEAP_NONE,
 		NULL,
 		0,
 /* precache */ ""
@@ -2104,8 +2104,8 @@ tank commander's head
 /* width */		3,
 		0,
 		NULL,
-		0,
-		0,
+		IT_NONE,
+		WEAP_NONE,
 		NULL,
 		0,
 /* precache */ "items/s_health.wav items/n_health.wav items/l_health.wav items/m_health.wav"

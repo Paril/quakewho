@@ -27,7 +27,7 @@ bool ai_checkattack (edict_t *self, float dist);
 
 bool		enemy_vis;
 bool		enemy_infront;
-int			enemy_range;
+range_t		enemy_range;
 float		enemy_yaw;
 
 //============================================================================
@@ -260,7 +260,7 @@ returns the range catagorization of an entity reletive to self
 3	only triggered by damage
 =============
 */
-int range (edict_t *self, edict_t *other)
+range_t range (edict_t *self, edict_t *other)
 {
 	vec3_t	v;
 	float	len;
@@ -754,7 +754,7 @@ void ai_run_slide(edict_t *self, float distance)
 	if (M_walkmove (self, self->ideal_yaw + ofs, distance))
 		return;
 		
-	self->monsterinfo.lefty = 1 - self->monsterinfo.lefty;
+	self->monsterinfo.lefty = !self->monsterinfo.lefty;
 	M_walkmove (self, self->ideal_yaw - ofs, distance);
 }
 

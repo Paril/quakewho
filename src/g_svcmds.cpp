@@ -59,11 +59,11 @@ If 0, then only addresses matching the list will be allowed.  This lets you easi
 ==============================================================================
 */
 
-typedef struct
+struct ipfilter_t
 {
 	unsigned	mask;
 	unsigned	compare;
-} ipfilter_t;
+};
 
 #define	MAX_IPFILTERS	1024
 

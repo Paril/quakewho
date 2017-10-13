@@ -609,7 +609,7 @@ void medic_cable_attack (edict_t *self)
 	else if (self->s.frame == FRAME_attack50)
 	{
 		self->enemy->spawnflags = 0;
-		self->enemy->monsterinfo.aiflags = 0;
+		self->enemy->monsterinfo.aiflags = AI_NONE;
 		self->enemy->target = NULL;
 		self->enemy->targetname = NULL;
 		self->enemy->combattarget = NULL;

@@ -325,7 +325,7 @@ void mutant_jump_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface
 			VectorNormalize(normal);
 			VectorMA (self->s.origin, self->maxs[0], normal, point);
 			damage = irandom(40, 50);
-			T_Damage (other, self, self, self->velocity, point, normal, damage, damage, 0, MOD_UNKNOWN);
+			T_Damage (other, self, self, self->velocity, point, normal, damage, damage, DAMAGE_NONE, MOD_UNKNOWN);
 		}
 	}
 

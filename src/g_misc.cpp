@@ -134,7 +134,7 @@ void gib_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, 
 	G_FreeEdict (self);
 }
 
-void ThrowGib (edict_t *self, char *gibname, int damage, int type)
+void ThrowGib (edict_t *self, char *gibname, int damage, gibtype_t type)
 {
 	edict_t *gib;
 	vec3_t	vd;
@@ -182,7 +182,7 @@ void ThrowGib (edict_t *self, char *gibname, int damage, int type)
 	gi.linkentity (gib);
 }
 
-void ThrowHead (edict_t *self, char *gibname, int damage, int type)
+void ThrowHead (edict_t *self, char *gibname, int damage, gibtype_t type)
 {
 	vec3_t	vd;
 	float	vscale;
@@ -673,7 +673,7 @@ void func_object_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface
 		return;
 	if (other->takedamage == DAMAGE_NO)
 		return;
-	T_Damage (other, self, self, vec3_origin, self->s.origin, vec3_origin, self->dmg, 1, 0, MOD_CRUSH);
+	T_Damage (other, self, self, vec3_origin, self->s.origin, vec3_origin, self->dmg, 1, DAMAGE_NONE, MOD_CRUSH);
 }
 
 void func_object_release (edict_t *self)

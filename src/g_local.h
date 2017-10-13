@@ -65,15 +65,6 @@ enum
 const float DAMAGE_TIME		= 0.5f;
 const float FALL_TIME		= 0.3f;
 
-
-// edict->spawnflags
-// these are set with checkboxes on each entity in the map editor
-const int	SPAWNFLAG_NOT_EASY			= bit(8);
-const int	SPAWNFLAG_NOT_MEDIUM		= bit(9);
-const int	SPAWNFLAG_NOT_HARD			= bit(10);
-const int	SPAWNFLAG_NOT_DEATHMATCH	= bit(11);
-const int	SPAWNFLAG_NOT_COOP			= bit(12);
-
 // edict->flags
 enum edictflags_t : uint32_t
 {
@@ -106,22 +97,22 @@ const int MELEE_DISTANCE	= 80;
 
 const uint32_t BODY_QUEUE_SIZE		= 8;
 
-enum damage_t
+enum damage_t : uint8_t
 {
 	DAMAGE_NO,
 	DAMAGE_YES,			// will take damage if hit
 	DAMAGE_AIM			// auto targeting recognizes this
 };
 
-typedef enum 
+enum weaponstate_t : uint8_t
 {
 	WEAPON_READY, 
 	WEAPON_ACTIVATING,
 	WEAPON_DROPPING,
 	WEAPON_FIRING
-} weaponstate_t;
+};
 
-typedef enum
+enum ammo_t : uint8_t
 {
 	AMMO_BULLETS,
 	AMMO_SHELLS,
@@ -129,47 +120,64 @@ typedef enum
 	AMMO_GRENADES,
 	AMMO_CELLS,
 	AMMO_SLUGS
-} ammo_t;
-
+};
 
 //deadflag
-#define DEAD_NO					0
-#define DEAD_DYING				1
-#define DEAD_DEAD				2
-#define DEAD_RESPAWNABLE		3
+enum deadflag_t : uint8_t
+{
+	DEAD_NO,
+	DEAD_DYING,
+	DEAD_DEAD,
+	DEAD_RESPAWNABLE
+};
 
 //range
-#define RANGE_MELEE				0
-#define RANGE_NEAR				1
-#define RANGE_MID				2
-#define RANGE_FAR				3
+enum range_t : uint8_t
+{
+	RANGE_MELEE,
+	RANGE_NEAR,
+	RANGE_MID,
+	RANGE_FAR
+};
 
 //gib types
-#define GIB_ORGANIC				0
-#define GIB_METALLIC			1
+enum gibtype_t : bool
+{
+	GIB_ORGANIC,
+	GIB_METALLIC
+};
 
 //monster ai flags
-#define AI_STAND_GROUND			0x00000001
-#define AI_TEMP_STAND_GROUND	0x00000002
-#define AI_SOUND_TARGET			0x00000004
-#define AI_LOST_SIGHT			0x00000008
-#define AI_PURSUIT_LAST_SEEN	0x00000010
-#define AI_PURSUE_NEXT			0x00000020
-#define AI_PURSUE_TEMP			0x00000040
-#define AI_HOLD_FRAME			0x00000080
-#define AI_GOOD_GUY				0x00000100
-#define AI_BRUTAL				0x00000200
-#define AI_NOSTEP				0x00000400
-#define AI_DUCKED				0x00000800
-#define AI_COMBAT_POINT			0x00001000
-#define AI_MEDIC				0x00002000
-#define AI_RESURRECTING			0x00004000
+enum aiflags_t : uint32_t
+{
+	AI_NONE					= 0,
+	AI_STAND_GROUND			= bit(0),
+	AI_TEMP_STAND_GROUND	= bit(1),
+	AI_SOUND_TARGET			= bit(2),
+	AI_LOST_SIGHT			= bit(3),
+	AI_PURSUIT_LAST_SEEN	= bit(4),
+	AI_PURSUE_NEXT			= bit(5),
+	AI_PURSUE_TEMP			= bit(6),
+	AI_HOLD_FRAME			= bit(7),
+	AI_GOOD_GUY				= bit(8),
+	AI_BRUTAL				= bit(9),
+	AI_NOSTEP				= bit(10),
+	AI_DUCKED				= bit(11),
+	AI_COMBAT_POINT			= bit(12),
+	AI_MEDIC				= bit(13),
+	AI_RESURRECTING			= bit(14)
+};
+
+MAKE_BITFLAGS(aiflags_t);
 
 //monster attack state
-#define AS_STRAIGHT				1
-#define AS_SLIDING				2
-#define	AS_MELEE				3
-#define	AS_MISSILE				4
+enum aistate_t : uint8_t
+{
+	AS_STRAIGHT,
+	AS_SLIDING,
+	AS_MELEE,
+	AS_MISSILE
+};
 
 // armor types
 #define ARMOR_NONE				0
@@ -179,82 +187,103 @@ typedef enum
 #define ARMOR_SHARD				4
 
 // power armor types
-#define POWER_ARMOR_NONE		0
-#define POWER_ARMOR_SCREEN		1
-#define POWER_ARMOR_SHIELD		2
+enum powerarmor_t : uint8_t
+{
+	POWER_ARMOR_NONE,
+	POWER_ARMOR_SCREEN,
+	POWER_ARMOR_SHIELD
+};
 
 // handedness values
-#define RIGHT_HANDED			0
-#define LEFT_HANDED				1
-#define CENTER_HANDED			2
-
+enum handedness_t : uint8_t
+{
+	RIGHT_HANDED,
+	LEFT_HANDED,
+	CENTER_HANDED
+};
 
 // game.serverflags values
-#define SFL_CROSS_TRIGGER_1		0x00000001
-#define SFL_CROSS_TRIGGER_2		0x00000002
-#define SFL_CROSS_TRIGGER_3		0x00000004
-#define SFL_CROSS_TRIGGER_4		0x00000008
-#define SFL_CROSS_TRIGGER_5		0x00000010
-#define SFL_CROSS_TRIGGER_6		0x00000020
-#define SFL_CROSS_TRIGGER_7		0x00000040
-#define SFL_CROSS_TRIGGER_8		0x00000080
-#define SFL_CROSS_TRIGGER_MASK	0x000000ff
+enum serverflags_t : uint8_t
+{
+	SFL_CROSS_TRIGGER_1 = bit(0),
+	SFL_CROSS_TRIGGER_2 = bit(1),
+	SFL_CROSS_TRIGGER_3 = bit(2),
+	SFL_CROSS_TRIGGER_4 = bit(3),
+	SFL_CROSS_TRIGGER_5 = bit(4),
+	SFL_CROSS_TRIGGER_6 = bit(5),
+	SFL_CROSS_TRIGGER_7 = bit(6),
+	SFL_CROSS_TRIGGER_8 = bit(7),
+	SFL_CROSS_TRIGGER_MASK = 0xFF
+};
 
+MAKE_BITFLAGS(serverflags_t);
 
 // noise types for PlayerNoise
-#define PNOISE_SELF				0
-#define PNOISE_WEAPON			1
-#define PNOISE_IMPACT			2
-
+enum playernoise_t : uint8_t
+{
+	PNOISE_SELF,
+	PNOISE_WEAPON,
+	PNOISE_IMPACT,
+};
 
 // edict->movetype values
-typedef enum
+enum movetype_t : uint8_t
 {
-MOVETYPE_NONE,			// never moves
-MOVETYPE_NOCLIP,		// origin and angles change with no interaction
-MOVETYPE_PUSH,			// no clip to world, push on box contact
-MOVETYPE_STOP,			// no clip to world, stops on box contact
+	MOVETYPE_NONE,			// never moves
+	MOVETYPE_NOCLIP,		// origin and angles change with no interaction
+	MOVETYPE_PUSH,			// no clip to world, push on box contact
+	MOVETYPE_STOP,			// no clip to world, stops on box contact
 
-MOVETYPE_WALK,			// gravity
-MOVETYPE_STEP,			// gravity, special edge handling
-MOVETYPE_FLY,
-MOVETYPE_TOSS,			// gravity
-MOVETYPE_FLYMISSILE,	// extra size to monsters
-MOVETYPE_BOUNCE
-} movetype_t;
+	MOVETYPE_WALK,			// gravity
+	MOVETYPE_STEP,			// gravity, special edge handling
+	MOVETYPE_FLY,
+	MOVETYPE_TOSS,			// gravity
+	MOVETYPE_FLYMISSILE,	// extra size to monsters
+	MOVETYPE_BOUNCE
+};
 
 
 
-typedef struct
+struct gitem_armor_t
 {
 	int		base_count;
 	int		max_count;
 	float	normal_protection;
 	float	energy_protection;
 	int		armor;
-} gitem_armor_t;
+};
 
 
 // gitem_t->flags
-#define	IT_WEAPON		1		// use makes active weapon
-#define	IT_AMMO			2
-#define IT_ARMOR		4
-#define IT_STAY_COOP	8
-#define IT_KEY			16
-#define IT_POWERUP		32
+enum gitem_flags_t : uint8_t
+{
+	IT_NONE			= 0,
+	IT_WEAPON		= bit(0),		// use makes active weapon
+	IT_AMMO			= bit(1),
+	IT_ARMOR		= bit(2),
+	IT_STAY_COOP	= bit(3),
+	IT_KEY			= bit(4),
+	IT_POWERUP		= bit(5)
+};
+
+MAKE_BITFLAGS(gitem_flags_t);
 
 // gitem_t->weapmodel for weapons indicates model index
-#define WEAP_BLASTER			1 
-#define WEAP_SHOTGUN			2 
-#define WEAP_SUPERSHOTGUN		3 
-#define WEAP_MACHINEGUN			4 
-#define WEAP_CHAINGUN			5 
-#define WEAP_GRENADES			6 
-#define WEAP_GRENADELAUNCHER	7 
-#define WEAP_ROCKETLAUNCHER		8 
-#define WEAP_HYPERBLASTER		9 
-#define WEAP_RAILGUN			10
-#define WEAP_BFG				11
+enum gitem_weapmodel_t : uint8_t
+{
+	WEAP_NONE,
+	WEAP_BLASTER,
+	WEAP_SHOTGUN,
+	WEAP_SUPERSHOTGUN,
+	WEAP_MACHINEGUN,
+	WEAP_CHAINGUN,
+	WEAP_GRENADES,
+	WEAP_GRENADELAUNCHER,
+	WEAP_ROCKETLAUNCHER,
+	WEAP_HYPERBLASTER,
+	WEAP_RAILGUN,
+	WEAP_BFG,
+};
 
 struct gitem_t
 {
@@ -275,9 +304,9 @@ struct gitem_t
 
 	int			quantity;		// for ammo how much, for weapons how much is used per shot
 	char		*ammo;			// for weapons
-	int			flags;			// IT_* flags
+	gitem_flags_t flags;			// IT_* flags
 
-	int			weapmodel;		// weapon model index (for weapons)
+	gitem_weapmodel_t weapmodel;		// weapon model index (for weapons)
 
 	void		*info;
 	int			tag;
@@ -292,7 +321,7 @@ struct gitem_t
 // it should be initialized at dll load time, and read/written to
 // the server.ssv file for savegames
 //
-typedef struct
+struct game_locals_t
 {
 	char		helpmessage1[512];
 	char		helpmessage2[512];
@@ -310,20 +339,20 @@ typedef struct
 	int			maxentities;
 
 	// cross level triggers
-	int			serverflags;
+	serverflags_t serverflags;
 
 	// items
 	int			num_items;
 
 	bool		autosaved;
-} game_locals_t;
+};
 
 
 //
 // this structure is cleared as each map is entered
 // it is read/written to the level.sav file for savegames
 //
-typedef struct
+struct level_locals_t
 {
 	int			framenum;
 	float		time;
@@ -363,13 +392,13 @@ typedef struct
 	int			body_que;			// dead bodies
 
 	int			power_cubes;		// ugly necessity for coop
-} level_locals_t;
+};
 
 
 // spawn_temp_t is only used to hold entity field values that
 // can be set from the editor, but aren't actualy present
 // in edict_t during gameplay
-typedef struct
+struct spawn_temp_t
 {
 	// world vars
 	char		*sky;
@@ -389,10 +418,10 @@ typedef struct
 	float		maxyaw;
 	float		minpitch;
 	float		maxpitch;
-} spawn_temp_t;
+};
 
 
-typedef struct
+struct moveinfo_t
 {
 	// fixed data
 	vec3_t		start_origin;
@@ -420,28 +449,28 @@ typedef struct
 	float		remaining_distance;
 	float		decel_distance;
 	void		(*endfunc)(edict_t *);
-} moveinfo_t;
+};
 
 
-typedef struct
+struct mframe_t
 {
 	void	(*aifunc)(edict_t *self, float dist);
 	float	dist;
 	void	(*thinkfunc)(edict_t *self);
-} mframe_t;
+};
 
-typedef struct
+struct mmove_t
 {
 	int			firstframe;
 	int			lastframe;
 	mframe_t	*frame;
 	void		(*endfunc)(edict_t *self);
-} mmove_t;
+};
 
-typedef struct
+struct monsterinfo_t
 {
 	mmove_t		*currentmove;
-	int			aiflags;
+	aiflags_t	aiflags;
 	int			nextframe;
 	float		scale;
 
@@ -463,14 +492,14 @@ typedef struct
 	float		search_time;
 	float		trail_time;
 	vec3_t		last_sighting;
-	int			attack_state;
-	int			lefty;
+	aistate_t	attack_state;
+	bool		lefty;
 	float		idle_time;
 	int			linkcount;
 
-	int			power_armor_type;
+	powerarmor_t power_armor_type;
 	int			power_armor_power;
-} monsterinfo_t;
+};
 
 
 
@@ -484,51 +513,57 @@ extern	int	sm_meat_index;
 extern	int	snd_fry;
 
 // means of death
-#define MOD_UNKNOWN			0
-#define MOD_BLASTER			1
-#define MOD_SHOTGUN			2
-#define MOD_SSHOTGUN		3
-#define MOD_MACHINEGUN		4
-#define MOD_CHAINGUN		5
-#define MOD_GRENADE			6
-#define MOD_G_SPLASH		7
-#define MOD_ROCKET			8
-#define MOD_R_SPLASH		9
-#define MOD_HYPERBLASTER	10
-#define MOD_RAILGUN			11
-#define MOD_BFG_LASER		12
-#define MOD_BFG_BLAST		13
-#define MOD_BFG_EFFECT		14
-#define MOD_HANDGRENADE		15
-#define MOD_HG_SPLASH		16
-#define MOD_WATER			17
-#define MOD_SLIME			18
-#define MOD_LAVA			19
-#define MOD_CRUSH			20
-#define MOD_TELEFRAG		21
-#define MOD_FALLING			22
-#define MOD_SUICIDE			23
-#define MOD_HELD_GRENADE	24
-#define MOD_EXPLOSIVE		25
-#define MOD_BARREL			26
-#define MOD_BOMB			27
-#define MOD_EXIT			28
-#define MOD_SPLASH			29
-#define MOD_TARGET_LASER	30
-#define MOD_TRIGGER_HURT	31
-#define MOD_HIT				32
-#define MOD_TARGET_BLASTER	33
-#define MOD_FRIENDLY_FIRE	0x8000000
+enum meansofdeath_t : uint8_t
+{
+	MOD_UNKNOWN,
+	MOD_BLASTER,
+	MOD_SHOTGUN,
+	MOD_SSHOTGUN,
+	MOD_MACHINEGUN,
+	MOD_CHAINGUN,
+	MOD_GRENADE,
+	MOD_G_SPLASH,
+	MOD_ROCKET,
+	MOD_R_SPLASH,
+	MOD_HYPERBLASTER,
+	MOD_RAILGUN,
+	MOD_BFG_LASER,
+	MOD_BFG_BLAST,
+	MOD_BFG_EFFECT,
+	MOD_HANDGRENADE,
+	MOD_HG_SPLASH,
+	MOD_WATER,
+	MOD_SLIME,
+	MOD_LAVA,
+	MOD_CRUSH,
+	MOD_TELEFRAG,
+	MOD_FALLING,
+	MOD_SUICIDE,
+	MOD_HELD_GRENADE,
+	MOD_EXPLOSIVE,
+	MOD_BARREL,
+	MOD_BOMB,
+	MOD_EXIT,
+	MOD_SPLASH,
+	MOD_TARGET_LASER,
+	MOD_TRIGGER_HURT,
+	MOD_HIT,
+	MOD_TARGET_BLASTER,
 
-extern	int	meansOfDeath;
+	MOD_FRIENDLY_FIRE = bit(7)
+};
+
+MAKE_BITFLAGS(meansofdeath_t);
+
+extern	meansofdeath_t	meansOfDeath;
 
 
 extern	edict_t			*g_edicts;
 
-#define	FOFS(x) (int)&(((edict_t *)0)->x)
-#define	STOFS(x) (int)&(((spawn_temp_t *)0)->x)
-#define	LLOFS(x) (int)&(((level_locals_t *)0)->x)
-#define	CLOFS(x) (int)&(((gclient_t *)0)->x)
+#define	FOFS(x)		offsetof(edict_t, x)
+#define	STOFS(x)	offsetof(spawn_temp_t, x)
+#define	LLOFS(x)	offsetof(level_locals_t, x)
+#define	CLOFS(x)	offsetof(gclient_t, x)
 
 #include "q_random.h"
 
@@ -573,22 +608,37 @@ extern	cvar_t	*sv_maplist;
 #define world	(&g_edicts[0])
 
 // item spawnflags
-#define ITEM_TRIGGER_SPAWN		0x00000001
-#define ITEM_NO_TOUCH			0x00000002
+const uint32_t ITEM_TRIGGER_SPAWN		= bit(0);
+const uint32_t ITEM_NO_TOUCH			= bit(1);
 // 6 bits reserved for editor flags
 // 8 bits used as power cube id bits for coop games
-#define DROPPED_ITEM			0x00010000
-#define	DROPPED_PLAYER_ITEM		0x00020000
-#define ITEM_TARGETS_USED		0x00040000
+const uint32_t DROPPED_ITEM				= bit(16);
+const uint32_t DROPPED_PLAYER_ITEM		= bit(17);
+const uint32_t ITEM_TARGETS_USED		= bit(18);
+
+// edict->spawnflags
+// these are set with checkboxes on each entity in the map editor
+const uint32_t	SPAWNFLAG_NOT_EASY			= bit(8);
+const uint32_t	SPAWNFLAG_NOT_MEDIUM		= bit(9);
+const uint32_t	SPAWNFLAG_NOT_HARD			= bit(10);
+const uint32_t	SPAWNFLAG_NOT_DEATHMATCH	= bit(11);
+const uint32_t	SPAWNFLAG_NOT_COOP			= bit(12);
 
 //
 // fields are needed for spawning from the entity string
 // and saving / loading games
 //
-#define FFL_SPAWNTEMP		1
-#define FFL_NOSPAWN			2
+enum fieldflags_t : uint8_t
+{
+	FFL_NONE = 0,
+	FFL_SPAWNTEMP = bit(0),
+	FFL_NOSPAWN = bit(1)
+};
 
-typedef enum {
+MAKE_BITFLAGS(fieldflags_t);
+
+enum fieldtype_t : uint8_t
+{
 	F_INT, 
 	F_FLOAT,
 	F_LSTRING,			// string on disk, pointer in memory, TAG_LEVEL
@@ -601,15 +651,15 @@ typedef enum {
 	F_FUNCTION,
 	F_MMOVE,
 	F_IGNORE
-} fieldtype_t;
+};
 
-typedef struct
+struct field_t
 {
 	char	*name;
 	int		ofs;
 	fieldtype_t	type;
-	int		flags;
-} field_t;
+	fieldflags_t flags;
+};
 
 
 extern	field_t fields[];
@@ -637,7 +687,7 @@ void ChangeWeapon (edict_t *ent);
 void SpawnItem (edict_t *ent, gitem_t *item);
 void Think_Weapon (edict_t *ent);
 int ArmorIndex (edict_t *ent);
-int PowerArmorType (edict_t *ent);
+powerarmor_t PowerArmorType (edict_t *ent);
 gitem_t	*GetItemByIndex (int index);
 bool Add_Ammo (edict_t *ent, gitem_t *item, int count);
 void Touch_Item (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf);
@@ -671,26 +721,33 @@ void vectoangles (vec3_t vec, vec3_t angles);
 //
 // g_combat.c
 //
-bool OnSameTeam (edict_t *ent1, edict_t *ent2);
-bool CanDamage (edict_t *targ, edict_t *inflictor);
-void T_Damage (edict_t *targ, edict_t *inflictor, edict_t *attacker, vec3_t dir, vec3_t point, vec3_t normal, int damage, int knockback, int dflags, int mod);
-void T_RadiusDamage (edict_t *inflictor, edict_t *attacker, float damage, edict_t *ignore, float radius, int mod);
 
 // damage flags
-#define DAMAGE_RADIUS			0x00000001	// damage was indirect
-#define DAMAGE_NO_ARMOR			0x00000002	// armour does not protect from this damage
-#define DAMAGE_ENERGY			0x00000004	// damage is from an energy based weapon
-#define DAMAGE_NO_KNOCKBACK		0x00000008	// do not affect velocity, just view angles
-#define DAMAGE_BULLET			0x00000010  // damage is from a bullet (used for ricochets)
-#define DAMAGE_NO_PROTECTION	0x00000020  // armor, shields, invulnerability, and godmode have no effect
+enum damageflag_t : uint8_t
+{
+	DAMAGE_NONE				= 0,
+	DAMAGE_RADIUS			= bit(0),	// damage was indirect
+	DAMAGE_NO_ARMOR			= bit(1),	// armour does not protect from this damage
+	DAMAGE_ENERGY			= bit(2),	// damage is from an energy based weapon
+	DAMAGE_NO_KNOCKBACK		= bit(3),	// do not affect velocity, just view angles
+	DAMAGE_BULLET			= bit(4),   // damage is from a bullet (used for ricochets)
+	DAMAGE_NO_PROTECTION	= bit(5),   // armor, shields, invulnerability, and godmode have no effect
+};
 
-#define DEFAULT_BULLET_HSPREAD	300
-#define DEFAULT_BULLET_VSPREAD	500
-#define DEFAULT_SHOTGUN_HSPREAD	1000
-#define DEFAULT_SHOTGUN_VSPREAD	500
-#define DEFAULT_DEATHMATCH_SHOTGUN_COUNT	12
-#define DEFAULT_SHOTGUN_COUNT	12
-#define DEFAULT_SSHOTGUN_COUNT	20
+MAKE_BITFLAGS(damageflag_t);
+
+bool OnSameTeam (edict_t *ent1, edict_t *ent2);
+bool CanDamage (edict_t *targ, edict_t *inflictor);
+void T_Damage (edict_t *targ, edict_t *inflictor, edict_t *attacker, vec3_t dir, vec3_t point, vec3_t normal, int damage, int knockback, damageflag_t dflags, meansofdeath_t mod);
+void T_RadiusDamage (edict_t *inflictor, edict_t *attacker, float damage, edict_t *ignore, float radius, meansofdeath_t mod);
+
+const int DEFAULT_BULLET_HSPREAD	= 300;
+const int DEFAULT_BULLET_VSPREAD	= 500;
+const int DEFAULT_SHOTGUN_HSPREAD	= 1000;
+const int DEFAULT_SHOTGUN_VSPREAD	= 500;
+const int DEFAULT_DEATHMATCH_SHOTGUN_COUNT	= 12;
+const int DEFAULT_SHOTGUN_COUNT	= 12;
+const int DEFAULT_SSHOTGUN_COUNT	= 20;
 
 //
 // g_monster.c
@@ -717,9 +774,9 @@ void M_CheckGround (edict_t *ent);
 //
 // g_misc.c
 //
-void ThrowHead (edict_t *self, char *gibname, int damage, int type);
+void ThrowHead (edict_t *self, char *gibname, int damage, gibtype_t type);
 void ThrowClientHead (edict_t *self, int damage);
-void ThrowGib (edict_t *self, char *gibname, int damage, int type);
+void ThrowGib (edict_t *self, char *gibname, int damage, gibtype_t type);
 void BecomeExplosion1(edict_t *self);
 
 //
@@ -733,7 +790,7 @@ void ai_walk (edict_t *self, float dist);
 void ai_turn (edict_t *self, float dist);
 void ai_run (edict_t *self, float dist);
 void ai_charge (edict_t *self, float dist);
-int range (edict_t *self, edict_t *other);
+range_t range (edict_t *self, edict_t *other);
 
 void FoundTarget (edict_t *self);
 bool infront (edict_t *self, edict_t *other);
@@ -746,8 +803,8 @@ bool FindTarget (edict_t *self);
 //
 void ThrowDebris (edict_t *self, char *modelname, float speed, vec3_t origin);
 bool fire_hit (edict_t *self, vec3_t aim, int damage, int kick);
-void fire_bullet (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick, int hspread, int vspread, int mod);
-void fire_shotgun (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick, int hspread, int vspread, int count, int mod);
+void fire_bullet (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick, int hspread, int vspread, meansofdeath_t mod);
+void fire_shotgun (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick, int hspread, int vspread, int count, meansofdeath_t mod);
 void fire_blaster (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int speed, int effect, bool hyper);
 void fire_grenade (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int speed, float timer, float damage_radius);
 void fire_grenade2 (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int speed, float timer, float damage_radius, bool held);
@@ -806,7 +863,7 @@ void DeathmatchScoreboardMessage (edict_t *client, edict_t *killer);
 //
 // g_pweapon.c
 //
-void PlayerNoise(edict_t *who, vec3_t where, int type);
+void PlayerNoise(edict_t *who, vec3_t where, playernoise_t type);
 
 //
 // m_move.c
@@ -838,21 +895,23 @@ void GetChaseTarget(edict_t *ent);
 //============================================================================
 
 // client_t->anim_priority
-#define	ANIM_BASIC		0		// stand / run
-#define	ANIM_WAVE		1
-#define	ANIM_JUMP		2
-#define	ANIM_PAIN		3
-#define	ANIM_ATTACK		4
-#define	ANIM_DEATH		5
-#define	ANIM_REVERSE	6
-
+enum animpriority_t : uint8_t
+{
+	ANIM_BASIC,		// stand / run
+	ANIM_WAVE,
+	ANIM_JUMP,
+	ANIM_PAIN,
+	ANIM_ATTACK,
+	ANIM_DEATH,
+	ANIM_REVERSE
+};
 
 // client data that stays across multiple level loads
-typedef struct
+struct client_persistant_t
 {
 	char		userinfo[MAX_INFO_STRING];
 	char		netname[16];
-	int			hand;
+	handedness_t hand;
 
 	bool		connected;			// a loadgame will leave valid entities that
 									// just don't have a connection yet
@@ -883,10 +942,10 @@ typedef struct
 	int			helpchanged;
 
 	bool		spectator;			// client is a spectator
-} client_persistant_t;
+};
 
 // client data that stays across deathmatch respawns
-typedef struct
+struct client_respawn_t
 {
 	client_persistant_t	coop_respawn;	// what to set client->pers to on a respawn
 	int			enterframe;			// level.framenum the client entered the game
@@ -894,7 +953,7 @@ typedef struct
 	vec3_t		cmd_angles;			// angles sent over in the last command
 
 	bool		spectator;			// client is a spectator
-} client_respawn_t;
+};
 
 // this structure is cleared on each PutClientInServer(),
 // except for 'client->pers'
@@ -918,9 +977,9 @@ struct gclient_t
 
 	int			ammo_index;
 
-	int			buttons;
-	int			oldbuttons;
-	int			latched_buttons;
+	button_t	buttons;
+	button_t	oldbuttons;
+	button_t	latched_buttons;
 
 	bool		weapon_thunk;
 
@@ -957,7 +1016,7 @@ struct gclient_t
 
 	// animation vars
 	int			anim_end;
-	int			anim_priority;
+	animpriority_t anim_priority;
 	bool		anim_duck;
 	bool		anim_run;
 
@@ -1029,7 +1088,7 @@ struct edict_t
 	//
 	char		*message;
 	char		*classname;
-	int			spawnflags;
+	uint32_t	spawnflags;
 
 	float		timestamp;
 
@@ -1077,8 +1136,8 @@ struct edict_t
 	int			health;
 	int			max_health;
 	int			gib_health;
-	int			deadflag;
-	bool		show_hostile;
+	deadflag_t	deadflag;
+	float		show_hostile;
 
 	float		powerarmor_time;
 

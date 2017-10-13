@@ -22,11 +22,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "g_local.h"
 
-typedef struct
+struct spawn_t
 {
 	char	*name;
 	void	(*spawn)(edict_t *ent);
-} spawn_t;
+};
 
 
 void SP_item_health (edict_t *self);

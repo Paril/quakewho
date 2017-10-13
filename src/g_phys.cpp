@@ -381,13 +381,14 @@ retry:
 }					
 
 
-typedef struct
+struct pushed_t
 {
 	edict_t	*ent;
 	vec3_t	origin;
 	vec3_t	angles;
 	float	deltayaw;
-} pushed_t;
+};
+
 pushed_t	pushed[MAX_EDICTS], *pushed_p;
 
 edict_t	*obstacle;
@@ -587,7 +588,7 @@ void SV_Physics_Pusher (edict_t *ent)
 		}
 	}
 	if (pushed_p > &pushed[MAX_EDICTS])
-		gi.error (ERR_FATAL, "pushed_p > &pushed[MAX_EDICTS], memory corrupted");
+		gi.error ("pushed_p > &pushed[MAX_EDICTS], memory corrupted");
 
 	if (part)
 	{

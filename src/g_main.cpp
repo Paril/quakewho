@@ -33,7 +33,7 @@ spawn_temp_t	st;
 
 int	sm_meat_index;
 int	snd_fry;
-int meansOfDeath;
+meansofdeath_t meansOfDeath;
 
 edict_t		*g_edicts;
 
@@ -153,7 +153,7 @@ void Sys_Error (char *error, ...)
 	vsprintf (text, error, argptr);
 	va_end (argptr);
 
-	gi.error (ERR_FATAL, "%s", text);
+	gi.error ("%s", text);
 }
 
 void Com_Printf (char *msg, ...)

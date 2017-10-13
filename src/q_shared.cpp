@@ -26,7 +26,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #define DEG2RAD( a ) ( a * M_PI ) / 180.0F
 
-vec3_t vec3_origin = {0,0,0};
+vec3_t vec3_origin = { 0, 0, 0 };
 
 //============================================================================
 
@@ -271,7 +271,7 @@ float	anglemod(float a)
 }
 
 // this is the slow, general version
-int BoxOnPlaneSide2 (vec3_t emins, vec3_t emaxs, struct cplane_s *p)
+int BoxOnPlaneSide2 (vec3_t emins, vec3_t emaxs, cplane_t *p)
 {
 	int		i;
 	float	dist1, dist2;
@@ -309,7 +309,7 @@ BoxOnPlaneSide
 Returns 1, 2, or 1 + 2
 ==================
 */
-int BoxOnPlaneSide (vec3_t emins, vec3_t emaxs, struct cplane_s *p)
+int BoxOnPlaneSide (vec3_t emins, vec3_t emaxs, cplane_t *p)
 {
 	float	dist1, dist2;
 	int		sides;

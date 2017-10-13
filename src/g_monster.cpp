@@ -274,7 +274,7 @@ void M_WorldEffects (edict_t *ent)
 		if (ent->damage_debounce_time < level.time)
 		{
 			ent->damage_debounce_time = level.time + 0.2;
-			T_Damage (ent, world, world, vec3_origin, ent->s.origin, vec3_origin, 10*ent->waterlevel, 0, 0, MOD_LAVA);
+			T_Damage (ent, world, world, vec3_origin, ent->s.origin, vec3_origin, 10*ent->waterlevel, 0, DAMAGE_NONE, MOD_LAVA);
 		}
 	}
 	if ((ent->watertype & CONTENTS_SLIME) && !(ent->flags & FL_IMMUNE_SLIME))
@@ -282,7 +282,7 @@ void M_WorldEffects (edict_t *ent)
 		if (ent->damage_debounce_time < level.time)
 		{
 			ent->damage_debounce_time = level.time + 1;
-			T_Damage (ent, world, world, vec3_origin, ent->s.origin, vec3_origin, 4*ent->waterlevel, 0, 0, MOD_SLIME);
+			T_Damage (ent, world, world, vec3_origin, ent->s.origin, vec3_origin, 4*ent->waterlevel, 0, DAMAGE_NONE, MOD_SLIME);
 		}
 	}
 	
