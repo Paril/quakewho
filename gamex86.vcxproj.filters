@@ -156,6 +156,9 @@
     <ClCompile Include="src\q_shared.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\q_random.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\g_local.h">
@@ -234,6 +237,9 @@
       <Filter>inc</Filter>
     </ClInclude>
     <ClInclude Include="src\q_shared.h">
+      <Filter>inc</Filter>
+    </ClInclude>
+    <ClInclude Include="src\q_random.h">
       <Filter>inc</Filter>
     </ClInclude>
   </ItemGroup>

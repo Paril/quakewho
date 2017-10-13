@@ -92,7 +92,7 @@ void berserk_fidget (edict_t *self)
 {
 	if (self->monsterinfo.aiflags & AI_STAND_GROUND)
 		return;
-	if (random() > 0.15)
+	if (prandom(85))
 		return;
 
 	self->monsterinfo.currentmove = &berserk_move_stand_fidget;
@@ -170,7 +170,7 @@ void berserk_run (edict_t *self)
 void berserk_attack_spike (edict_t *self)
 {
 	static	vec3_t	aim = {MELEE_DISTANCE, 0, -24};
-	fire_hit (self, aim, (15 + (rand() % 6)), 400);		//	Faster attack -- upwards and backwards
+	fire_hit (self, aim, irandom(15, 20), 400);		//	Faster attack -- upwards and backwards
 }
 
 
@@ -198,7 +198,7 @@ void berserk_attack_club (edict_t *self)
 	vec3_t	aim;
 
 	VectorSet (aim, MELEE_DISTANCE, self->mins[0], -4);
-	fire_hit (self, aim, (5 + (rand() % 6)), 400);		// Slower attack
+	fire_hit (self, aim, irandom(5, 10), 400);		// Slower attack
 }
 
 mframe_t berserk_frames_attack_club [] =
@@ -248,7 +248,7 @@ mmove_t berserk_move_attack_strike = {FRAME_att_c21, FRAME_att_c34, berserk_fram
 
 void berserk_melee (edict_t *self)
 {
-	if ((rand() % 2) == 0)
+	if (prandom(50))
 		self->monsterinfo.currentmove = &berserk_move_attack_spike;
 	else
 		self->monsterinfo.currentmove = &berserk_move_attack_club;
@@ -326,7 +326,7 @@ void berserk_pain (edict_t *self, edict_t *other, float kick, int damage)
 	if (skill->value == 3)
 		return;		// no pain anims in nightmare
 
-	if ((damage < 20) || (random() < 0.5))
+	if ((damage < 20) || prandom(50))
 		self->monsterinfo.currentmove = &berserk_move_pain1;
 	else
 		self->monsterinfo.currentmove = &berserk_move_pain2;

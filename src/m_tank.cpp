@@ -297,7 +297,7 @@ void tank_pain (edict_t *self, edict_t *other, float kick, int damage)
 			return;
 
 	if (damage <= 30)
-		if (random() > 0.2)
+		if (prandom(80))
 			return;
 	
 	// If hard or nightmare, don't go into pain while attacking
@@ -469,7 +469,7 @@ void tank_reattack_blaster (edict_t *self)
 	if (skill->value >= 2)
 		if (visible (self, self->enemy))
 			if (self->enemy->health > 0)
-				if (random() <= 0.6)
+				if (prandom(60))
 				{
 					self->monsterinfo.currentmove = &tank_move_reattack_blast;
 					return;
@@ -639,7 +639,7 @@ void tank_refire_rocket (edict_t *self)
 	if ( skill->value >= 2 )
 		if (self->enemy->health > 0)
 			if (visible(self, self->enemy) )
-				if (random() <= 0.4)
+				if (prandom(40))
 				{
 					self->monsterinfo.currentmove = &tank_move_attack_fire_rocket;
 					return;
@@ -656,7 +656,6 @@ void tank_attack(edict_t *self)
 {
 	vec3_t	vec;
 	float	range;
-	float	r;
 
 	if (self->enemy->health < 0)
 	{
@@ -668,7 +667,7 @@ void tank_attack(edict_t *self)
 	VectorSubtract (self->enemy->s.origin, self->s.origin, vec);
 	range = VectorLength (vec);
 
-	r = random();
+	float r = random();
 
 	if (range <= 125)
 	{

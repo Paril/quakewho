@@ -25,14 +25,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #pragma warning(disable : 4244)
 #pragma warning(disable : 4242)
 
-#include <cassert>
-#include <cmath>
-#include <cstdio>
-#include <cstdarg>
 #include <cstring>
-#include <cstdlib>
-#include <ctime>
+#include <cmath>
 #include <cstdint>
+
+template <size_t SIZE, typename T>
+inline constexpr size_t lengthof(T (&arr)[SIZE]) { return SIZE; }
 
 typedef unsigned char 		byte;
 typedef int	qboolean;

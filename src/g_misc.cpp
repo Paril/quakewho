@@ -17,7 +17,9 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
+
 // g_misc.c
+#include <ctime>
 
 #include "g_local.h"
 
@@ -57,9 +59,9 @@ Misc functions
 */
 void VelocityForDamage (int damage, vec3_t v)
 {
-	v[0] = 100.0 * crandom();
-	v[1] = 100.0 * crandom();
-	v[2] = 200.0 + 100.0 * random();
+	v[0] = crandom(100);
+	v[1] = crandom(100);
+	v[2] = random(200, 300);
 
 	if (damage < 50)
 		VectorScale (v, 0.7, v);
@@ -97,7 +99,7 @@ void gib_think (edict_t *self)
 	if (self->s.frame == 10)
 	{
 		self->think = G_FreeEdict;
-		self->nextthink = level.time + 8 + random()*10;
+		self->nextthink = level.time + irandom(8, 18);
 	}
 }
 
@@ -170,12 +172,12 @@ void ThrowGib (edict_t *self, char *gibname, int damage, int type)
 	VelocityForDamage (damage, vd);
 	VectorMA (self->velocity, vscale, vd, gib->velocity);
 	ClipGibVelocity (gib);
-	gib->avelocity[0] = random()*600;
-	gib->avelocity[1] = random()*600;
-	gib->avelocity[2] = random()*600;
+	gib->avelocity[0] = random(600);
+	gib->avelocity[1] = random(600);
+	gib->avelocity[2] = random(600);
 
 	gib->think = G_FreeEdict;
-	gib->nextthink = level.time + 10 + random()*10;
+	gib->nextthink = level.time + irandom(10, 20);
 
 	gi.linkentity (gib);
 }
@@ -220,7 +222,7 @@ void ThrowHead (edict_t *self, char *gibname, int damage, int type)
 	self->avelocity[YAW] = crandom()*600;
 
 	self->think = G_FreeEdict;
-	self->nextthink = level.time + 10 + random()*10;
+	self->nextthink = level.time + irandom(10, 20);
 
 	gi.linkentity (self);
 }
@@ -231,7 +233,7 @@ void ThrowClientHead (edict_t *self, int damage)
 	vec3_t	vd;
 	char	*gibname;
 
-	if (rand()&1)
+	if (prandom(50))
 	{
 		gibname = "models/objects/gibs/head2/tris.md2";
 		self->s.skinnum = 1;		// second skin is player
@@ -297,11 +299,11 @@ void ThrowDebris (edict_t *self, char *modelname, float speed, vec3_t origin)
 	VectorMA (self->velocity, speed, v, chunk->velocity);
 	chunk->movetype = MOVETYPE_BOUNCE;
 	chunk->solid = SOLID_NOT;
-	chunk->avelocity[0] = random()*600;
-	chunk->avelocity[1] = random()*600;
-	chunk->avelocity[2] = random()*600;
+	chunk->avelocity[0] = random(600);
+	chunk->avelocity[1] = random(600);
+	chunk->avelocity[2] = random(600);
 	chunk->think = G_FreeEdict;
-	chunk->nextthink = level.time + 5 + random()*5;
+	chunk->nextthink = level.time + irandom(5, 10);
 	chunk->s.frame = 0;
 	chunk->flags = 0;
 	chunk->classname = "debris";
@@ -1204,7 +1206,7 @@ void SP_misc_banner (edict_t *ent)
 	ent->movetype = MOVETYPE_NONE;
 	ent->solid = SOLID_NOT;
 	ent->s.modelindex = gi.modelindex ("models/objects/banner/tris.md2");
-	ent->s.frame = rand() % 16;
+	ent->s.frame = irandom(15);
 	gi.linkentity (ent);
 
 	ent->think = misc_banner_think;
@@ -1503,9 +1505,9 @@ void SP_misc_gib_arm (edict_t *ent)
 	ent->movetype = MOVETYPE_TOSS;
 	ent->svflags |= SVF_MONSTER;
 	ent->deadflag = DEAD_DEAD;
-	ent->avelocity[0] = random()*200;
-	ent->avelocity[1] = random()*200;
-	ent->avelocity[2] = random()*200;
+	ent->avelocity[0] = random(200);
+	ent->avelocity[1] = random(200);
+	ent->avelocity[2] = random(200);
 	ent->think = G_FreeEdict;
 	ent->nextthink = level.time + 30;
 	gi.linkentity (ent);
@@ -1524,9 +1526,9 @@ void SP_misc_gib_leg (edict_t *ent)
 	ent->movetype = MOVETYPE_TOSS;
 	ent->svflags |= SVF_MONSTER;
 	ent->deadflag = DEAD_DEAD;
-	ent->avelocity[0] = random()*200;
-	ent->avelocity[1] = random()*200;
-	ent->avelocity[2] = random()*200;
+	ent->avelocity[0] = random(200);
+	ent->avelocity[1] = random(200);
+	ent->avelocity[2] = random(200);
 	ent->think = G_FreeEdict;
 	ent->nextthink = level.time + 30;
 	gi.linkentity (ent);
@@ -1545,9 +1547,9 @@ void SP_misc_gib_head (edict_t *ent)
 	ent->movetype = MOVETYPE_TOSS;
 	ent->svflags |= SVF_MONSTER;
 	ent->deadflag = DEAD_DEAD;
-	ent->avelocity[0] = random()*200;
-	ent->avelocity[1] = random()*200;
-	ent->avelocity[2] = random()*200;
+	ent->avelocity[0] = random(200);
+	ent->avelocity[1] = random(200);
+	ent->avelocity[2] = random(200);
 	ent->think = G_FreeEdict;
 	ent->nextthink = level.time + 30;
 	gi.linkentity (ent);

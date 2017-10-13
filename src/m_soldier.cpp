@@ -43,7 +43,7 @@ static int	sound_cock;
 
 void soldier_idle (edict_t *self)
 {
-	if (random() > 0.8)
+	if (prandom(20))
 		gi.sound (self, CHAN_VOICE, sound_idle, 1, ATTN_IDLE, 0);
 }
 
@@ -210,7 +210,7 @@ mmove_t soldier_move_stand4 = {FRAME_stand401, FRAME_stand452, soldier_frames_st
 
 void soldier_stand (edict_t *self)
 {
-	if ((self->monsterinfo.currentmove == &soldier_move_stand3) || (random() < 0.8))
+	if ((self->monsterinfo.currentmove == &soldier_move_stand3) || (prandom(80)))
 		self->monsterinfo.currentmove = &soldier_move_stand1;
 	else
 		self->monsterinfo.currentmove = &soldier_move_stand3;
@@ -223,7 +223,7 @@ void soldier_stand (edict_t *self)
 
 void soldier_walk1_random (edict_t *self)
 {
-	if (random() > 0.1)
+	if (prandom(90))
 		self->monsterinfo.nextframe = FRAME_walk101;
 }
 
@@ -282,7 +282,7 @@ mmove_t soldier_move_walk2 = {FRAME_walk209, FRAME_walk218, soldier_frames_walk2
 
 void soldier_walk (edict_t *self)
 {
-	if (random() < 0.5)
+	if (prandom(50))
 		self->monsterinfo.currentmove = &soldier_move_walk1;
 	else
 		self->monsterinfo.currentmove = &soldier_move_walk2;
@@ -408,7 +408,6 @@ mmove_t soldier_move_pain4 = {FRAME_pain401, FRAME_pain417, soldier_frames_pain4
 
 void soldier_pain (edict_t *self, edict_t *other, float kick, int damage)
 {
-	float	r;
 	int		n;
 
 	if (self->health < (self->max_health / 2))
@@ -440,11 +439,11 @@ void soldier_pain (edict_t *self, edict_t *other, float kick, int damage)
 	if (skill->value == 3)
 		return;		// no pain anims in nightmare
 
-	r = random();
+	int r = irandom(2);
 
-	if (r < 0.33)
+	if (r == 0)
 		self->monsterinfo.currentmove = &soldier_move_pain1;
-	else if (r < 0.66)
+	else if (r == 1)
 		self->monsterinfo.currentmove = &soldier_move_pain2;
 	else
 		self->monsterinfo.currentmove = &soldier_move_pain3;
@@ -512,7 +511,7 @@ void soldier_fire (edict_t *self, int flash_number)
 	else
 	{
 		if (!(self->monsterinfo.aiflags & AI_HOLD_FRAME))
-			self->monsterinfo.pausetime = level.time + (3 + rand() % 8) * FRAMETIME;
+			self->monsterinfo.pausetime = level.time + irandom(3, 10) * FRAMETIME;
 
 		monster_fire_bullet (self, start, aim, 2, 4, DEFAULT_BULLET_HSPREAD, DEFAULT_BULLET_VSPREAD, flash_index);
 
@@ -538,7 +537,7 @@ void soldier_attack1_refire1 (edict_t *self)
 	if (self->enemy->health <= 0)
 		return;
 
-	if ( ((skill->value == 3) && (random() < 0.5)) || (range(self, self->enemy) == RANGE_MELEE) )
+	if ( ((skill->value == 3) && prandom(50)) || (range(self, self->enemy) == RANGE_MELEE) )
 		self->monsterinfo.nextframe = FRAME_attak102;
 	else
 		self->monsterinfo.nextframe = FRAME_attak110;
@@ -791,14 +790,14 @@ void soldier_attack(edict_t *self)
 
 void soldier_sight(edict_t *self, edict_t *other)
 {
-	if (random() < 0.5)
+	if (prandom(50))
 		gi.sound (self, CHAN_VOICE, sound_sight1, 1, ATTN_NORM, 0);
 	else
 		gi.sound (self, CHAN_VOICE, sound_sight2, 1, ATTN_NORM, 0);
 
 	if ((skill->value > 0) && (range(self, self->enemy) >= RANGE_MID))
 	{
-		if (random() > 0.5)
+		if (prandom(50))
 			self->monsterinfo.currentmove = &soldier_move_attack6;
 	}
 }
@@ -827,10 +826,7 @@ mmove_t soldier_move_duck = {FRAME_duck01, FRAME_duck05, soldier_frames_duck, so
 
 void soldier_dodge (edict_t *self, edict_t *attacker, float eta)
 {
-	float	r;
-
-	r = random();
-	if (r > 0.25)
+	if (prandom(75))
 		return;
 
 	if (!self->enemy)
@@ -843,11 +839,11 @@ void soldier_dodge (edict_t *self, edict_t *attacker, float eta)
 	}
 
 	self->monsterinfo.pausetime = level.time + eta + 0.3;
-	r = random();
+	int r = irandom(2);
 
 	if (skill->value == 1)
 	{
-		if (r > 0.33)
+		if (r != 2)
 			self->monsterinfo.currentmove = &soldier_move_duck;
 		else
 			self->monsterinfo.currentmove = &soldier_move_attack3;
@@ -856,7 +852,7 @@ void soldier_dodge (edict_t *self, edict_t *attacker, float eta)
 
 	if (skill->value >= 2)
 	{
-		if (r > 0.66)
+		if (r == 2)
 			self->monsterinfo.currentmove = &soldier_move_duck;
 		else
 			self->monsterinfo.currentmove = &soldier_move_attack3;
@@ -1179,7 +1175,7 @@ void soldier_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int dama
 		return;
 	}
 
-	n = rand() % 5;
+	n = irandom(4);
 	if (n == 0)
 		self->monsterinfo.currentmove = &soldier_move_death1;
 	else if (n == 1)

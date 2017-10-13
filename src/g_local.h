@@ -505,8 +505,7 @@ extern	edict_t			*g_edicts;
 #define	LLOFS(x) (int)&(((level_locals_t *)0)->x)
 #define	CLOFS(x) (int)&(((gclient_t *)0)->x)
 
-#define random()	((rand () & 0x7fff) / ((float)0x7fff))
-#define crandom()	(2.0 * (random() - 0.5))
+#include "q_random.h"
 
 extern	cvar_t	*maxentities;
 extern	cvar_t	*deathmatch;

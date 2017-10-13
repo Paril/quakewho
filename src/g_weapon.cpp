@@ -39,7 +39,7 @@ static void check_dodge (edict_t *self, vec3_t start, vec3_t dir, int speed)
 	// easy mode only ducks one quarter the time
 	if (skill->value == 0)
 	{
-		if (random() > 0.25)
+		if (prandom(75))
 			return;
 	}
 	VectorMA (start, 8192, dir, end);
@@ -467,7 +467,7 @@ static void Grenade_Touch (edict_t *ent, edict_t *other, cplane_t *plane, csurfa
 	{
 		if (ent->spawnflags & 1)
 		{
-			if (random() > 0.5)
+			if (prandom(50))
 				gi.sound (ent, CHAN_VOICE, gi.soundindex ("weapons/hgrenb1a.wav"), 1, ATTN_NORM, 0);
 			else
 				gi.sound (ent, CHAN_VOICE, gi.soundindex ("weapons/hgrenb2a.wav"), 1, ATTN_NORM, 0);
@@ -597,7 +597,7 @@ void rocket_touch (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *su
 		{
 			if ((surf) && !(surf->flags & (SURF_WARP|SURF_TRANS33|SURF_TRANS66|SURF_FLOWING)))
 			{
-				n = rand() % 5;
+				n = irandom(4);
 				while(n--)
 					ThrowDebris (ent, "models/objects/debris2/tris.md2", 2, ent->s.origin);
 			}

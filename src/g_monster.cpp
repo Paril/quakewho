@@ -125,11 +125,11 @@ void M_FlyCheck (edict_t *self)
 	if (self->waterlevel)
 		return;
 
-	if (random() > 0.5)
+	if (prandom(50))
 		return;
 
 	self->think = M_FliesOn;
-	self->nextthink = level.time + 5 + 10 * random();
+	self->nextthink = level.time + irandom(5, 15);
 }
 
 void AttackFinished (edict_t *self, float time)
@@ -291,7 +291,7 @@ void M_WorldEffects (edict_t *ent)
 		if (!(ent->svflags & SVF_DEADMONSTER))
 		{
 			if (ent->watertype & CONTENTS_LAVA)
-				if (random() <= 0.5)
+				if (prandom(50))
 					gi.sound (ent, CHAN_BODY, gi.soundindex("player/lava1.wav"), 1, ATTN_NORM, 0);
 				else
 					gi.sound (ent, CHAN_BODY, gi.soundindex("player/lava2.wav"), 1, ATTN_NORM, 0);
@@ -575,7 +575,7 @@ qboolean monster_start (edict_t *self)
 
 	// randomize what frame they start on
 	if (self->monsterinfo.currentmove)
-		self->s.frame = self->monsterinfo.currentmove->firstframe + (rand() % (self->monsterinfo.currentmove->lastframe - self->monsterinfo.currentmove->firstframe + 1));
+		self->s.frame = irandom(self->monsterinfo.currentmove->firstframe, self->monsterinfo.currentmove->lastframe);
 
 	return true;
 }

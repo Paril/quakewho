@@ -125,7 +125,7 @@ void gunner_fidget (edict_t *self)
 {
 	if (self->monsterinfo.aiflags & AI_STAND_GROUND)
 		return;
-	if (random() <= 0.05)
+	if (prandom(5))
 		self->monsterinfo.currentmove = &gunner_move_fidget;
 }
 
@@ -290,7 +290,7 @@ void gunner_pain (edict_t *self, edict_t *other, float kick, int damage)
 
 	self->pain_debounce_time = level.time + 3;
 
-	if (rand()&1)
+	if (prandom(50))
 		gi.sound (self, CHAN_VOICE, sound_pain, 1, ATTN_NORM, 0);
 	else
 		gi.sound (self, CHAN_VOICE, sound_pain2, 1, ATTN_NORM, 0);
@@ -367,7 +367,7 @@ void gunner_duck_down (edict_t *self)
 	self->monsterinfo.aiflags |= AI_DUCKED;
 	if (skill->value >= 2)
 	{
-		if (random() > 0.5)
+		if (prandom(50))
 			GunnerGrenade (self);
 	}
 
@@ -408,7 +408,7 @@ mmove_t	gunner_move_duck = {FRAME_duck01, FRAME_duck08, gunner_frames_duck, gunn
 
 void gunner_dodge (edict_t *self, edict_t *attacker, float eta)
 {
-	if (random() > 0.25)
+	if (prandom(75))
 		return;
 
 	if (!self->enemy)
@@ -552,7 +552,7 @@ void gunner_attack(edict_t *self)
 	}
 	else
 	{
-		if (random() <= 0.5)
+		if (prandom(50))
 			self->monsterinfo.currentmove = &gunner_move_attack_grenade;
 		else
 			self->monsterinfo.currentmove = &gunner_move_attack_chain;
@@ -568,7 +568,7 @@ void gunner_refire_chain(edict_t *self)
 {
 	if (self->enemy->health > 0)
 		if ( visible (self, self->enemy) )
-			if (random() <= 0.5)
+			if (prandom(50))
 			{
 				self->monsterinfo.currentmove = &gunner_move_fire_chain;
 				return;

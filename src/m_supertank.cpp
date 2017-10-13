@@ -48,7 +48,7 @@ void TreadSound (edict_t *self)
 
 void supertank_search (edict_t *self)
 {
-	if (random() < 0.5)
+	if (prandom(50))
 		gi.sound (self, CHAN_VOICE, sound_search1, 1, ATTN_NORM, 0);
 	else
 		gi.sound (self, CHAN_VOICE, sound_search2, 1, ATTN_NORM, 0);
@@ -441,7 +441,7 @@ mmove_t supertank_move_end_attack1 = {FRAME_attak1_7, FRAME_attak1_20, supertank
 void supertank_reattack1(edict_t *self)
 {
 	if (visible(self, self->enemy))
-		if (random() < 0.9)
+		if (prandom(90))
 			self->monsterinfo.currentmove = &supertank_move_attack1;
 		else
 			self->monsterinfo.currentmove = &supertank_move_end_attack1;	
@@ -459,8 +459,8 @@ void supertank_pain (edict_t *self, edict_t *other, float kick, int damage)
 			return;
 
 	// Lessen the chance of him going into his pain frames
-	if (damage <=25)
-		if (random()<0.2)
+	if (damage <= 25)
+		if (prandom(20))
 			return;
 
 	// Don't go into pain if he's firing his rockets
@@ -568,7 +568,7 @@ void supertank_attack(edict_t *self)
 	}
 	else
 	{	// fire rockets more often at distance
-		if (random() < 0.3)
+		if (prandom(30))
 			self->monsterinfo.currentmove = &supertank_move_attack1;
 		else
 			self->monsterinfo.currentmove = &supertank_move_attack2;
@@ -598,7 +598,7 @@ void BossExplode (edict_t *self)
 
 	self->think = BossExplode;
 	VectorCopy (self->s.origin, org);
-	org[2] += 24 + (rand()&15);
+	org[2] += random(24, 39);
 	switch (self->count++)
 	{
 	case 0:

@@ -143,7 +143,7 @@ edict_t *G_PickTarget (char *targetname)
 		return NULL;
 	}
 
-	return choice[rand() % num_choices];
+	return choice[irandom(num_choices - 1)];
 }
 
 

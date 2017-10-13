@@ -40,7 +40,7 @@ static int	sound_search1;
 
 void boss2_search (edict_t *self)
 {
-	if (random() < 0.5)
+	if (prandom(50))
 		gi.sound (self, CHAN_VOICE, sound_search1, 1, ATTN_NONE, 0);
 }
 
@@ -443,7 +443,7 @@ void boss2_attack (edict_t *self)
 	}
 	else 
 	{
-		if (random() <= 0.6)
+		if (prandom(60))
 			self->monsterinfo.currentmove = &boss2_move_attack_pre_mg;
 		else
 			self->monsterinfo.currentmove = &boss2_move_attack_rocket;
@@ -458,7 +458,7 @@ void boss2_attack_mg (edict_t *self)
 void boss2_reattack_mg (edict_t *self)
 {
 	if ( infront(self, self->enemy) )
-		if (random() <= 0.7)
+		if (prandom(70))
 			self->monsterinfo.currentmove = &boss2_move_attack_mg;
 		else
 			self->monsterinfo.currentmove = &boss2_move_attack_post_mg;
@@ -541,7 +541,7 @@ qboolean Boss2_CheckAttack (edict_t *self)
 {
 	vec3_t	spot1, spot2;
 	vec3_t	temp;
-	float	chance;
+	int		chance;
 	trace_t	tr;
 	qboolean	enemy_infront;
 	int			enemy_range;
@@ -592,35 +592,29 @@ qboolean Boss2_CheckAttack (edict_t *self)
 
 	if (self->monsterinfo.aiflags & AI_STAND_GROUND)
 	{
-		chance = 0.4;
+		chance = 40;
 	}
-	else if (enemy_range == RANGE_MELEE)
+	else if (enemy_range == RANGE_MELEE ||
+			 enemy_range == RANGE_NEAR ||
+			 enemy_range == RANGE_MID)
 	{
-		chance = 0.8;
-	}
-	else if (enemy_range == RANGE_NEAR)
-	{
-		chance = 0.8;
-	}
-	else if (enemy_range == RANGE_MID)
-	{
-		chance = 0.8;
+		chance = 80;
 	}
 	else
 	{
 		return false;
 	}
 
-	if (random () < chance)
+	if (prandom(chance))
 	{
 		self->monsterinfo.attack_state = AS_MISSILE;
-		self->monsterinfo.attack_finished = level.time + 2*random();
+		self->monsterinfo.attack_finished = level.time + irandom(2);
 		return true;
 	}
 
 	if (self->flags & FL_FLY)
 	{
-		if (random() < 0.3)
+		if (prandom(30))
 			self->monsterinfo.attack_state = AS_SLIDING;
 		else
 			self->monsterinfo.attack_state = AS_STRAIGHT;

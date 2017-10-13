@@ -1771,7 +1771,7 @@ These can used but not touched.
 void func_timer_think (edict_t *self)
 {
 	G_UseTargets (self, self->activator);
-	self->nextthink = level.time + self->wait + crandom() * self->random;
+	self->nextthink = level.time + self->wait + crandom(self->random);
 }
 
 void func_timer_use (edict_t *self, edict_t *other, edict_t *activator)
@@ -1808,7 +1808,7 @@ void SP_func_timer (edict_t *self)
 
 	if (self->spawnflags & 1)
 	{
-		self->nextthink = level.time + 1.0 + st.pausetime + self->delay + self->wait + crandom() * self->random;
+		self->nextthink = level.time + 1.0 + st.pausetime + self->delay + self->wait + crandom(self->random);
 		self->activator = self;
 	}
 

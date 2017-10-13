@@ -890,7 +890,7 @@ void Cmd_PlayerList_f(edict_t *ent)
 			e2->client->pers.netname,
 			e2->client->resp.spectator ? " (spectator)" : "");
 		if (strlen(text) + strlen(str) > sizeof(text) - 50) {
-			sprintf(text+strlen(text), "And more...\n");
+			Com_sprintf(text+strlen(text), sizeof(str) - strlen(text), "And more...\n");
 			gi.cprintf(ent, PRINT_HIGH, "%s", text);
 			return;
 		}

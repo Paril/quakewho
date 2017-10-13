@@ -54,7 +54,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <DisableSpecificWarnings>4820;4100;4706;4710;4711;4514;4061;4365;4838;4738</DisableSpecificWarnings>
+      <DisableSpecificWarnings>4820;4100;4706;4710;4711;4514;4061;4365;4838;4738;4774;4571;4625;4626;5026;5027</DisableSpecificWarnings>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <MinimalRebuild>false</MinimalRebuild>
       <DiagnosticsFormat>Caret</DiagnosticsFormat>
@@ -73,7 +73,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <DisableSpecificWarnings>4820;4100;4706;4710;4711;4514;4061;4365;4838;4738</DisableSpecificWarnings>
+      <DisableSpecificWarnings>4820;4100;4706;4710;4711;4514;4061;4365;4838;4738;4774;4571;4625;4626;5026;5027</DisableSpecificWarnings>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <DiagnosticsFormat>Caret</DiagnosticsFormat>
       <ErrorReporting>Send</ErrorReporting>
@@ -135,6 +135,7 @@
     <ClCompile Include="src\p_trail.cpp" />
     <ClCompile Include="src\p_view.cpp" />
     <ClCompile Include="src\p_weapon.cpp" />
+    <ClCompile Include="src\q_random.cpp" />
     <ClCompile Include="src\q_shared.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -163,6 +164,7 @@
     <ClInclude Include="src\m_soldier.h" />
     <ClInclude Include="src\m_supertank.h" />
     <ClInclude Include="src\m_tank.h" />
+    <ClInclude Include="src\q_random.h" />
     <ClInclude Include="src\q_shared.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

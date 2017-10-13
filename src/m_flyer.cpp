@@ -520,7 +520,7 @@ void flyer_melee (edict_t *self)
 void flyer_check_melee(edict_t *self)
 {
 	if (range (self, self->enemy) == RANGE_MELEE)
-		if (random() <= 0.8)
+		if (prandom(80))
 			self->monsterinfo.currentmove = &flyer_move_loop_melee;
 		else
 			self->monsterinfo.currentmove = &flyer_move_end_melee;
@@ -542,7 +542,7 @@ void flyer_pain (edict_t *self, edict_t *other, float kick, int damage)
 	if (skill->value == 3)
 		return;		// no pain anims in nightmare
 
-	n = rand() % 3;
+	n = irandom(2);
 	if (n == 0)
 	{
 		gi.sound (self, CHAN_VOICE, sound_pain1, 1, ATTN_NORM, 0);

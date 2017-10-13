@@ -585,7 +585,7 @@ void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 				self->client->anim_end = FRAME_death308;
 				break;
 			}
-			gi.sound (self, CHAN_VOICE, gi.soundindex(va("*death%i.wav", (rand()%4)+1)), 1, ATTN_NORM, 0);
+			gi.sound (self, CHAN_VOICE, gi.soundindex(va("*death%i.wav", irandom(1, 4))), 1, ATTN_NORM, 0);
 		}
 	}
 
@@ -767,7 +767,7 @@ edict_t *SelectRandomDeathmatchSpawnPoint (void)
 	else
 		count -= 2;
 
-	selection = rand() % count;
+	selection = irandom(count - 1);
 
 	spot = NULL;
 	do

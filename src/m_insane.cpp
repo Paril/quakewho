@@ -51,7 +51,7 @@ void insane_moan (edict_t *self)
 
 void insane_scream (edict_t *self)
 {
-	gi.sound (self, CHAN_VOICE, sound_scream[rand()%8], 1, ATTN_IDLE, 0);
+	gi.sound (self, CHAN_VOICE, sound_scream[lengthof(sound_scream) - 1], 1, ATTN_IDLE, 0);
 }
 
 
@@ -433,7 +433,7 @@ mmove_t insane_move_struggle_cross = {FRAME_cross16, FRAME_cross30, insane_frame
 
 void insane_cross (edict_t *self)
 {
-	if (random() < 0.8)		
+	if (prandom(80))
 		self->monsterinfo.currentmove = &insane_move_cross;
 	else
 		self->monsterinfo.currentmove = &insane_move_struggle_cross;
@@ -450,7 +450,7 @@ void insane_walk (edict_t *self)
 	if (self->spawnflags & 4)
 		self->monsterinfo.currentmove = &insane_move_crawl;
 	else
-		if (random() <= 0.5)
+		if (prandom(50))
 			self->monsterinfo.currentmove = &insane_move_walk_normal;
 		else
 			self->monsterinfo.currentmove = &insane_move_walk_insane;
@@ -467,7 +467,7 @@ void insane_run (edict_t *self)
 	if (self->spawnflags & 4)				// Crawling?
 		self->monsterinfo.currentmove = &insane_move_runcrawl;
 	else
-		if (random() <= 0.5)				// Else, mix it up
+		if (prandom(50))				// Else, mix it up
 			self->monsterinfo.currentmove = &insane_move_run_normal;
 		else
 			self->monsterinfo.currentmove = &insane_move_run_insane;
@@ -486,7 +486,7 @@ void insane_pain (edict_t *self, edict_t *other, float kick, int damage)
 
 	self->pain_debounce_time = level.time + 3;
 
-	r = 1 + (rand()&1);
+	r = 1 + prandom(50);
 	if (self->health < 25)
 		l = 25;
 	else if (self->health < 50)
@@ -526,8 +526,8 @@ void insane_checkdown (edict_t *self)
 //	if ( (self->s.frame == FRAME_stand94) || (self->s.frame == FRAME_stand65) )
 	if (self->spawnflags & 32)				// Always stand
 		return;
-	if (random() < 0.3)
-		if (random() < 0.5)
+	if (prandom(30))
+		if (prandom(50))
 			self->monsterinfo.currentmove = &insane_move_uptodown;
 		else
 			self->monsterinfo.currentmove = &insane_move_jumpdown; 
@@ -538,7 +538,7 @@ void insane_checkup (edict_t *self)
 	// If Hold_Ground and Crawl are set
 	if ( (self->spawnflags & 4) && (self->spawnflags & 16) )
 		return;
-	if (random() < 0.5)
+	if (prandom(50))
 		self->monsterinfo.currentmove = &insane_move_downtoup;				
 
 }
@@ -554,7 +554,7 @@ void insane_stand (edict_t *self)
 	else if ( (self->spawnflags & 4) && (self->spawnflags & 16) )
 		self->monsterinfo.currentmove = &insane_move_down;
 	else
-		if (random() < 0.5)
+		if (prandom(50))
 			self->monsterinfo.currentmove = &insane_move_stand_normal;
 		else
 			self->monsterinfo.currentmove = &insane_move_stand_insane;
@@ -584,7 +584,7 @@ void insane_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 
 	if (self->health <= self->gib_health)
 	{
-		gi.sound (self, CHAN_VOICE, gi.soundindex ("misc/udeath.wav"), 1, ATTN_IDLE, 0);
+		gi.sound (self, CHAN_VOICE, gi.soundindex("misc/udeath.wav"), 1, ATTN_IDLE, 0);
 		for (n= 0; n < 2; n++)
 			ThrowGib (self, "models/objects/gibs/bone/tris.md2", damage, GIB_ORGANIC);
 		for (n= 0; n < 4; n++)
@@ -597,7 +597,7 @@ void insane_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 	if (self->deadflag == DEAD_DEAD)
 		return;
 
-	gi.sound (self, CHAN_VOICE, gi.soundindex(va("player/male/death%i.wav", (rand()%4)+1)), 1, ATTN_IDLE, 0);
+	gi.sound (self, CHAN_VOICE, gi.soundindex(va("player/male/death%i.wav", irandom(1, 4))), 1, ATTN_IDLE, 0);
 
 	self->deadflag = DEAD_DEAD;
 	self->takedamage = DAMAGE_YES;
@@ -688,6 +688,6 @@ void SP_misc_insane (edict_t *self)
 	else
 	{
 		walkmonster_start (self);
-		self->s.skinnum = rand()%3;
+		self->s.skinnum = irandom(2);
 	}
 }

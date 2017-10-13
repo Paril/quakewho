@@ -55,7 +55,7 @@ static int	sound_search;
 
 void ChickMoan (edict_t *self)
 {
-	if (random() < 0.5)
+	if (prandom(50))
 		gi.sound (self, CHAN_VOICE, sound_idle1, 1, ATTN_IDLE, 0);
 	else
 		gi.sound (self, CHAN_VOICE, sound_idle2, 1, ATTN_IDLE, 0);
@@ -100,7 +100,7 @@ void chick_fidget (edict_t *self)
 {
 	if (self->monsterinfo.aiflags & AI_STAND_GROUND)
 		return;
-	if (random() <= 0.3)
+	if (prandom(30))
 		self->monsterinfo.currentmove = &chick_move_fidget;
 }
 
@@ -265,8 +265,6 @@ mmove_t chick_move_pain3 = {FRAME_pain301, FRAME_pain321, chick_frames_pain3, ch
 
 void chick_pain (edict_t *self, edict_t *other, float kick, int damage)
 {
-	float	r;
-
 	if (self->health < (self->max_health / 2))
 		self->s.skinnum = 1;
 
@@ -275,10 +273,10 @@ void chick_pain (edict_t *self, edict_t *other, float kick, int damage)
 
 	self->pain_debounce_time = level.time + 3;
 
-	r = random();
-	if (r < 0.33)
+	int r = irandom(2);
+	if (r == 0)
 		gi.sound (self, CHAN_VOICE, sound_pain1, 1, ATTN_NORM, 0);
-	else if (r < 0.66)
+	else if (r == 1)
 		gi.sound (self, CHAN_VOICE, sound_pain2, 1, ATTN_NORM, 0);
 	else
 		gi.sound (self, CHAN_VOICE, sound_pain3, 1, ATTN_NORM, 0);
@@ -374,7 +372,7 @@ void chick_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage
 	self->deadflag = DEAD_DEAD;
 	self->takedamage = DAMAGE_YES;
 
-	n = rand() % 2;
+	n = prandom(50);
 	if (n == 0)
 	{
 		self->monsterinfo.currentmove = &chick_move_death1;
@@ -429,7 +427,7 @@ mmove_t chick_move_duck = {FRAME_duck01, FRAME_duck07, chick_frames_duck, chick_
 
 void chick_dodge (edict_t *self, edict_t *attacker, float eta)
 {
-	if (random() > 0.25)
+	if (prandom(75))
 		return;
 
 	if (!self->enemy)
@@ -444,7 +442,7 @@ void ChickSlash (edict_t *self)
 
 	VectorSet (aim, MELEE_DISTANCE, self->mins[0], 10);
 	gi.sound (self, CHAN_WEAPON, sound_melee_swing, 1, ATTN_NORM, 0);
-	fire_hit (self, aim, (10 + (rand() %6)), 100);
+	fire_hit (self, aim, irandom(10, 15), 100);
 }
 
 
@@ -532,7 +530,7 @@ void chick_rerocket(edict_t *self)
 	{
 		if (range (self, self->enemy) > RANGE_MELEE)
 			if ( visible (self, self->enemy) )
-				if (random() <= 0.6)
+				if (prandom(60))
 				{
 					self->monsterinfo.currentmove = &chick_move_attack1;
 					return;
@@ -575,7 +573,7 @@ void chick_reslash(edict_t *self)
 	if (self->enemy->health > 0)
 	{
 		if (range (self, self->enemy) == RANGE_MELEE)
-			if (random() <= 0.9)
+			if (prandom(90))
 			{				
 				self->monsterinfo.currentmove = &chick_move_slash;
 				return;

@@ -50,7 +50,7 @@ static int	sound_thud;
 void mutant_step (edict_t *self)
 {
 	int		n;
-	n = (rand() + 1) % 3;
+	n = irandom(2);
 	if (n == 0)
 		gi.sound (self, CHAN_VOICE, sound_step1, 1, ATTN_NORM, 0);		
 	else if (n == 1)
@@ -152,7 +152,7 @@ void mutant_stand (edict_t *self)
 
 void mutant_idle_loop (edict_t *self)
 {
-	if (random() < 0.75)
+	if (prandom(75))
 		self->monsterinfo.nextframe = FRAME_stand155;
 }
 
@@ -257,7 +257,7 @@ void mutant_hit_left (edict_t *self)
 	vec3_t	aim;
 
 	VectorSet (aim, MELEE_DISTANCE, self->mins[0], 8);
-	if (fire_hit (self, aim, (10 + (rand() %5)), 100))
+	if (fire_hit (self, aim, irandom(10, 14), 100))
 		gi.sound (self, CHAN_WEAPON, sound_hit, 1, ATTN_NORM, 0);
 	else
 		gi.sound (self, CHAN_WEAPON, sound_swing, 1, ATTN_NORM, 0);
@@ -268,7 +268,7 @@ void mutant_hit_right (edict_t *self)
 	vec3_t	aim;
 
 	VectorSet (aim, MELEE_DISTANCE, self->maxs[0], 8);
-	if (fire_hit (self, aim, (10 + (rand() %5)), 100))
+	if (fire_hit (self, aim, irandom(10, 14), 100))
 		gi.sound (self, CHAN_WEAPON, sound_hit2, 1, ATTN_NORM, 0);
 	else
 		gi.sound (self, CHAN_WEAPON, sound_swing, 1, ATTN_NORM, 0);
@@ -279,7 +279,7 @@ void mutant_check_refire (edict_t *self)
 	if (!self->enemy || !self->enemy->inuse || self->enemy->health <= 0)
 		return;
 
-	if ( ((skill->value == 3) && (random() < 0.5)) || (range(self, self->enemy) == RANGE_MELEE) )
+	if ( ((skill->value == 3) && prandom(50)) || (range(self, self->enemy) == RANGE_MELEE) )
 		self->monsterinfo.nextframe = FRAME_attack09;
 }
 
@@ -324,7 +324,7 @@ void mutant_jump_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface
 			VectorCopy (self->velocity, normal);
 			VectorNormalize(normal);
 			VectorMA (self->s.origin, self->maxs[0], normal, point);
-			damage = 40 + 10 * random();
+			damage = irandom(40, 50);
 			T_Damage (other, self, self, self->velocity, point, normal, damage, damage, 0, MOD_UNKNOWN);
 		}
 	}
@@ -423,7 +423,7 @@ qboolean mutant_check_jump (edict_t *self)
 		return false;
 	if (distance > 100)
 	{
-		if (random() < 0.9)
+		if (prandom(90))
 			return false;
 	}
 
@@ -495,8 +495,6 @@ mmove_t mutant_move_pain3 = {FRAME_pain301, FRAME_pain311, mutant_frames_pain3, 
 
 void mutant_pain (edict_t *self, edict_t *other, float kick, int damage)
 {
-	float	r;
-
 	if (self->health < (self->max_health / 2))
 		self->s.skinnum = 1;
 
@@ -508,13 +506,13 @@ void mutant_pain (edict_t *self, edict_t *other, float kick, int damage)
 	if (skill->value == 3)
 		return;		// no pain anims in nightmare
 
-	r = random();
-	if (r < 0.33)
+	int r = irandom(2);
+	if (r == 0)
 	{
 		gi.sound (self, CHAN_VOICE, sound_pain1, 1, ATTN_NORM, 0);
 		self->monsterinfo.currentmove = &mutant_move_pain1;
 	}
-	else if (r < 0.66)
+	else if (r == 1)
 	{
 		gi.sound (self, CHAN_VOICE, sound_pain2, 1, ATTN_NORM, 0);
 		self->monsterinfo.currentmove = &mutant_move_pain2;
@@ -595,7 +593,7 @@ void mutant_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 	self->takedamage = DAMAGE_YES;
 	self->s.skinnum = 1;
 
-	if (random() < 0.5)
+	if (prandom(50))
 		self->monsterinfo.currentmove = &mutant_move_death1;
 	else
 		self->monsterinfo.currentmove = &mutant_move_death2;

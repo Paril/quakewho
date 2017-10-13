@@ -55,12 +55,11 @@ static int	sound_hit;
 
 void makron_taunt (edict_t *self)
 {
-	float r;
+	int r = irandom(2);
 
-	r=random();
-	if (r <= 0.3)
+	if (r == 0)
 		gi.sound (self, CHAN_AUTO, sound_taunt1, 1, ATTN_NONE, 0);
-	else if (r <= 0.6)
+	else if (r == 1)
 		gi.sound (self, CHAN_AUTO, sound_taunt2, 1, ATTN_NONE, 0);
 	else
 		gi.sound (self, CHAN_AUTO, sound_taunt3, 1, ATTN_NONE, 0);
@@ -563,7 +562,7 @@ void makron_pain (edict_t *self, edict_t *other, float kick, int damage)
 
 	// Lessen the chance of him going into his pain frames
 	if (damage <=25)
-		if (random()<0.2)
+		if (prandom(20))
 			return;
 
 	self->pain_debounce_time = level.time + 3;
@@ -584,13 +583,13 @@ void makron_pain (edict_t *self, edict_t *other, float kick, int damage)
 	else
 	{
 		if (damage <= 150)
-			if (random() <= 0.45)
+			if (prandom(45))
 			{
 				gi.sound (self, CHAN_VOICE, sound_pain6, 1, ATTN_NONE,0);
 				self->monsterinfo.currentmove = &makron_move_pain6;
 			}
 		else
-			if (random() <= 0.35)
+			if (prandom(35))
 			{
 				gi.sound (self, CHAN_VOICE, sound_pain6, 1, ATTN_NONE,0);
 				self->monsterinfo.currentmove = &makron_move_pain6;
@@ -607,17 +606,15 @@ void makron_attack(edict_t *self)
 {
 	vec3_t	vec;
 	float	range;
-	float	r;
-
-	r = random();
+	int		r = irandom(2);
 
 	VectorSubtract (self->enemy->s.origin, self->s.origin, vec);
 	range = VectorLength (vec);
 
 
-	if (r <= 0.3)
+	if (r == 0)
 		self->monsterinfo.currentmove = &makron_move_attack3;
-	else if (r <= 0.6)
+	else if (r == 1)
 		self->monsterinfo.currentmove = &makron_move_attack4;
 	else
 		self->monsterinfo.currentmove = &makron_move_attack5;
@@ -712,7 +709,7 @@ qboolean Makron_CheckAttack (edict_t *self)
 {
 	vec3_t	spot1, spot2;
 	vec3_t	temp;
-	float	chance;
+	int		chance;
 	trace_t	tr;
 	qboolean	enemy_infront;
 	int			enemy_range;
@@ -763,35 +760,35 @@ qboolean Makron_CheckAttack (edict_t *self)
 
 	if (self->monsterinfo.aiflags & AI_STAND_GROUND)
 	{
-		chance = 0.4;
+		chance = 40;
 	}
 	else if (enemy_range == RANGE_MELEE)
 	{
-		chance = 0.8;
+		chance = 80;
 	}
 	else if (enemy_range == RANGE_NEAR)
 	{
-		chance = 0.4;
+		chance = 40;
 	}
 	else if (enemy_range == RANGE_MID)
 	{
-		chance = 0.2;
+		chance = 20;
 	}
 	else
 	{
 		return false;
 	}
 
-	if (random () < chance)
+	if (prandom(chance))
 	{
 		self->monsterinfo.attack_state = AS_MISSILE;
-		self->monsterinfo.attack_finished = level.time + 2*random();
+		self->monsterinfo.attack_finished = level.time + irandom(2);
 		return true;
 	}
 
 	if (self->flags & FL_FLY)
 	{
-		if (random() < 0.3)
+		if (prandom(30))
 			self->monsterinfo.attack_state = AS_SLIDING;
 		else
 			self->monsterinfo.attack_state = AS_STRAIGHT;

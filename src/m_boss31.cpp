@@ -52,13 +52,11 @@ void MakronToss (edict_t *self);
 
 void jorg_search (edict_t *self)
 {
-	float r;
+	int r = irandom(2);
 
-	r = random();
-
-	if (r <= 0.3)
+	if (r == 0)
 		gi.sound (self, CHAN_VOICE, sound_search1, 1, ATTN_NORM, 0);
-	else if (r <= 0.6)
+	else if (r == 1)
 		gi.sound (self, CHAN_VOICE, sound_search2, 1, ATTN_NORM, 0);
 	else
 		gi.sound (self, CHAN_VOICE, sound_search3, 1, ATTN_NORM, 0);
@@ -394,7 +392,7 @@ mmove_t jorg_move_end_attack1 = {FRAME_attak115, FRAME_attak118, jorg_frames_end
 void jorg_reattack1(edict_t *self)
 {
 	if (visible(self, self->enemy))
-		if (random() < 0.9)
+		if (prandom(90))
 			self->monsterinfo.currentmove = &jorg_move_attack1;
 		else
 		{
@@ -426,7 +424,7 @@ void jorg_pain (edict_t *self, edict_t *other, float kick, int damage)
 
 	// Lessen the chance of him going into his pain frames if he takes little damage
 	if (damage <= 40)
-		if (random()<=0.6)
+		if (prandom(60))
 			return;
 
 	/* 
@@ -435,16 +433,16 @@ void jorg_pain (edict_t *self, edict_t *other, float kick, int damage)
 	*/
 	
 	if ( (self->s.frame >= FRAME_attak101) && (self->s.frame <= FRAME_attak108) )
-		if (random() <= 0.005)
+		if (prandom(0.5f))
 			return;
 
 	if ( (self->s.frame >= FRAME_attak109) && (self->s.frame <= FRAME_attak114) )
-		if (random() <= 0.00005)
+		if (prandom(0.005f))
 			return;
 
 
 	if ( (self->s.frame >= FRAME_attak201) && (self->s.frame <= FRAME_attak208) )
-		if (random() <= 0.005)
+		if (prandom(0.5f))
 			return;
 
 
@@ -464,7 +462,7 @@ void jorg_pain (edict_t *self, edict_t *other, float kick, int damage)
 	}
 	else
 	{
-		if (random() <= 0.3)
+		if (prandom(30))
 		{
 			gi.sound (self, CHAN_VOICE, sound_pain3, 1, ATTN_NORM,0);
 			self->monsterinfo.currentmove = &jorg_move_pain3;
@@ -544,7 +542,7 @@ void jorg_attack(edict_t *self)
 	VectorSubtract (self->enemy->s.origin, self->s.origin, vec);
 	range = VectorLength (vec);
 
-	if (random() <= 0.75)
+	if (prandom(75))
 	{
 		gi.sound (self, CHAN_VOICE, sound_attack1, 1, ATTN_NORM,0);
 		self->s.sound = gi.soundindex ("boss3/w_loop.wav");
@@ -600,7 +598,7 @@ qboolean Jorg_CheckAttack (edict_t *self)
 {
 	vec3_t	spot1, spot2;
 	vec3_t	temp;
-	float	chance;
+	int		chance;
 	trace_t	tr;
 	qboolean	enemy_infront;
 	int			enemy_range;
@@ -651,35 +649,35 @@ qboolean Jorg_CheckAttack (edict_t *self)
 
 	if (self->monsterinfo.aiflags & AI_STAND_GROUND)
 	{
-		chance = 0.4;
+		chance = 40;
 	}
 	else if (enemy_range == RANGE_MELEE)
 	{
-		chance = 0.8;
+		chance = 80;
 	}
 	else if (enemy_range == RANGE_NEAR)
 	{
-		chance = 0.4;
+		chance = 40;
 	}
 	else if (enemy_range == RANGE_MID)
 	{
-		chance = 0.2;
+		chance = 20;
 	}
 	else
 	{
 		return false;
 	}
 
-	if (random () < chance)
+	if (prandom(chance))
 	{
 		self->monsterinfo.attack_state = AS_MISSILE;
-		self->monsterinfo.attack_finished = level.time + 2*random();
+		self->monsterinfo.attack_finished = level.time + irandom(2);
 		return true;
 	}
 
 	if (self->flags & FL_FLY)
 	{
-		if (random() < 0.3)
+		if (prandom(30))
 			self->monsterinfo.attack_state = AS_SLIDING;
 		else
 			self->monsterinfo.attack_state = AS_STRAIGHT;

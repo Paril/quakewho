@@ -143,11 +143,11 @@ void ai_stand (edict_t *self, float dist)
 		if (self->monsterinfo.idle_time)
 		{
 			self->monsterinfo.idle (self);
-			self->monsterinfo.idle_time = level.time + 15 + random() * 15;
+			self->monsterinfo.idle_time = level.time + irandom(15, 30);
 		}
 		else
 		{
-			self->monsterinfo.idle_time = level.time + random() * 15;
+			self->monsterinfo.idle_time = level.time + irandom(15);
 		}
 	}
 }
@@ -173,11 +173,11 @@ void ai_walk (edict_t *self, float dist)
 		if (self->monsterinfo.idle_time)
 		{
 			self->monsterinfo.search (self);
-			self->monsterinfo.idle_time = level.time + 15 + random() * 15;
+			self->monsterinfo.idle_time = level.time + irandom(15, 30);
 		}
 		else
 		{
-			self->monsterinfo.idle_time = level.time + random() * 15;
+			self->monsterinfo.idle_time = level.time + irandom(15);
 		}
 	}
 }
@@ -607,7 +607,7 @@ qboolean FacingIdeal(edict_t *self)
 qboolean M_CheckAttack (edict_t *self)
 {
 	vec3_t	spot1, spot2;
-	float	chance;
+	int	chance;
 	trace_t	tr;
 
 	if (self->enemy->health > 0)
@@ -629,7 +629,7 @@ qboolean M_CheckAttack (edict_t *self)
 	if (enemy_range == RANGE_MELEE)
 	{
 		// don't always melee in easy mode
-		if (skill->value == 0 && (rand()&3) )
+		if (skill->value == 0 && prandom(75))
 			return false;
 		if (self->monsterinfo.melee)
 			self->monsterinfo.attack_state = AS_MELEE;
@@ -650,19 +650,19 @@ qboolean M_CheckAttack (edict_t *self)
 
 	if (self->monsterinfo.aiflags & AI_STAND_GROUND)
 	{
-		chance = 0.4;
+		chance = 40;
 	}
 	else if (enemy_range == RANGE_MELEE)
 	{
-		chance = 0.2;
+		chance = 20;
 	}
 	else if (enemy_range == RANGE_NEAR)
 	{
-		chance = 0.1;
+		chance = 10;
 	}
 	else if (enemy_range == RANGE_MID)
 	{
-		chance = 0.02;
+		chance = 2;
 	}
 	else
 	{
@@ -670,20 +670,20 @@ qboolean M_CheckAttack (edict_t *self)
 	}
 
 	if (skill->value == 0)
-		chance *= 0.5;
+		chance /= 2;
 	else if (skill->value >= 2)
 		chance *= 2;
 
-	if (random () < chance)
+	if (prandom(chance))
 	{
 		self->monsterinfo.attack_state = AS_MISSILE;
-		self->monsterinfo.attack_finished = level.time + 2*random();
+		self->monsterinfo.attack_finished = level.time + irandom(2);
 		return true;
 	}
 
 	if (self->flags & FL_FLY)
 	{
-		if (random() < 0.3)
+		if (prandom(30))
 			self->monsterinfo.attack_state = AS_SLIDING;
 		else
 			self->monsterinfo.attack_state = AS_STRAIGHT;
