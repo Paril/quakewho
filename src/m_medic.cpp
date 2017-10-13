@@ -28,16 +28,16 @@ MEDIC
 #include "g_local.h"
 #include "m_medic.h"
 
-static int	sound_idle1;
-static int	sound_pain1;
-static int	sound_pain2;
-static int	sound_die;
-static int	sound_sight;
-static int	sound_search;
-static int	sound_hook_launch;
-static int	sound_hook_hit;
-static int	sound_hook_heal;
-static int	sound_hook_retract;
+static soundindex_t	sound_idle1;
+static soundindex_t	sound_pain1;
+static soundindex_t	sound_pain2;
+static soundindex_t	sound_die;
+static soundindex_t	sound_sight;
+static soundindex_t	sound_search;
+static soundindex_t	sound_hook_launch;
+static soundindex_t	sound_hook_hit;
+static soundindex_t	sound_hook_heal;
+static soundindex_t	sound_hook_retract;
 
 
 edict_t *medic_FindDeadMonster (edict_t *self)
@@ -342,14 +342,14 @@ void medic_fire_blaster (edict_t *self)
 	vec3_t	forward, right;
 	vec3_t	end;
 	vec3_t	dir;
-	int		effect;
+	entity_effects_t		effect;
 
 	if ((self->s.frame == FRAME_attack9) || (self->s.frame == FRAME_attack12))
 		effect = EF_BLASTER;
 	else if ((self->s.frame == FRAME_attack19) || (self->s.frame == FRAME_attack22) || (self->s.frame == FRAME_attack25) || (self->s.frame == FRAME_attack28))
 		effect = EF_HYPERBLASTER;
 	else
-		effect = 0;
+		effect = EF_NONE;
 
 	AngleVectors (self->s.angles, forward, right, NULL);
 	G_ProjectSource (self->s.origin, monster_flash_offset[MZ2_MEDIC_BLASTER_1], forward, right, start);

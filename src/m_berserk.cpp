@@ -29,12 +29,12 @@ BERSERK
 #include "m_berserk.h"
 
 
-static int sound_pain;
-static int sound_die;
-static int sound_idle;
-static int sound_punch;
-static int sound_sight;
-static int sound_search;
+static soundindex_t sound_pain;
+static soundindex_t sound_die;
+static soundindex_t sound_idle;
+static soundindex_t sound_punch;
+static soundindex_t sound_sight;
+static soundindex_t sound_search;
 
 void berserk_sight (edict_t *self, edict_t *other)
 {

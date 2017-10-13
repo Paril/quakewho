@@ -28,13 +28,13 @@ hover
 #include "g_local.h"
 #include "m_hover.h"
 
-static int	sound_pain1;
-static int	sound_pain2;
-static int	sound_death1;
-static int	sound_death2;
-static int	sound_sight;
-static int	sound_search1;
-static int	sound_search2;
+static soundindex_t	sound_pain1;
+static soundindex_t	sound_pain2;
+static soundindex_t	sound_death1;
+static soundindex_t	sound_death2;
+static soundindex_t	sound_sight;
+static soundindex_t	sound_search1;
+static soundindex_t	sound_search2;
 
 
 void hover_sight (edict_t *self, edict_t *other)
@@ -434,12 +434,12 @@ void hover_fire_blaster (edict_t *self)
 	vec3_t	forward, right;
 	vec3_t	end;
 	vec3_t	dir;
-	int		effect;
+	entity_effects_t		effect;
 
 	if (self->s.frame == FRAME_attak104)
 		effect = EF_HYPERBLASTER;
 	else
-		effect = 0;
+		effect = EF_NONE;
 
 	AngleVectors (self->s.angles, forward, right, NULL);
 	G_ProjectSource (self->s.origin, monster_flash_offset[MZ2_HOVER_BLASTER_1], forward, right, start);

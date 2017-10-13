@@ -57,19 +57,19 @@ Multiple identical looping sounds will just increase volume without any speed co
 */
 void Use_Target_Speaker (edict_t *ent, edict_t *other, edict_t *activator)
 {
-	int		chan;
+	soundchannel_t		chan;
 
 	if (ent->spawnflags & 3)
 	{	// looping sound toggles
 		if (ent->s.sound)
-			ent->s.sound = 0;	// turn it off
+			ent->s.sound = SOUND_NONE;	// turn it off
 		else
 			ent->s.sound = ent->noise_index;	// start it
 	}
 	else
 	{	// normal sound
 		if (ent->spawnflags & 4)
-			chan = CHAN_VOICE|CHAN_RELIABLE;
+			chan = CHAN_VOICE | CHAN_RELIABLE;
 		else
 			chan = CHAN_VOICE;
 		// use a positioned_sound, because this entity won't normally be
@@ -279,7 +279,7 @@ void use_target_changelevel (edict_t *self, edict_t *other, edict_t *activator)
 	}
 
 	// if noexit, do a ton of damage to other
-	if (deathmatch->value && !( (int)dmflags->value & DF_ALLOW_EXIT) && other != world)
+	if (deathmatch->value && !( (dmflags_t)dmflags->value & DF_ALLOW_EXIT) && other != world)
 	{
 		T_Damage (other, self, self, vec3_origin, other->s.origin, vec3_origin, 10 * other->max_health, 1000, DAMAGE_NONE, MOD_EXIT);
 		return;
@@ -589,7 +589,7 @@ void target_laser_start (edict_t *self)
 	self->movetype = MOVETYPE_NONE;
 	self->solid = SOLID_NOT;
 	self->s.renderfx |= RF_BEAM|RF_TRANSLUCENT;
-	self->s.modelindex = 1;			// must be non-zero
+	self->s.modelindex = MODEL_WORLD;			// must be non-zero
 
 	// set the beam diameter
 	if (self->spawnflags & 64)

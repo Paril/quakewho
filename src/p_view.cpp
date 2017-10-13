@@ -523,11 +523,11 @@ void P_FallingDamage (edict_t *ent)
 	delta = delta*delta * 0.0001;
 
 	// never take falling damage if completely underwater
-	if (ent->waterlevel == 3)
+	if (ent->waterlevel == WATER_UNDER)
 		return;
-	if (ent->waterlevel == 2)
+	if (ent->waterlevel == WATER_WAIST)
 		delta *= 0.25;
-	if (ent->waterlevel == 1)
+	if (ent->waterlevel == WATER_FEET)
 		delta *= 0.5;
 
 	if (delta < 1)
@@ -559,7 +559,7 @@ void P_FallingDamage (edict_t *ent)
 			damage = 1;
 		VectorSet (dir, 0, 0, 1);
 
-		if (!deathmatch->value || !((int)dmflags->value & DF_NO_FALLING) )
+		if (!deathmatch->value || !((dmflags_t)dmflags->value & DF_NO_FALLING) )
 			T_Damage (ent, world, world, dir, ent->s.origin, vec3_origin, damage, 0, DAMAGE_NONE, MOD_FALLING);
 	}
 	else
@@ -580,7 +580,7 @@ void P_WorldEffects (void)
 {
 	bool		breather;
 	bool		envirosuit;
-	int			waterlevel, old_waterlevel;
+	waterlevel_t waterlevel, old_waterlevel;
 
 	if (current_player->movetype == MOVETYPE_NOCLIP)
 	{
@@ -626,7 +626,7 @@ void P_WorldEffects (void)
 	//
 	// check for head just going under water
 	//
-	if (old_waterlevel != 3 && waterlevel == 3)
+	if (old_waterlevel != WATER_UNDER && waterlevel == WATER_UNDER)
 	{
 		gi.sound (current_player, CHAN_BODY, gi.soundindex("player/watr_un.wav"), 1, ATTN_NORM, 0);
 	}
@@ -634,7 +634,7 @@ void P_WorldEffects (void)
 	//
 	// check for head just coming out of water
 	//
-	if (old_waterlevel == 3 && waterlevel != 3)
+	if (old_waterlevel == WATER_UNDER && waterlevel != WATER_UNDER)
 	{
 		if (current_player->air_finished < level.time)
 		{	// gasp for air
@@ -663,7 +663,7 @@ void P_WorldEffects (void)
 					gi.sound (current_player, CHAN_AUTO, gi.soundindex("player/u_breath1.wav"), 1, ATTN_NORM, 0);
 				else
 					gi.sound (current_player, CHAN_AUTO, gi.soundindex("player/u_breath2.wav"), 1, ATTN_NORM, 0);
-				current_client->breather_sound ^= 1;
+				current_client->breather_sound = !current_client->breather_sound;
 				PlayerNoise(current_player, current_player->s.origin, PNOISE_SELF);
 				//FIXME: release a bubble?
 			}
@@ -705,7 +705,7 @@ void P_WorldEffects (void)
 	//
 	// check for sizzle damage
 	//
-	if (waterlevel && (current_player->watertype&(CONTENTS_LAVA|CONTENTS_SLIME)) )
+	if (waterlevel && (current_player->watertype & (CONTENTS_LAVA | CONTENTS_SLIME)) )
 	{
 		if (current_player->watertype & CONTENTS_LAVA)
 		{
@@ -747,8 +747,8 @@ void G_SetClientEffects (edict_t *ent)
 	int		pa_type;
 	int		remaining;
 
-	ent->s.effects = 0;
-	ent->s.renderfx = 0;
+	ent->s.effects = EF_NONE;
+	ent->s.renderfx = RF_NONE;
 
 	if (ent->health <= 0 || level.intermissiontime)
 		return;
@@ -835,7 +835,7 @@ void G_SetClientSound (edict_t *ent)
 	else
 		weap = "";
 
-	if (ent->waterlevel && (ent->watertype&(CONTENTS_LAVA|CONTENTS_SLIME)) )
+	if (ent->waterlevel && (ent->watertype & (CONTENTS_LAVA | CONTENTS_SLIME)) )
 		ent->s.sound = snd_fry;
 	else if (strcmp(weap, "weapon_railgun") == 0)
 		ent->s.sound = gi.soundindex("weapons/rg_hum.wav");
@@ -844,7 +844,7 @@ void G_SetClientSound (edict_t *ent)
 	else if (ent->client->weapon_sound)
 		ent->s.sound = ent->client->weapon_sound;
 	else
-		ent->s.sound = 0;
+		ent->s.sound = SOUND_NONE;
 }
 
 /*

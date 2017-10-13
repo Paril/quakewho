@@ -180,11 +180,14 @@ enum aistate_t : uint8_t
 };
 
 // armor types
-#define ARMOR_NONE				0
-#define ARMOR_JACKET			1
-#define ARMOR_COMBAT			2
-#define ARMOR_BODY				3
-#define ARMOR_SHARD				4
+enum armortype_t
+{
+	ARMOR_NONE,
+	ARMOR_JACKET,
+	ARMOR_COMBAT,
+	ARMOR_BODY,
+	ARMOR_SHARD
+};
 
 // power armor types
 enum powerarmor_t : uint8_t
@@ -294,7 +297,7 @@ struct gitem_t
 	void		(*weaponthink)(edict_t *ent);
 	char		*pickup_sound;
 	char		*world_model;
-	int			world_model_flags;
+	entity_effects_t world_model_flags;
 	char		*view_model;
 
 	// client side info
@@ -420,6 +423,13 @@ struct spawn_temp_t
 	float		maxpitch;
 };
 
+enum movestate_t : uint8_t
+{
+	STATE_TOP,
+	STATE_BOTTOM,
+	STATE_UP,
+	STATE_DOWN
+};
 
 struct moveinfo_t
 {
@@ -429,9 +439,9 @@ struct moveinfo_t
 	vec3_t		end_origin;
 	vec3_t		end_angles;
 
-	int			sound_start;
-	int			sound_middle;
-	int			sound_end;
+	soundindex_t sound_start;
+	soundindex_t sound_middle;
+	soundindex_t sound_end;
 
 	float		accel;
 	float		speed;
@@ -441,7 +451,7 @@ struct moveinfo_t
 	float		wait;
 
 	// state data
-	int			state;
+	movestate_t	state;
 	vec3_t		dir;
 	float		current_speed;
 	float		move_speed;
@@ -509,8 +519,8 @@ extern	game_import_t	gi;
 extern	game_export_t	globals;
 extern	spawn_temp_t	st;
 
-extern	int	sm_meat_index;
-extern	int	snd_fry;
+extern	modelindex_t	sm_meat_index;
+extern	soundindex_t	snd_fry;
 
 // means of death
 enum meansofdeath_t : uint8_t
@@ -754,7 +764,7 @@ const int DEFAULT_SSHOTGUN_COUNT	= 20;
 //
 void monster_fire_bullet (edict_t *self, vec3_t start, vec3_t dir, int damage, int kick, int hspread, int vspread, int flashtype);
 void monster_fire_shotgun (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick, int hspread, int vspread, int count, int flashtype);
-void monster_fire_blaster (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, int flashtype, int effect);
+void monster_fire_blaster (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, int flashtype, entity_effects_t effect);
 void monster_fire_grenade (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int speed, int flashtype);
 void monster_fire_rocket (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, int flashtype);
 void monster_fire_railgun (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick, int flashtype);
@@ -805,7 +815,7 @@ void ThrowDebris (edict_t *self, char *modelname, float speed, vec3_t origin);
 bool fire_hit (edict_t *self, vec3_t aim, int damage, int kick);
 void fire_bullet (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick, int hspread, int vspread, meansofdeath_t mod);
 void fire_shotgun (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick, int hspread, int vspread, int count, meansofdeath_t mod);
-void fire_blaster (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int speed, int effect, bool hyper);
+void fire_blaster (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int speed, entity_effects_t effect, bool hyper);
 void fire_grenade (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int speed, float timer, float damage_radius);
 void fire_grenade2 (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int speed, float timer, float damage_radius, bool held);
 void fire_rocket (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, float damage_radius, int radius_damage);
@@ -1009,8 +1019,8 @@ struct gclient_t
 	vec3_t		oldvelocity;
 
 	float		next_drown_time;
-	int			old_waterlevel;
-	int			breather_sound;
+	waterlevel_t old_waterlevel;
+	bool		breather_sound;
 
 	int			machinegun_shots;	// for weapon raising
 
@@ -1029,7 +1039,7 @@ struct gclient_t
 	bool		grenade_blew_up;
 	float		grenade_time;
 	int			silencer_shots;
-	int			weapon_sound;
+	soundindex_t weapon_sound;
 
 	float		pickup_msg_time;
 
@@ -1163,8 +1173,8 @@ struct edict_t
 	edict_t		*mynoise;		// can go in client only
 	edict_t		*mynoise2;
 
-	int			noise_index;
-	int			noise_index2;
+	soundindex_t noise_index;
+	soundindex_t noise_index2;
 	float		volume;
 	float		attenuation;
 
@@ -1175,8 +1185,8 @@ struct edict_t
 
 	float		teleport_time;
 
-	int			watertype;
-	int			waterlevel;
+	brushcontents_t	watertype;
+	waterlevel_t waterlevel;
 
 	vec3_t		move_origin;
 	vec3_t		move_angles;

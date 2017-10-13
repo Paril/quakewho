@@ -31,18 +31,18 @@ INFANTRY
 void InfantryMachineGun (edict_t *self);
 
 
-static int	sound_pain1;
-static int	sound_pain2;
-static int	sound_die1;
-static int	sound_die2;
+static soundindex_t	sound_pain1;
+static soundindex_t	sound_pain2;
+static soundindex_t	sound_die1;
+static soundindex_t	sound_die2;
 
-static int	sound_gunshot;
-static int	sound_weapon_cock;
-static int	sound_punch_swing;
-static int	sound_punch_hit;
-static int	sound_sight;
-static int	sound_search;
-static int	sound_idle;
+static soundindex_t	sound_gunshot;
+static soundindex_t	sound_weapon_cock;
+static soundindex_t	sound_punch_swing;
+static soundindex_t	sound_punch_hit;
+static soundindex_t	sound_sight;
+static soundindex_t	sound_search;
+static soundindex_t	sound_idle;
 
 
 mframe_t infantry_frames_stand [] =

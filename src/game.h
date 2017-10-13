@@ -20,7 +20,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 // game.h -- game dll information visible to server
 
-#define	GAME_API_VERSION	3
+const int	GAME_API_VERSION	= 3;
 
 // edict->svflags
 
@@ -50,7 +50,6 @@ const int32_t	MAX_ENT_CLUSTERS	= 16;
 
 struct edict_t;
 struct gclient_t;
-
 
 #ifndef GAME_INCLUDE
 
@@ -105,8 +104,8 @@ struct game_import_t
 	void	(*dprintf) (char *fmt, ...);
 	void	(*cprintf) (edict_t *ent, printflags_t printlevel, char *fmt, ...);
 	void	(*centerprintf) (edict_t *ent, char *fmt, ...);
-	void	(*sound) (edict_t *ent, int channel, int soundindex, float volume, float attenuation, float timeofs);
-	void	(*positioned_sound) (const vec3_t origin, edict_t *ent, int channel, int soundinedex, float volume, float attenuation, float timeofs);
+	void	(*sound) (edict_t *ent, soundchannel_t channel, soundindex_t soundindex, float volume, float attenuation, float timeofs);
+	void	(*positioned_sound) (const vec3_t origin, edict_t *ent, soundchannel_t channel, soundindex_t soundindex, float volume, float attenuation, float timeofs);
 
 	// config strings hold all the index strings, the lightstyles,
 	// and misc data like the sky definition and cdtrack.
@@ -117,15 +116,15 @@ struct game_import_t
 	void	(*error) (char *fmt, ...);
 
 	// the *index functions create configstrings and some internal server state
-	int		(*modelindex) (char *name);
-	int		(*soundindex) (char *name);
-	int		(*imageindex) (char *name);
+	modelindex_t (*modelindex) (char *name);
+	soundindex_t (*soundindex) (char *name);
+	imageindex_t (*imageindex) (char *name);
 
 	void	(*setmodel) (edict_t *ent, char *name);
 
 	// collision detection
 	trace_t	(*trace) (const vec3_t start, const vec3_t mins, const vec3_t maxs, const vec3_t end, edict_t *passent, int contentmask);
-	int		(*pointcontents) (vec3_t point);
+	brushcontents_t	(*pointcontents) (vec3_t point);
 	qboolean	(*inPVS) (const vec3_t p1, const vec3_t p2);
 	qboolean	(*inPHS) (const vec3_t p1, const vec3_t p2);
 	void		(*SetAreaPortalState) (int portalnum, qboolean open);
@@ -158,7 +157,7 @@ struct game_import_t
 	void	(*FreeTags) (int tag);
 
 	// console variable interaction
-	cvar_t	*(*cvar) (char *var_name, const char *value, int flags);
+	cvar_t	*(*cvar) (char *var_name, const char *value, cvarflags_t flags);
 	cvar_t	*(*cvar_set) (char *var_name, const char *value);
 	cvar_t	*(*cvar_forceset) (char *var_name, const char *value);
 

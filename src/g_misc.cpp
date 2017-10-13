@@ -150,7 +150,7 @@ void ThrowGib (edict_t *self, char *gibname, int damage, gibtype_t type)
 	gib->s.origin[1] = origin[1] + crandom() * size[1];
 	gib->s.origin[2] = origin[2] + crandom() * size[2];
 
-	gi.setmodel (gib, gibname);
+	gib->s.modelindex = gi.modelindex(gibname);
 	gib->solid = SOLID_NOT;
 	gib->s.effects |= EF_GIB;
 	gib->flags |= FL_NO_KNOCKBACK;
@@ -192,12 +192,12 @@ void ThrowHead (edict_t *self, char *gibname, int damage, gibtype_t type)
 	VectorClear (self->mins);
 	VectorClear (self->maxs);
 
-	self->s.modelindex2 = 0;
-	gi.setmodel (self, gibname);
+	self->s.modelindex2 = MODEL_NONE;
+	self->s.modelindex = gi.modelindex(gibname);
 	self->solid = SOLID_NOT;
 	self->s.effects |= EF_GIB;
 	self->s.effects &= ~EF_FLIES;
-	self->s.sound = 0;
+	self->s.sound = SOUND_NONE;
 	self->flags |= FL_NO_KNOCKBACK;
 	self->svflags &= ~SVF_MONSTER;
 	self->takedamage = DAMAGE_YES;
@@ -246,14 +246,14 @@ void ThrowClientHead (edict_t *self, int damage)
 
 	self->s.origin[2] += 32;
 	self->s.frame = 0;
-	gi.setmodel (self, gibname);
+	self->s.modelindex = gi.modelindex(gibname);
 	VectorSet (self->mins, -16, -16, 0);
 	VectorSet (self->maxs, 16, 16, 16);
 
 	self->takedamage = DAMAGE_NO;
 	self->solid = SOLID_NOT;
 	self->s.effects = EF_GIB;
-	self->s.sound = 0;
+	self->s.sound = SOUND_NONE;
 	self->flags |= FL_NO_KNOCKBACK;
 
 	self->movetype = MOVETYPE_BOUNCE;
@@ -292,7 +292,7 @@ void ThrowDebris (edict_t *self, char *modelname, float speed, vec3_t origin)
 
 	chunk = G_Spawn();
 	VectorCopy (origin, chunk->s.origin);
-	gi.setmodel (chunk, modelname);
+	chunk->s.modelindex = gi.modelindex(modelname);
 	v[0] = 100 * crandom();
 	v[1] = 100 * crandom();
 	v[2] = 100 + 100 * crandom();
@@ -542,7 +542,7 @@ If targeted, will toggle between on and off.
 Default _cone value is 10 (used to set size of light for spotlights)
 */
 
-#define START_OFF	1
+const int START_OFF	= bit(0);
 
 static void light_use (edict_t *self, edict_t *other, edict_t *activator)
 {
@@ -1497,7 +1497,7 @@ Intended for use with the target_spawner
 */
 void SP_misc_gib_arm (edict_t *ent)
 {
-	gi.setmodel (ent, "models/objects/gibs/arm/tris.md2");
+	ent->s.modelindex = gi.modelindex("models/objects/gibs/arm/tris.md2");
 	ent->solid = SOLID_NOT;
 	ent->s.effects |= EF_GIB;
 	ent->takedamage = DAMAGE_YES;
@@ -1518,7 +1518,7 @@ Intended for use with the target_spawner
 */
 void SP_misc_gib_leg (edict_t *ent)
 {
-	gi.setmodel (ent, "models/objects/gibs/leg/tris.md2");
+	ent->s.modelindex = gi.modelindex("models/objects/gibs/leg/tris.md2");
 	ent->solid = SOLID_NOT;
 	ent->s.effects |= EF_GIB;
 	ent->takedamage = DAMAGE_YES;
@@ -1539,7 +1539,7 @@ Intended for use with the target_spawner
 */
 void SP_misc_gib_head (edict_t *ent)
 {
-	gi.setmodel (ent, "models/objects/gibs/head/tris.md2");
+	ent->s.modelindex = gi.modelindex("models/objects/gibs/head/tris.md2");
 	ent->solid = SOLID_NOT;
 	ent->s.effects |= EF_GIB;
 	ent->takedamage = DAMAGE_YES;
@@ -1627,7 +1627,7 @@ If START_OFF, this entity must be used before it starts
 			2 "xx:xx:xx"
 */
 
-#define	CLOCK_MESSAGE_SIZE	16
+const size_t CLOCK_MESSAGE_SIZE	= 16;
 
 // don't let field width of any clock messages change, or it
 // could cause an overwrite after a game load
@@ -1842,7 +1842,7 @@ void SP_misc_teleporter (edict_t *ent)
 		return;
 	}
 
-	gi.setmodel (ent, "models/objects/dmspot/tris.md2");
+	ent->s.modelindex = gi.modelindex("models/objects/dmspot/tris.md2");
 	ent->s.skinnum = 1;
 	ent->s.effects = EF_TELEPORTER;
 	ent->s.sound = gi.soundindex ("world/amb10.wav");
@@ -1869,7 +1869,7 @@ Point teleporters at these.
 */
 void SP_misc_teleporter_dest (edict_t *ent)
 {
-	gi.setmodel (ent, "models/objects/dmspot/tris.md2");
+	ent->s.modelindex = gi.modelindex("models/objects/dmspot/tris.md2");
 	ent->s.skinnum = 0;
 	ent->solid = SOLID_BBOX;
 //	ent->s.effects |= EF_FLIES;

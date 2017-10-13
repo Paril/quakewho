@@ -29,14 +29,14 @@ FLIPPER
 #include "m_flipper.h"
 
 
-static int	sound_chomp;
-static int	sound_attack;
-static int	sound_pain1;
-static int	sound_pain2;
-static int	sound_death;
-static int	sound_idle;
-static int	sound_search;
-static int	sound_sight;
+static soundindex_t	sound_chomp;
+static soundindex_t	sound_attack;
+static soundindex_t	sound_pain1;
+static soundindex_t	sound_pain2;
+static soundindex_t	sound_death;
+static soundindex_t	sound_idle;
+static soundindex_t	sound_search;
+static soundindex_t	sound_sight;
 
 
 void flipper_stand (edict_t *self);
@@ -53,7 +53,7 @@ void flipper_stand (edict_t *self)
 		self->monsterinfo.currentmove = &flipper_move_stand;
 }
 
-#define FLIPPER_RUN_SPEED	24
+const float FLIPPER_RUN_SPEED	= 24;
 
 mframe_t flipper_frames_run [] =
 {

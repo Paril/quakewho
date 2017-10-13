@@ -39,7 +39,7 @@ void MoveClientToIntermission (edict_t *ent)
 	ent->client->ps.pmove.origin[2] = level.intermission_origin[2]*8;
 	VectorCopy (level.intermission_angle, ent->client->ps.viewangles);
 	ent->client->ps.pmove.pm_type = PM_FREEZE;
-	ent->client->ps.gunindex = 0;
+	ent->client->ps.gunindex = MODEL_NONE;
 	ent->client->ps.blend[3] = 0;
 	ent->client->ps.rdflags &= ~RDF_UNDERWATER;
 
@@ -52,12 +52,12 @@ void MoveClientToIntermission (edict_t *ent)
 	ent->client->grenade_time = 0;
 
 	ent->viewheight = 0;
-	ent->s.modelindex = 0;
-	ent->s.modelindex2 = 0;
-	ent->s.modelindex3 = 0;
-	ent->s.modelindex = 0;
-	ent->s.effects = 0;
-	ent->s.sound = 0;
+	ent->s.modelindex = MODEL_NONE;
+	ent->s.modelindex2 = MODEL_NONE;
+	ent->s.modelindex3 = MODEL_NONE;
+	ent->s.modelindex4 = MODEL_NONE;
+	ent->s.effects = EF_NONE;
+	ent->s.sound = SOUND_NONE;
 	ent->solid = SOLID_NOT;
 
 	// add the layout

@@ -427,7 +427,7 @@ void TossClientWeapon (edict_t *self)
 	if (item && (strcmp (item->pickup_name, "Blaster") == 0))
 		item = NULL;
 
-	if (!((int)(dmflags->value) & DF_QUAD_DROP))
+	if (!((dmflags_t)dmflags->value & DF_QUAD_DROP))
 		quad = false;
 	else
 		quad = (self->client->quad_framenum > (level.framenum + 10));
@@ -511,13 +511,13 @@ void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 	self->takedamage = DAMAGE_YES;
 	self->movetype = MOVETYPE_TOSS;
 
-	self->s.modelindex2 = 0;	// remove linked weapon model
+	self->s.modelindex2 = MODEL_NONE;	// remove linked weapon model
 
 	self->s.angles[0] = 0;
 	self->s.angles[2] = 0;
 
-	self->s.sound = 0;
-	self->client->weapon_sound = 0;
+	self->s.sound = SOUND_NONE;
+	self->client->weapon_sound = SOUND_NONE;
 
 	self->maxs[2] = -8;
 
@@ -825,7 +825,7 @@ edict_t *SelectFarthestDeathmatchSpawnPoint (void)
 
 edict_t *SelectDeathmatchSpawnPoint (void)
 {
-	if ( (int)(dmflags->value) & DF_SPAWN_FARTHEST)
+	if ( (dmflags_t)dmflags->value & DF_SPAWN_FARTHEST)
 		return SelectFarthestDeathmatchSpawnPoint ();
 	else
 		return SelectRandomDeathmatchSpawnPoint ();
@@ -1179,8 +1179,8 @@ void PutClientInServer (edict_t *ent)
 	ent->model = "players/male/tris.md2";
 	ent->pain = player_pain;
 	ent->die = player_die;
-	ent->waterlevel = 0;
-	ent->watertype = 0;
+	ent->waterlevel = WATER_NONE;
+	ent->watertype = CONTENTS_NONE;
 	ent->flags &= ~FL_NO_KNOCKBACK;
 	ent->svflags &= ~SVF_DEADMONSTER;
 
@@ -1195,7 +1195,7 @@ void PutClientInServer (edict_t *ent)
 	client->ps.pmove.origin[1] = spawn_origin[1]*8;
 	client->ps.pmove.origin[2] = spawn_origin[2]*8;
 
-	if (deathmatch->value && ((int)dmflags->value & DF_FIXED_FOV))
+	if (deathmatch->value && ((dmflags_t)dmflags->value & DF_FIXED_FOV))
 	{
 		client->ps.fov = 90;
 	}
@@ -1211,9 +1211,9 @@ void PutClientInServer (edict_t *ent)
 	client->ps.gunindex = gi.modelindex(client->pers.weapon->view_model);
 
 	// clear entity state values
-	ent->s.effects = 0;
-	ent->s.modelindex = 255;		// will use the skin specified model
-	ent->s.modelindex2 = 255;		// custom gun model
+	ent->s.effects = EF_NONE;
+	ent->s.modelindex = MODEL_PLAYER;		// will use the skin specified model
+	ent->s.modelindex2 = MODEL_PLAYER;		// custom gun model
 	// sknum is player num and weapon number
 	// weapon number will be added in changeweapon
 	ent->s.skinnum = ent - g_edicts - 1;
@@ -1244,7 +1244,7 @@ void PutClientInServer (edict_t *ent)
 		ent->movetype = MOVETYPE_NOCLIP;
 		ent->solid = SOLID_NOT;
 		ent->svflags |= SVF_NOCLIENT;
-		ent->client->ps.gunindex = 0;
+		ent->client->ps.gunindex = MODEL_NONE;
 		gi.linkentity (ent);
 		return;
 	} else
@@ -1404,7 +1404,7 @@ void ClientUserinfoChanged (edict_t *ent, char *userinfo)
 	gi.configstring (CS_PLAYERSKINS+playernum, va("%s\\%s", ent->client->pers.netname, s) );
 
 	// fov
-	if (deathmatch->value && ((int)dmflags->value & DF_FIXED_FOV))
+	if (deathmatch->value && ((dmflags_t)dmflags->value & DF_FIXED_FOV))
 	{
 		ent->client->ps.fov = 90;
 	}
@@ -1531,7 +1531,7 @@ void ClientDisconnect (edict_t *ent)
 	gi.multicast (ent->s.origin, MULTICAST_PVS);
 
 	gi.unlinkentity (ent);
-	ent->s.modelindex = 0;
+	ent->s.modelindex = MODEL_NONE;
 	ent->solid = SOLID_NOT;
 	ent->inuse = false;
 	ent->classname = "disconnected";
@@ -1663,7 +1663,7 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 		client->resp.cmd_angles[1] = SHORT2ANGLE(ucmd->angles[1]);
 		client->resp.cmd_angles[2] = SHORT2ANGLE(ucmd->angles[2]);
 
-		if (ent->groundentity && !pm.groundentity && (pm.cmd.upmove >= 10) && (pm.waterlevel == 0))
+		if (ent->groundentity && !pm.groundentity && (pm.cmd.upmove >= 10) && (pm.waterlevel == WATER_NONE))
 		{
 			gi.sound(ent, CHAN_VOICE, gi.soundindex("*jump1.wav"), 1, ATTN_NORM, 0);
 			PlayerNoise(ent, ent->s.origin, PNOISE_SELF);
@@ -1801,7 +1801,7 @@ void ClientBeginServerFrame (edict_t *ent)
 				buttonMask = -1;
 
 			if ( ( client->latched_buttons & buttonMask ) ||
-				(deathmatch->value && ((int)dmflags->value & DF_FORCE_RESPAWN) ) )
+				(deathmatch->value && ((dmflags_t)dmflags->value & DF_FORCE_RESPAWN) ) )
 			{
 				respawn(ent);
 				client->latched_buttons = BUTTON_NONE;

@@ -65,7 +65,7 @@ struct ipfilter_t
 	unsigned	compare;
 };
 
-#define	MAX_IPFILTERS	1024
+const size_t MAX_IPFILTERS	= 1024;
 
 ipfilter_t	ipfilters[MAX_IPFILTERS];
 int			numipfilters;
@@ -245,7 +245,7 @@ void SVCmd_WriteIP_f (void)
 	int		i;
 	cvar_t	*sv_game;
 
-	sv_game = gi.cvar("game", "", 0);
+	sv_game = gi.cvar("game", "", CVAR_NONE);
 
 	if (!*sv_game->string)
 		sprintf (name, "%s/listip.cfg", GAMEVERSION);

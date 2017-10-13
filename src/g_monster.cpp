@@ -48,7 +48,7 @@ void monster_fire_shotgun (edict_t *self, vec3_t start, vec3_t aimdir, int damag
 	gi.multicast (start, MULTICAST_PVS);
 }
 
-void monster_fire_blaster (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, int flashtype, int effect)
+void monster_fire_blaster (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, int flashtype, entity_effects_t effect)
 {
 	fire_blaster (self, start, dir, damage, speed, effect, false);
 
@@ -107,7 +107,7 @@ void monster_fire_bfg (edict_t *self, vec3_t start, vec3_t aimdir, int damage, i
 static void M_FliesOff (edict_t *self)
 {
 	self->s.effects &= ~EF_FLIES;
-	self->s.sound = 0;
+	self->s.sound = SOUND_NONE;
 }
 
 static void M_FliesOn (edict_t *self)
@@ -183,7 +183,7 @@ void M_CheckGround (edict_t *ent)
 void M_CatagorizePosition (edict_t *ent)
 {
 	vec3_t		point;
-	int			cont;
+	brushcontents_t	cont;
 
 //
 // get waterlevel
@@ -195,23 +195,23 @@ void M_CatagorizePosition (edict_t *ent)
 
 	if (!(cont & MASK_WATER))
 	{
-		ent->waterlevel = 0;
-		ent->watertype = 0;
+		ent->waterlevel = WATER_NONE;
+		ent->watertype = CONTENTS_NONE;
 		return;
 	}
 
 	ent->watertype = cont;
-	ent->waterlevel = 1;
+	ent->waterlevel = WATER_FEET;
 	point[2] += 26;
 	cont = gi.pointcontents (point);
 	if (!(cont & MASK_WATER))
 		return;
 
-	ent->waterlevel = 2;
+	ent->waterlevel = WATER_WAIST;
 	point[2] += 22;
 	cont = gi.pointcontents (point);
 	if (cont & MASK_WATER)
-		ent->waterlevel = 3;
+		ent->waterlevel = WATER_UNDER;
 }
 
 
@@ -223,7 +223,7 @@ void M_WorldEffects (edict_t *ent)
 	{
 		if (!(ent->flags & FL_SWIM))
 		{
-			if (ent->waterlevel < 3)
+			if (ent->waterlevel < WATER_UNDER)
 			{
 				ent->air_finished = level.time + 12;
 			}
@@ -241,7 +241,7 @@ void M_WorldEffects (edict_t *ent)
 		}
 		else
 		{
-			if (ent->waterlevel > 0)
+			if (ent->waterlevel > WATER_NONE)
 			{
 				ent->air_finished = level.time + 9;
 			}
@@ -259,7 +259,7 @@ void M_WorldEffects (edict_t *ent)
 		}
 	}
 	
-	if (ent->waterlevel == 0)
+	if (ent->waterlevel == WATER_NONE)
 	{
 		if (ent->flags & FL_INWATER)
 		{	

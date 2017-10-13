@@ -34,21 +34,21 @@ void chick_reslash(edict_t *self);
 void chick_rerocket(edict_t *self);
 void chick_attack1(edict_t *self);
 
-static int	sound_missile_prelaunch;
-static int	sound_missile_launch;
-static int	sound_melee_swing;
-static int	sound_melee_hit;
-static int	sound_missile_reload;
-static int	sound_death1;
-static int	sound_death2;
-static int	sound_fall_down;
-static int	sound_idle1;
-static int	sound_idle2;
-static int	sound_pain1;
-static int	sound_pain2;
-static int	sound_pain3;
-static int	sound_sight;
-static int	sound_search;
+static soundindex_t	sound_missile_prelaunch;
+static soundindex_t	sound_missile_launch;
+static soundindex_t	sound_melee_swing;
+static soundindex_t	sound_melee_hit;
+static soundindex_t	sound_missile_reload;
+static soundindex_t	sound_death1;
+static soundindex_t	sound_death2;
+static soundindex_t	sound_fall_down;
+static soundindex_t	sound_idle1;
+static soundindex_t	sound_idle2;
+static soundindex_t	sound_pain1;
+static soundindex_t	sound_pain2;
+static soundindex_t	sound_pain3;
+static soundindex_t	sound_sight;
+static soundindex_t	sound_search;
 
 
 void ChickMoan (edict_t *self)

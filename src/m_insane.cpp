@@ -29,10 +29,10 @@ insane
 #include "m_insane.h"
 
 
-static int	sound_fist;
-static int	sound_shake;
-static int	sound_moan;
-static int	sound_scream[8];
+static soundindex_t	sound_fist;
+static soundindex_t	sound_shake;
+static soundindex_t	sound_moan;
+static soundindex_t	sound_scream[8];
 
 void insane_fist (edict_t *self)
 {

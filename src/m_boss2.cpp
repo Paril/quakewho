@@ -32,11 +32,11 @@ void BossExplode (edict_t *self);
 
 bool infront (edict_t *self, edict_t *other);
 
-static int	sound_pain1;
-static int	sound_pain2;
-static int	sound_pain3;
-static int	sound_death;
-static int	sound_search1;
+static soundindex_t	sound_pain1;
+static soundindex_t	sound_pain2;
+static soundindex_t	sound_pain3;
+static soundindex_t	sound_death;
+static soundindex_t	sound_search1;
 
 void boss2_search (edict_t *self)
 {

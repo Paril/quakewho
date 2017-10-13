@@ -29,13 +29,13 @@ GUNNER
 #include "m_gunner.h"
 
 
-static int	sound_pain;
-static int	sound_pain2;
-static int	sound_death;
-static int	sound_idle;
-static int	sound_open;
-static int	sound_search;
-static int	sound_sight;
+static soundindex_t	sound_pain;
+static soundindex_t	sound_pain2;
+static soundindex_t	sound_death;
+static soundindex_t	sound_idle;
+static soundindex_t	sound_open;
+static soundindex_t	sound_search;
+static soundindex_t	sound_sight;
 
 
 void gunner_idlesound (edict_t *self)

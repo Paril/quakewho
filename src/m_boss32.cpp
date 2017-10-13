@@ -36,20 +36,20 @@ void makron_step_right (edict_t *self);
 void makronBFG (edict_t *self);
 void makron_dead (edict_t *self);
 
-static int	sound_pain4;
-static int	sound_pain5;
-static int	sound_pain6;
-static int	sound_death;
-static int	sound_step_left;
-static int	sound_step_right;
-static int	sound_attack_bfg;
-static int	sound_brainsplorch;
-static int	sound_prerailgun;
-static int	sound_popup;
-static int	sound_taunt1;
-static int	sound_taunt2;
-static int	sound_taunt3;
-static int	sound_hit;
+static soundindex_t	sound_pain4;
+static soundindex_t	sound_pain5;
+static soundindex_t	sound_pain6;
+static soundindex_t	sound_death;
+static soundindex_t	sound_step_left;
+static soundindex_t	sound_step_right;
+static soundindex_t	sound_attack_bfg;
+static soundindex_t	sound_brainsplorch;
+static soundindex_t	sound_prerailgun;
+static soundindex_t	sound_popup;
+static soundindex_t	sound_taunt1;
+static soundindex_t	sound_taunt2;
+static soundindex_t	sound_taunt3;
+static soundindex_t	sound_hit;
 
 void makron_taunt (edict_t *self)
 {
@@ -671,7 +671,8 @@ void makron_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 
 	int		n;
 
-	self->s.sound = 0;
+	self->s.sound = SOUND_NONE;
+
 	// check for gib
 	if (self->health <= self->gib_health)
 	{

@@ -140,7 +140,7 @@ Slide off of the impacting object
 returns the blocked flags (1 = floor, 2 = step / wall)
 ==================
 */
-#define	STOP_EPSILON	0.1
+const float STOP_EPSILON	= 0.1;
 
 int ClipVelocity (vec3_t in, vec3_t normal, vec3_t out, float overbounce)
 {
@@ -179,7 +179,7 @@ Returns the clipflags if the velocity was modified (hit something solid)
 4 = dead stop
 ============
 */
-#define	MAX_CLIP_PLANES	5
+const size_t MAX_CLIP_PLANES	= 5;
 int SV_FlyMove (edict_t *ent, float time, int mask)
 {
 	edict_t		*hit;
@@ -746,9 +746,9 @@ void SV_Physics_Toss (edict_t *ent)
 	isinwater = ent->watertype & MASK_WATER;
 
 	if (isinwater)
-		ent->waterlevel = 1;
+		ent->waterlevel = WATER_FEET;
 	else
-		ent->waterlevel = 0;
+		ent->waterlevel = WATER_NONE;
 
 	if (!wasinwater && isinwater)
 		gi.positioned_sound (old_origin, g_edicts, CHAN_AUTO, gi.soundindex("misc/h2ohit1.wav"), 1, 1, 0);
@@ -785,9 +785,9 @@ FIXME: is this true?
 */
 
 //FIXME: hacked in for E3 demo
-#define	sv_stopspeed		100
-#define sv_friction			6
-#define sv_waterfriction	1
+const float sv_stopspeed		= 100;
+const float sv_friction			= 6;
+const float sv_waterfriction	= 1;
 
 void SV_AddRotationalFriction (edict_t *ent)
 {
@@ -844,11 +844,11 @@ void SV_Physics_Step (edict_t *ent)
 	//   swimming monsters who are in the water
 	if (! wasonground)
 		if (!(ent->flags & FL_FLY))
-			if (!((ent->flags & FL_SWIM) && (ent->waterlevel > 2)))
+			if (!((ent->flags & FL_SWIM) && (ent->waterlevel > WATER_WAIST)))
 			{
 				if (ent->velocity[2] < sv_gravity->value*-0.1)
 					hitsound = true;
-				if (ent->waterlevel == 0)
+				if (ent->waterlevel == WATER_NONE)
 					SV_AddGravity (ent);
 			}
 
@@ -916,7 +916,7 @@ void SV_Physics_Step (edict_t *ent)
 		if (ent->groundentity)
 			if (!wasonground)
 				if (hitsound)
-					gi.sound (ent, 0, gi.soundindex("world/land.wav"), 1, 1, 0);
+					gi.sound (ent, CHAN_AUTO, gi.soundindex("world/land.wav"), 1, 1, 0);
 	}
 
 // regular thinking

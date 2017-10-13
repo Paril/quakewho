@@ -800,7 +800,7 @@ void SP_worldspawn (edict_t *ent)
 	ent->movetype = MOVETYPE_PUSH;
 	ent->solid = SOLID_BSP;
 	ent->inuse = true;			// since the world doesn't use G_Spawn()
-	ent->s.modelindex = 1;		// world model is always index 1
+	ent->s.modelindex = MODEL_WORLD;		// world model is always index 1
 
 	//---------------
 

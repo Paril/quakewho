@@ -28,15 +28,15 @@ flyer
 #include "g_local.h"
 #include "m_flyer.h"
 
-static int	nextmove;			// Used for start/stop frames
+static flyeraction_t	nextmove;			// Used for start/stop frames
 
-static int	sound_sight;
-static int	sound_idle;
-static int	sound_pain1;
-static int	sound_pain2;
-static int	sound_slash;
-static int	sound_sproing;
-static int	sound_die;
+static soundindex_t	sound_sight;
+static soundindex_t	sound_idle;
+static soundindex_t	sound_pain1;
+static soundindex_t	sound_pain2;
+static soundindex_t	sound_slash;
+static soundindex_t	sound_sproing;
+static soundindex_t	sound_die;
 
 
 void flyer_check_melee(edict_t *self);
@@ -368,12 +368,12 @@ void flyer_fire (edict_t *self, int flash_number)
 	vec3_t	forward, right;
 	vec3_t	end;
 	vec3_t	dir;
-	int		effect;
+	entity_effects_t		effect;
 
 	if ((self->s.frame == FRAME_attak204) || (self->s.frame == FRAME_attak207) || (self->s.frame == FRAME_attak210))
 		effect = EF_HYPERBLASTER;
 	else
-		effect = 0;
+		effect = EF_NONE;
 	AngleVectors (self->s.angles, forward, right, NULL);
 	G_ProjectSource (self->s.origin, monster_flash_offset[flash_number], forward, right, start);
 	

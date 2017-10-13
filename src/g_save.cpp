@@ -22,8 +22,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "g_local.h"
 
-#define Function(f) {#f, f}
-
 mmove_t mmove_reloc;
 
 field_t fields[] = {
@@ -155,15 +153,15 @@ void InitGame (void)
 {
 	gi.dprintf ("==== InitGame ====\n");
 
-	gun_x = gi.cvar ("gun_x", "0", 0);
-	gun_y = gi.cvar ("gun_y", "0", 0);
-	gun_z = gi.cvar ("gun_z", "0", 0);
+	gun_x = gi.cvar ("gun_x", "0", CVAR_NONE);
+	gun_y = gi.cvar ("gun_y", "0", CVAR_NONE);
+	gun_z = gi.cvar ("gun_z", "0", CVAR_NONE);
 
 	//FIXME: sv_ prefix is wrong for these
-	sv_rollspeed = gi.cvar ("sv_rollspeed", "200", 0);
-	sv_rollangle = gi.cvar ("sv_rollangle", "2", 0);
-	sv_maxvelocity = gi.cvar ("sv_maxvelocity", "2000", 0);
-	sv_gravity = gi.cvar ("sv_gravity", "800", 0);
+	sv_rollspeed = gi.cvar ("sv_rollspeed", "200", CVAR_NONE);
+	sv_rollangle = gi.cvar ("sv_rollangle", "2", CVAR_NONE);
+	sv_maxvelocity = gi.cvar ("sv_maxvelocity", "2000", CVAR_NONE);
+	sv_gravity = gi.cvar ("sv_gravity", "800", CVAR_NONE);
 
 	// noset vars
 	dedicated = gi.cvar ("dedicated", "0", CVAR_NOSET);
@@ -187,23 +185,23 @@ void InitGame (void)
 	password = gi.cvar ("password", "", CVAR_USERINFO);
 	spectator_password = gi.cvar ("spectator_password", "", CVAR_USERINFO);
 	needpass = gi.cvar ("needpass", "0", CVAR_SERVERINFO);
-	filterban = gi.cvar ("filterban", "1", 0);
+	filterban = gi.cvar ("filterban", "1", CVAR_NONE);
 
 	g_select_empty = gi.cvar ("g_select_empty", "0", CVAR_ARCHIVE);
 
-	run_pitch = gi.cvar ("run_pitch", "0.002", 0);
-	run_roll = gi.cvar ("run_roll", "0.005", 0);
-	bob_up  = gi.cvar ("bob_up", "0.005", 0);
-	bob_pitch = gi.cvar ("bob_pitch", "0.002", 0);
-	bob_roll = gi.cvar ("bob_roll", "0.002", 0);
+	run_pitch = gi.cvar ("run_pitch", "0.002", CVAR_NONE);
+	run_roll = gi.cvar ("run_roll", "0.005", CVAR_NONE);
+	bob_up  = gi.cvar ("bob_up", "0.005", CVAR_NONE);
+	bob_pitch = gi.cvar ("bob_pitch", "0.002", CVAR_NONE);
+	bob_roll = gi.cvar ("bob_roll", "0.002", CVAR_NONE);
 
 	// flood control
-	flood_msgs = gi.cvar ("flood_msgs", "4", 0);
-	flood_persecond = gi.cvar ("flood_persecond", "4", 0);
-	flood_waitdelay = gi.cvar ("flood_waitdelay", "10", 0);
+	flood_msgs = gi.cvar ("flood_msgs", "4", CVAR_NONE);
+	flood_persecond = gi.cvar ("flood_persecond", "4", CVAR_NONE);
+	flood_waitdelay = gi.cvar ("flood_waitdelay", "10", CVAR_NONE);
 
 	// dm map list
-	sv_maplist = gi.cvar ("sv_maplist", "", 0);
+	sv_maplist = gi.cvar ("sv_maplist", "", CVAR_NONE);
 
 	// items
 	InitItems ();

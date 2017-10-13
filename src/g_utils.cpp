@@ -113,7 +113,7 @@ NULL will be returned if the end of the list is reached.
 
 =============
 */
-#define MAXCHOICES	8
+const size_t MAXCHOICES	= 8;
 
 edict_t *G_PickTarget (char *targetname)
 {

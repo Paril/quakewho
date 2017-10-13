@@ -167,7 +167,7 @@ static void fire_lead (edict_t *self, vec3_t start, vec3_t aimdir, int damage, i
 		// see if we hit water
 		if (tr.contents & MASK_WATER)
 		{
-			int		color;
+			splashtype_t		color;
 
 			water = true;
 			VectorCopy (tr.endpos, water_start);
@@ -342,7 +342,7 @@ void blaster_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *
 	G_FreeEdict (self);
 }
 
-void fire_blaster (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, int effect, bool hyper)
+void fire_blaster (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, entity_effects_t effect, bool hyper)
 {
 	edict_t	*bolt;
 	trace_t	tr;
@@ -790,7 +790,7 @@ void bfg_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf
 	VectorClear (self->velocity);
 	self->s.modelindex = gi.modelindex ("sprites/s_bfg3.sp2");
 	self->s.frame = 0;
-	self->s.sound = 0;
+	self->s.sound = SOUND_NONE;
 	self->s.effects &= ~EF_ANIM_ALLFAST;
 	self->think = bfg_explode;
 	self->nextthink = level.time + FRAMETIME;

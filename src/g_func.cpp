@@ -53,20 +53,15 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 =========================================================
 */
 
-#define PLAT_LOW_TRIGGER	1
+const int PLAT_LOW_TRIGGER		= bit(0);
 
-#define	STATE_TOP			0
-#define	STATE_BOTTOM		1
-#define STATE_UP			2
-#define STATE_DOWN			3
-
-#define DOOR_START_OPEN		1
-#define DOOR_REVERSE		2
-#define DOOR_CRUSHER		4
-#define DOOR_NOMONSTER		8
-#define DOOR_TOGGLE			32
-#define DOOR_X_AXIS			64
-#define DOOR_Y_AXIS			128
+const int DOOR_START_OPEN		= bit(0);
+const int DOOR_REVERSE			= bit(1);
+const int DOOR_CRUSHER			= bit(2);
+const int DOOR_NOMONSTER		= bit(3);
+const int DOOR_TOGGLE			= bit(5);
+const int DOOR_X_AXIS			= bit(6);
+const int DOOR_Y_AXIS			= bit(7);
 
 
 //
@@ -230,7 +225,10 @@ The team has completed a frame of movement, so
 change the speed for the next frame
 ==============
 */
-#define AccelerationDistance(target, rate)	(target * ((target / rate) + 1) / 2)
+inline float AccelerationDistance(const float &target, const float &rate)
+{
+	return (target * ((target / rate) + 1) / 2);
+}
 
 void plat_CalcAcceleratedMove(moveinfo_t *moveinfo)
 {
@@ -360,8 +358,8 @@ void plat_hit_top (edict_t *ent)
 	if (!(ent->flags & FL_TEAMSLAVE))
 	{
 		if (ent->moveinfo.sound_end)
-			gi.sound (ent, CHAN_NO_PHS_ADD+CHAN_VOICE, ent->moveinfo.sound_end, 1, ATTN_STATIC, 0);
-		ent->s.sound = 0;
+			gi.sound (ent, CHAN_NO_PHS_ADD | CHAN_VOICE, ent->moveinfo.sound_end, 1, ATTN_STATIC, 0);
+		ent->s.sound = SOUND_NONE;
 	}
 	ent->moveinfo.state = STATE_TOP;
 
@@ -374,8 +372,8 @@ void plat_hit_bottom (edict_t *ent)
 	if (!(ent->flags & FL_TEAMSLAVE))
 	{
 		if (ent->moveinfo.sound_end)
-			gi.sound (ent, CHAN_NO_PHS_ADD+CHAN_VOICE, ent->moveinfo.sound_end, 1, ATTN_STATIC, 0);
-		ent->s.sound = 0;
+			gi.sound (ent, CHAN_NO_PHS_ADD | CHAN_VOICE, ent->moveinfo.sound_end, 1, ATTN_STATIC, 0);
+		ent->s.sound = SOUND_NONE;
 	}
 	ent->moveinfo.state = STATE_BOTTOM;
 }
@@ -385,7 +383,7 @@ void plat_go_down (edict_t *ent)
 	if (!(ent->flags & FL_TEAMSLAVE))
 	{
 		if (ent->moveinfo.sound_start)
-			gi.sound (ent, CHAN_NO_PHS_ADD+CHAN_VOICE, ent->moveinfo.sound_start, 1, ATTN_STATIC, 0);
+			gi.sound (ent, CHAN_NO_PHS_ADD | CHAN_VOICE, ent->moveinfo.sound_start, 1, ATTN_STATIC, 0);
 		ent->s.sound = ent->moveinfo.sound_middle;
 	}
 	ent->moveinfo.state = STATE_DOWN;
@@ -397,7 +395,7 @@ void plat_go_up (edict_t *ent)
 	if (!(ent->flags & FL_TEAMSLAVE))
 	{
 		if (ent->moveinfo.sound_start)
-			gi.sound (ent, CHAN_NO_PHS_ADD+CHAN_VOICE, ent->moveinfo.sound_start, 1, ATTN_STATIC, 0);
+			gi.sound (ent, CHAN_NO_PHS_ADD | CHAN_VOICE, ent->moveinfo.sound_start, 1, ATTN_STATIC, 0);
 		ent->s.sound = ent->moveinfo.sound_middle;
 	}
 	ent->moveinfo.state = STATE_UP;
@@ -607,7 +605,7 @@ void rotating_use (edict_t *self, edict_t *other, edict_t *activator)
 {
 	if (!VectorCompare (self->avelocity, vec3_origin))
 	{
-		self->s.sound = 0;
+		self->s.sound = SOUND_NONE;
 		VectorClear (self->avelocity);
 		self->touch = NULL;
 	}
@@ -730,7 +728,7 @@ void button_fire (edict_t *self)
 
 	self->moveinfo.state = STATE_UP;
 	if (self->moveinfo.sound_start && !(self->flags & FL_TEAMSLAVE))
-		gi.sound (self, CHAN_NO_PHS_ADD+CHAN_VOICE, self->moveinfo.sound_start, 1, ATTN_STATIC, 0);
+		gi.sound (self, CHAN_NO_PHS_ADD | CHAN_VOICE, self->moveinfo.sound_start, 1, ATTN_STATIC, 0);
 	Move_Calc (self, self->moveinfo.end_origin, button_wait);
 }
 
@@ -872,8 +870,8 @@ void door_hit_top (edict_t *self)
 	if (!(self->flags & FL_TEAMSLAVE))
 	{
 		if (self->moveinfo.sound_end)
-			gi.sound (self, CHAN_NO_PHS_ADD+CHAN_VOICE, self->moveinfo.sound_end, 1, ATTN_STATIC, 0);
-		self->s.sound = 0;
+			gi.sound (self, CHAN_NO_PHS_ADD | CHAN_VOICE, self->moveinfo.sound_end, 1, ATTN_STATIC, 0);
+		self->s.sound = SOUND_NONE;
 	}
 	self->moveinfo.state = STATE_TOP;
 	if (self->spawnflags & DOOR_TOGGLE)
@@ -890,8 +888,8 @@ void door_hit_bottom (edict_t *self)
 	if (!(self->flags & FL_TEAMSLAVE))
 	{
 		if (self->moveinfo.sound_end)
-			gi.sound (self, CHAN_NO_PHS_ADD+CHAN_VOICE, self->moveinfo.sound_end, 1, ATTN_STATIC, 0);
-		self->s.sound = 0;
+			gi.sound (self, CHAN_NO_PHS_ADD | CHAN_VOICE, self->moveinfo.sound_end, 1, ATTN_STATIC, 0);
+		self->s.sound = SOUND_NONE;
 	}
 	self->moveinfo.state = STATE_BOTTOM;
 	door_use_areaportals (self, false);
@@ -902,7 +900,7 @@ void door_go_down (edict_t *self)
 	if (!(self->flags & FL_TEAMSLAVE))
 	{
 		if (self->moveinfo.sound_start)
-			gi.sound (self, CHAN_NO_PHS_ADD+CHAN_VOICE, self->moveinfo.sound_start, 1, ATTN_STATIC, 0);
+			gi.sound (self, CHAN_NO_PHS_ADD | CHAN_VOICE, self->moveinfo.sound_start, 1, ATTN_STATIC, 0);
 		self->s.sound = self->moveinfo.sound_middle;
 	}
 	if (self->max_health)
@@ -933,7 +931,7 @@ void door_go_up (edict_t *self, edict_t *activator)
 	if (!(self->flags & FL_TEAMSLAVE))
 	{
 		if (self->moveinfo.sound_start)
-			gi.sound (self, CHAN_NO_PHS_ADD+CHAN_VOICE, self->moveinfo.sound_start, 1, ATTN_STATIC, 0);
+			gi.sound (self, CHAN_NO_PHS_ADD | CHAN_VOICE, self->moveinfo.sound_start, 1, ATTN_STATIC, 0);
 		self->s.sound = self->moveinfo.sound_middle;
 	}
 	self->moveinfo.state = STATE_UP;
@@ -1442,9 +1440,9 @@ void SP_func_water (edict_t *self)
 }
 
 
-#define TRAIN_START_ON		1
-#define TRAIN_TOGGLE		2
-#define TRAIN_BLOCK_STOPS	4
+const int TRAIN_START_ON	= bit(0);
+const int TRAIN_TOGGLE		= bit(1);
+const int TRAIN_BLOCK_STOPS	= bit(2);
 
 /*QUAKED func_train (0 .5 .8) ? START_ON TOGGLE BLOCK_STOPS
 Trains are moving platforms that players can ride.
@@ -1515,8 +1513,8 @@ void train_wait (edict_t *self)
 		if (!(self->flags & FL_TEAMSLAVE))
 		{
 			if (self->moveinfo.sound_end)
-				gi.sound (self, CHAN_NO_PHS_ADD+CHAN_VOICE, self->moveinfo.sound_end, 1, ATTN_STATIC, 0);
-			self->s.sound = 0;
+				gi.sound (self, CHAN_NO_PHS_ADD | CHAN_VOICE, self->moveinfo.sound_end, 1, ATTN_STATIC, 0);
+			self->s.sound = SOUND_NONE;
 		}
 	}
 	else
@@ -1571,7 +1569,7 @@ again:
 	if (!(self->flags & FL_TEAMSLAVE))
 	{
 		if (self->moveinfo.sound_start)
-			gi.sound (self, CHAN_NO_PHS_ADD+CHAN_VOICE, self->moveinfo.sound_start, 1, ATTN_STATIC, 0);
+			gi.sound (self, CHAN_NO_PHS_ADD | CHAN_VOICE, self->moveinfo.sound_start, 1, ATTN_STATIC, 0);
 		self->s.sound = self->moveinfo.sound_middle;
 	}
 
@@ -1871,9 +1869,9 @@ always_shoot	door is shootebale even if targeted
 "wait"		how long to hold in the open position (default 5, -1 means hold)
 */
 
-#define SECRET_ALWAYS_SHOOT	1
-#define SECRET_1ST_LEFT		2
-#define SECRET_1ST_DOWN		4
+const int SECRET_ALWAYS_SHOOT	= bit(0);
+const int SECRET_1ST_LEFT		= bit(1);
+const int SECRET_1ST_DOWN		= bit(2);
 
 void door_secret_move1 (edict_t *self);
 void door_secret_move2 (edict_t *self);

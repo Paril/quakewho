@@ -21,7 +21,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "g_local.h"
 
-#define	STEPSIZE	18
+const float STEPSIZE	= 18;
 
 /*
 =============
@@ -139,7 +139,7 @@ bool SV_movestep (edict_t *ent, vec3_t move, bool relink)
 				{
 					if (dz > 40)
 						neworg[2] -= 8;
-					if (!((ent->flags & FL_SWIM) && (ent->waterlevel < 2)))
+					if (!((ent->flags & FL_SWIM) && (ent->waterlevel < WATER_WAIST)))
 						if (dz < 30)
 							neworg[2] += 8;
 				}
@@ -174,7 +174,7 @@ bool SV_movestep (edict_t *ent, vec3_t move, bool relink)
 			// swim monsters don't exit water voluntarily
 			if (ent->flags & FL_SWIM)
 			{
-				if (ent->waterlevel < 2)
+				if (ent->waterlevel < WATER_WAIST)
 				{
 					test[0] = trace.endpos[0];
 					test[1] = trace.endpos[1];
@@ -228,7 +228,7 @@ bool SV_movestep (edict_t *ent, vec3_t move, bool relink)
 
 
 	// don't go in to water
-	if (ent->waterlevel == 0)
+	if (ent->waterlevel == WATER_NONE)
 	{
 		test[0] = trace.endpos[0];
 		test[1] = trace.endpos[1];
@@ -399,7 +399,9 @@ SV_NewChaseDir
 
 ================
 */
-#define	DI_NODIR	-1
+
+const int DI_NODIR	= -1;
+
 void SV_NewChaseDir (edict_t *actor, edict_t *enemy, float dist)
 {
 	float	deltax,deltay;

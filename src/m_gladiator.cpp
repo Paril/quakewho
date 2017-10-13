@@ -29,16 +29,16 @@ GLADIATOR
 #include "m_gladiator.h"
 
 
-static int	sound_pain1;
-static int	sound_pain2;
-static int	sound_die;
-static int	sound_gun;
-static int	sound_cleaver_swing;
-static int	sound_cleaver_hit;
-static int	sound_cleaver_miss;
-static int	sound_idle;
-static int	sound_search;
-static int	sound_sight;
+static soundindex_t	sound_pain1;
+static soundindex_t	sound_pain2;
+static soundindex_t	sound_die;
+static soundindex_t	sound_gun;
+static soundindex_t	sound_cleaver_swing;
+static soundindex_t	sound_cleaver_hit;
+static soundindex_t	sound_cleaver_miss;
+static soundindex_t	sound_idle;
+static soundindex_t	sound_search;
+static soundindex_t	sound_sight;
 
 
 void gladiator_idle (edict_t *self)

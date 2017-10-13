@@ -31,8 +31,8 @@ game_import_t	gi;
 game_export_t	globals;
 spawn_temp_t	st;
 
-int	sm_meat_index;
-int	snd_fry;
+modelindex_t	sm_meat_index;
+soundindex_t	snd_fry;
 meansofdeath_t meansOfDeath;
 
 edict_t		*g_edicts;
@@ -227,7 +227,7 @@ void EndDMLevel (void)
 	static const char *seps = " ,\n\r";
 
 	// stay on same level flag
-	if ((int)dmflags->value & DF_SAME_LEVEL)
+	if ((dmflags_t)dmflags->value & DF_SAME_LEVEL)
 	{
 		BeginIntermission (CreateTargetChangeLevel (level.mapname) );
 		return;

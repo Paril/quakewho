@@ -36,13 +36,13 @@ char *ClientTeam (edict_t *ent)
 	if (!p)
 		return value;
 
-	if ((int)(dmflags->value) & DF_MODELTEAMS)
+	if ((dmflags_t)dmflags->value & DF_MODELTEAMS)
 	{
 		*p = 0;
 		return value;
 	}
 
-	// if ((int)(dmflags->value) & DF_SKINTEAMS)
+	// if ((dmflags_t)dmflags->value & DF_SKINTEAMS)
 	return ++p;
 }
 
@@ -51,7 +51,7 @@ bool OnSameTeam (edict_t *ent1, edict_t *ent2)
 	char	ent1Team [512];
 	char	ent2Team [512];
 
-	if (!((int)(dmflags->value) & (DF_MODELTEAMS | DF_SKINTEAMS)))
+	if (!((dmflags_t)dmflags->value & (DF_MODELTEAMS | DF_SKINTEAMS)))
 		return false;
 
 	strcpy (ent1Team, ClientTeam (ent1));
@@ -795,7 +795,7 @@ void Cmd_Say_f (edict_t *ent, bool team, bool arg0)
 	if (gi.argc () < 2 && !arg0)
 		return;
 
-	if (!((int)(dmflags->value) & (DF_MODELTEAMS | DF_SKINTEAMS)))
+	if (!((dmflags_t)dmflags->value & (DF_MODELTEAMS | DF_SKINTEAMS)))
 		team = false;
 
 	if (team)

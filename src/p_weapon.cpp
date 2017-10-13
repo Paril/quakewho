@@ -122,7 +122,7 @@ bool Pickup_Weapon (edict_t *ent, edict_t *other)
 
 	index = ITEM_INDEX(ent->item);
 
-	if ( ( ((int)(dmflags->value) & DF_WEAPONS_STAY) || coop->value) 
+	if ( ( ((dmflags_t)dmflags->value & DF_WEAPONS_STAY) || coop->value) 
 		&& other->client->pers.inventory[index])
 	{
 		if (!(ent->spawnflags & (DROPPED_ITEM | DROPPED_PLAYER_ITEM) ) )
@@ -135,7 +135,7 @@ bool Pickup_Weapon (edict_t *ent, edict_t *other)
 	{
 		// give them some ammo with it
 		ammo = FindItem (ent->item->ammo);
-		if ( (int)dmflags->value & DF_INFINITE_AMMO )
+		if ( (dmflags_t)dmflags->value & DF_INFINITE_AMMO )
 			Add_Ammo (other, ammo, 1000);
 		else
 			Add_Ammo (other, ammo, ammo->quantity);
@@ -144,7 +144,7 @@ bool Pickup_Weapon (edict_t *ent, edict_t *other)
 		{
 			if (deathmatch->value)
 			{
-				if ((int)(dmflags->value) & DF_WEAPONS_STAY)
+				if ((dmflags_t)dmflags->value & DF_WEAPONS_STAY)
 					ent->flags |= FL_RESPAWN;
 				else
 					SetRespawn (ent, 30);
@@ -178,7 +178,7 @@ void ChangeWeapon (edict_t *ent)
 	if (ent->client->grenade_time)
 	{
 		ent->client->grenade_time = level.time;
-		ent->client->weapon_sound = 0;
+		ent->client->weapon_sound = SOUND_NONE;
 		weapon_grenade_fire (ent, false);
 		ent->client->grenade_time = 0;
 	}
@@ -204,7 +204,7 @@ void ChangeWeapon (edict_t *ent)
 
 	if (!ent->client->pers.weapon)
 	{	// dead
-		ent->client->ps.gunindex = 0;
+		ent->client->ps.gunindex = MODEL_NONE;
 		return;
 	}
 
@@ -350,7 +350,7 @@ void Drop_Weapon (edict_t *ent, gitem_t *item)
 {
 	int		index;
 
-	if ((int)(dmflags->value) & DF_WEAPONS_STAY)
+	if ((dmflags_t)dmflags->value & DF_WEAPONS_STAY)
 		return;
 
 	index = ITEM_INDEX(item);
@@ -373,13 +373,13 @@ Weapon_Generic
 A generic function to handle the basics of weapon thinking
 ================
 */
-#define FRAME_FIRE_FIRST		(FRAME_ACTIVATE_LAST + 1)
-#define FRAME_IDLE_FIRST		(FRAME_FIRE_LAST + 1)
-#define FRAME_DEACTIVATE_FIRST	(FRAME_IDLE_LAST + 1)
 
 void Weapon_Generic (edict_t *ent, int FRAME_ACTIVATE_LAST, int FRAME_FIRE_LAST, int FRAME_IDLE_LAST, int FRAME_DEACTIVATE_LAST, int *pause_frames, int *fire_frames, void (*fire)(edict_t *ent))
 {
 	int		n;
+	const int FRAME_FIRE_FIRST		= (FRAME_ACTIVATE_LAST + 1);
+	const int FRAME_IDLE_FIRST		= (FRAME_FIRE_LAST + 1);
+	const int FRAME_DEACTIVATE_FIRST= (FRAME_IDLE_LAST + 1);
 
 	if(ent->deadflag || ent->s.modelindex != 255) // VWep animations screw up corpses
 	{
@@ -539,9 +539,9 @@ GRENADE
 ======================================================================
 */
 
-#define GRENADE_TIMER		3.0
-#define GRENADE_MINSPEED	400
-#define GRENADE_MAXSPEED	800
+const float GRENADE_TIMER		= 3.0;
+const float GRENADE_MINSPEED	= 400;
+const float GRENADE_MAXSPEED	= 800;
 
 void weapon_grenade_fire (edict_t *ent, bool held)
 {
@@ -565,7 +565,7 @@ void weapon_grenade_fire (edict_t *ent, bool held)
 	speed = GRENADE_MINSPEED + (GRENADE_TIMER - timer) * ((GRENADE_MAXSPEED - GRENADE_MINSPEED) / GRENADE_TIMER);
 	fire_grenade2 (ent, start, forward, damage, speed, timer, radius, held);
 
-	if (! ( (int)dmflags->value & DF_INFINITE_AMMO ) )
+	if (! ( (dmflags_t)dmflags->value & DF_INFINITE_AMMO ) )
 		ent->client->pers.inventory[ent->client->ammo_index]--;
 
 	ent->client->grenade_time = level.time + 1.0;
@@ -657,7 +657,7 @@ void Weapon_Grenade (edict_t *ent)
 			// they waited too long, detonate it in their hand
 			if (!ent->client->grenade_blew_up && level.time >= ent->client->grenade_time)
 			{
-				ent->client->weapon_sound = 0;
+				ent->client->weapon_sound = SOUND_NONE;
 				weapon_grenade_fire (ent, true);
 				ent->client->grenade_blew_up = true;
 			}
@@ -681,7 +681,7 @@ void Weapon_Grenade (edict_t *ent)
 
 		if (ent->client->ps.gunframe == 12)
 		{
-			ent->client->weapon_sound = 0;
+			ent->client->weapon_sound = SOUND_NONE;
 			weapon_grenade_fire (ent, false);
 		}
 
@@ -736,7 +736,7 @@ void weapon_grenadelauncher_fire (edict_t *ent)
 
 	PlayerNoise(ent, start, PNOISE_WEAPON);
 
-	if (! ( (int)dmflags->value & DF_INFINITE_AMMO ) )
+	if (! ( (dmflags_t)dmflags->value & DF_INFINITE_AMMO ) )
 		ent->client->pers.inventory[ent->client->ammo_index]--;
 }
 
@@ -792,7 +792,7 @@ void Weapon_RocketLauncher_Fire (edict_t *ent)
 
 	PlayerNoise(ent, start, PNOISE_WEAPON);
 
-	if (! ( (int)dmflags->value & DF_INFINITE_AMMO ) )
+	if (! ( (dmflags_t)dmflags->value & DF_INFINITE_AMMO ) )
 		ent->client->pers.inventory[ent->client->ammo_index]--;
 }
 
@@ -813,7 +813,7 @@ BLASTER / HYPERBLASTER
 ======================================================================
 */
 
-void Blaster_Fire (edict_t *ent, vec3_t g_offset, int damage, bool hyper, int effect)
+void Blaster_Fire (edict_t *ent, vec3_t g_offset, int damage, bool hyper, entity_effects_t effect)
 {
 	vec3_t	forward, right;
 	vec3_t	start;
@@ -869,7 +869,7 @@ void Weapon_HyperBlaster_Fire (edict_t *ent)
 {
 	float	rotation;
 	vec3_t	offset;
-	int		effect;
+	entity_effects_t	effect;
 	int		damage;
 
 	ent->client->weapon_sound = gi.soundindex("weapons/hyprbl1a.wav");
@@ -899,13 +899,13 @@ void Weapon_HyperBlaster_Fire (edict_t *ent)
 			if ((ent->client->ps.gunframe == 6) || (ent->client->ps.gunframe == 9))
 				effect = EF_HYPERBLASTER;
 			else
-				effect = 0;
+				effect = EF_NONE;
 			if (deathmatch->value)
 				damage = 15;
 			else
 				damage = 20;
 			Blaster_Fire (ent, offset, damage, true, effect);
-			if (! ( (int)dmflags->value & DF_INFINITE_AMMO ) )
+			if (! ( (dmflags_t)dmflags->value & DF_INFINITE_AMMO ) )
 				ent->client->pers.inventory[ent->client->ammo_index]--;
 
 			ent->client->anim_priority = ANIM_ATTACK;
@@ -929,7 +929,7 @@ void Weapon_HyperBlaster_Fire (edict_t *ent)
 	if (ent->client->ps.gunframe == 12)
 	{
 		gi.sound(ent, CHAN_AUTO, gi.soundindex("weapons/hyprbd1a.wav"), 1, ATTN_NORM, 0);
-		ent->client->weapon_sound = 0;
+		ent->client->weapon_sound = SOUND_NONE;
 	}
 
 }
@@ -1020,7 +1020,7 @@ void Machinegun_Fire (edict_t *ent)
 
 	PlayerNoise(ent, start, PNOISE_WEAPON);
 
-	if (! ( (int)dmflags->value & DF_INFINITE_AMMO ) )
+	if (! ( (dmflags_t)dmflags->value & DF_INFINITE_AMMO ) )
 		ent->client->pers.inventory[ent->client->ammo_index]--;
 
 	ent->client->anim_priority = ANIM_ATTACK;
@@ -1066,7 +1066,7 @@ void Chaingun_Fire (edict_t *ent)
 	if ((ent->client->ps.gunframe == 14) && !(ent->client->buttons & BUTTON_ATTACK))
 	{
 		ent->client->ps.gunframe = 32;
-		ent->client->weapon_sound = 0;
+		ent->client->weapon_sound = SOUND_NONE;
 		return;
 	}
 	else if ((ent->client->ps.gunframe == 21) && (ent->client->buttons & BUTTON_ATTACK)
@@ -1081,7 +1081,7 @@ void Chaingun_Fire (edict_t *ent)
 
 	if (ent->client->ps.gunframe == 22)
 	{
-		ent->client->weapon_sound = 0;
+		ent->client->weapon_sound = SOUND_NONE;
 		gi.sound(ent, CHAN_AUTO, gi.soundindex("weapons/chngnd1a.wav"), 1, ATTN_IDLE, 0);
 	}
 	else
@@ -1159,7 +1159,7 @@ void Chaingun_Fire (edict_t *ent)
 
 	PlayerNoise(ent, start, PNOISE_WEAPON);
 
-	if (! ( (int)dmflags->value & DF_INFINITE_AMMO ) )
+	if (! ( (dmflags_t)dmflags->value & DF_INFINITE_AMMO ) )
 		ent->client->pers.inventory[ent->client->ammo_index] -= shots;
 }
 
@@ -1223,7 +1223,7 @@ void weapon_shotgun_fire (edict_t *ent)
 	ent->client->ps.gunframe++;
 	PlayerNoise(ent, start, PNOISE_WEAPON);
 
-	if (! ( (int)dmflags->value & DF_INFINITE_AMMO ) )
+	if (! ( (dmflags_t)dmflags->value & DF_INFINITE_AMMO ) )
 		ent->client->pers.inventory[ent->client->ammo_index]--;
 }
 
@@ -1277,7 +1277,7 @@ void weapon_supershotgun_fire (edict_t *ent)
 	ent->client->ps.gunframe++;
 	PlayerNoise(ent, start, PNOISE_WEAPON);
 
-	if (! ( (int)dmflags->value & DF_INFINITE_AMMO ) )
+	if (! ( (dmflags_t)dmflags->value & DF_INFINITE_AMMO ) )
 		ent->client->pers.inventory[ent->client->ammo_index] -= 2;
 }
 
@@ -1342,7 +1342,7 @@ void weapon_railgun_fire (edict_t *ent)
 	ent->client->ps.gunframe++;
 	PlayerNoise(ent, start, PNOISE_WEAPON);
 
-	if (! ( (int)dmflags->value & DF_INFINITE_AMMO ) )
+	if (! ( (dmflags_t)dmflags->value & DF_INFINITE_AMMO ) )
 		ent->client->pers.inventory[ent->client->ammo_index]--;
 }
 
@@ -1418,7 +1418,7 @@ void weapon_bfg_fire (edict_t *ent)
 
 	PlayerNoise(ent, start, PNOISE_WEAPON);
 
-	if (! ( (int)dmflags->value & DF_INFINITE_AMMO ) )
+	if (! ( (dmflags_t)dmflags->value & DF_INFINITE_AMMO ) )
 		ent->client->pers.inventory[ent->client->ammo_index] -= 50;
 }
 

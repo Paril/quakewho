@@ -46,8 +46,8 @@ static int	body_armor_index;
 static int	power_screen_index;
 static int	power_shield_index;
 
-#define HEALTH_IGNORE_MAX	1
-#define HEALTH_TIMED		2
+const int HEALTH_IGNORE_MAX	= bit(0);
+const int HEALTH_TIMED		= bit(1);
 
 void Use_Quad (edict_t *ent, gitem_t *item);
 static int	quad_drop_timeout_hack;
@@ -173,7 +173,7 @@ bool Pickup_Powerup (edict_t *ent, edict_t *other)
 	{
 		if (!(ent->spawnflags & DROPPED_ITEM) )
 			SetRespawn (ent, ent->item->quantity);
-		if (((int)dmflags->value & DF_INSTANT_ITEMS) || ((ent->item->use == Use_Quad) && (ent->spawnflags & DROPPED_PLAYER_ITEM)))
+		if (((dmflags_t)dmflags->value & DF_INSTANT_ITEMS) || ((ent->item->use == Use_Quad) && (ent->spawnflags & DROPPED_PLAYER_ITEM)))
 		{
 			if ((ent->item->use == Use_Quad) && (ent->spawnflags & DROPPED_PLAYER_ITEM))
 				quad_drop_timeout_hack = (ent->nextthink - level.time) / FRAMETIME;
@@ -487,7 +487,7 @@ bool Pickup_Ammo (edict_t *ent, edict_t *other)
 	bool		weapon;
 
 	weapon = (ent->item->flags & IT_WEAPON);
-	if ( (weapon) && ( (int)dmflags->value & DF_INFINITE_AMMO ) )
+	if ( (weapon) && ( (dmflags_t)dmflags->value & DF_INFINITE_AMMO ) )
 		count = 1000;
 	else if (ent->count)
 		count = ent->count;
@@ -855,7 +855,7 @@ edict_t *Drop_Item (edict_t *ent, gitem_t *item)
 	dropped->s.renderfx = RF_GLOW;
 	VectorSet (dropped->mins, -15, -15, -15);
 	VectorSet (dropped->maxs, 15, 15, 15);
-	gi.setmodel (dropped, dropped->item->world_model);
+	dropped->s.modelindex = gi.modelindex(dropped->item->world_model);
 	dropped->solid = SOLID_TRIGGER;
 	dropped->movetype = MOVETYPE_TOSS;  
 	dropped->touch = drop_temp_touch;
@@ -927,9 +927,9 @@ void droptofloor (edict_t *ent)
 	VectorCopy (v, ent->maxs);
 
 	if (ent->model)
-		gi.setmodel (ent, ent->model);
+		ent->s.modelindex = gi.modelindex(ent->model);
 	else
-		gi.setmodel (ent, ent->item->world_model);
+		ent->s.modelindex = gi.modelindex(ent->item->world_model);
 	ent->solid = SOLID_TRIGGER;
 	ent->movetype = MOVETYPE_TOSS;  
 	ent->touch = Touch_Item;
@@ -1074,7 +1074,7 @@ void SpawnItem (edict_t *ent, gitem_t *item)
 	// some items will be prevented in deathmatch
 	if (deathmatch->value)
 	{
-		if ( (int)dmflags->value & DF_NO_ARMOR )
+		if ( (dmflags_t)dmflags->value & DF_NO_ARMOR )
 		{
 			if (item->pickup == Pickup_Armor || item->pickup == Pickup_PowerArmor)
 			{
@@ -1082,7 +1082,7 @@ void SpawnItem (edict_t *ent, gitem_t *item)
 				return;
 			}
 		}
-		if ( (int)dmflags->value & DF_NO_ITEMS )
+		if ( (dmflags_t)dmflags->value & DF_NO_ITEMS )
 		{
 			if (item->pickup == Pickup_Powerup)
 			{
@@ -1090,7 +1090,7 @@ void SpawnItem (edict_t *ent, gitem_t *item)
 				return;
 			}
 		}
-		if ( (int)dmflags->value & DF_NO_HEALTH )
+		if ( (dmflags_t)dmflags->value & DF_NO_HEALTH )
 		{
 			if (item->pickup == Pickup_Health || item->pickup == Pickup_Adrenaline || item->pickup == Pickup_AncientHead)
 			{
@@ -1098,7 +1098,7 @@ void SpawnItem (edict_t *ent, gitem_t *item)
 				return;
 			}
 		}
-		if ( (int)dmflags->value & DF_INFINITE_AMMO )
+		if ( (dmflags_t)dmflags->value & DF_INFINITE_AMMO )
 		{
 			if ( (item->flags == IT_AMMO) || (strcmp(ent->classname, "weapon_bfg") == 0) )
 			{
@@ -1133,9 +1133,7 @@ void SpawnItem (edict_t *ent, gitem_t *item)
 
 gitem_t	itemlist[] = 
 {
-	{
-		NULL
-	},	// leave index 0 alone
+	{ 0 },	// leave index 0 alone
 
 	//
 	// ARMOR
@@ -1295,7 +1293,7 @@ always owned, never in the world
 		NULL,
 		Weapon_Blaster,
 		"misc/w_pkup.wav",
-		NULL, 0,
+		NULL, EF_NONE,
 		"models/weapons/v_blast/tris.md2",
 /* icon */		"w_blaster",
 /* pickup */	"Blaster",
@@ -1410,7 +1408,7 @@ always owned, never in the world
 		Drop_Ammo,
 		Weapon_Grenade,
 		"misc/am_pkup.wav",
-		"models/items/ammo/grenades/medium/tris.md2", 0,
+		"models/items/ammo/grenades/medium/tris.md2", EF_NONE,
 		"models/weapons/v_handgr/tris.md2",
 /* icon */		"a_grenades",
 /* pickup */	"Grenades",
@@ -1552,7 +1550,7 @@ always owned, never in the world
 		Drop_Ammo,
 		NULL,
 		"misc/am_pkup.wav",
-		"models/items/ammo/shells/medium/tris.md2", 0,
+		"models/items/ammo/shells/medium/tris.md2", EF_NONE,
 		NULL,
 /* icon */		"a_shells",
 /* pickup */	"Shells",
@@ -1575,7 +1573,7 @@ always owned, never in the world
 		Drop_Ammo,
 		NULL,
 		"misc/am_pkup.wav",
-		"models/items/ammo/bullets/medium/tris.md2", 0,
+		"models/items/ammo/bullets/medium/tris.md2", EF_NONE,
 		NULL,
 /* icon */		"a_bullets",
 /* pickup */	"Bullets",
@@ -1598,7 +1596,7 @@ always owned, never in the world
 		Drop_Ammo,
 		NULL,
 		"misc/am_pkup.wav",
-		"models/items/ammo/cells/medium/tris.md2", 0,
+		"models/items/ammo/cells/medium/tris.md2", EF_NONE,
 		NULL,
 /* icon */		"a_cells",
 /* pickup */	"Cells",
@@ -1621,7 +1619,7 @@ always owned, never in the world
 		Drop_Ammo,
 		NULL,
 		"misc/am_pkup.wav",
-		"models/items/ammo/rockets/medium/tris.md2", 0,
+		"models/items/ammo/rockets/medium/tris.md2", EF_NONE,
 		NULL,
 /* icon */		"a_rockets",
 /* pickup */	"Rockets",
@@ -1644,7 +1642,7 @@ always owned, never in the world
 		Drop_Ammo,
 		NULL,
 		"misc/am_pkup.wav",
-		"models/items/ammo/slugs/medium/tris.md2", 0,
+		"models/items/ammo/slugs/medium/tris.md2", EF_NONE,
 		NULL,
 /* icon */		"a_slugs",
 /* pickup */	"Slugs",
@@ -2097,7 +2095,7 @@ tank commander's head
 		NULL,
 		NULL,
 		"items/pkup.wav",
-		NULL, 0,
+		NULL, EF_NONE,
 		NULL,
 /* icon */		"i_health",
 /* pickup */	"Health",
@@ -2120,7 +2118,7 @@ tank commander's head
 */
 void SP_item_health (edict_t *self)
 {
-	if ( deathmatch->value && ((int)dmflags->value & DF_NO_HEALTH) )
+	if ( deathmatch->value && ((dmflags_t)dmflags->value & DF_NO_HEALTH) )
 	{
 		G_FreeEdict (self);
 		return;
@@ -2136,7 +2134,7 @@ void SP_item_health (edict_t *self)
 */
 void SP_item_health_small (edict_t *self)
 {
-	if ( deathmatch->value && ((int)dmflags->value & DF_NO_HEALTH) )
+	if ( deathmatch->value && ((dmflags_t)dmflags->value & DF_NO_HEALTH) )
 	{
 		G_FreeEdict (self);
 		return;
@@ -2153,7 +2151,7 @@ void SP_item_health_small (edict_t *self)
 */
 void SP_item_health_large (edict_t *self)
 {
-	if ( deathmatch->value && ((int)dmflags->value & DF_NO_HEALTH) )
+	if ( deathmatch->value && ((dmflags_t)dmflags->value & DF_NO_HEALTH) )
 	{
 		G_FreeEdict (self);
 		return;
@@ -2169,7 +2167,7 @@ void SP_item_health_large (edict_t *self)
 */
 void SP_item_health_mega (edict_t *self)
 {
-	if ( deathmatch->value && ((int)dmflags->value & DF_NO_HEALTH) )
+	if ( deathmatch->value && ((dmflags_t)dmflags->value & DF_NO_HEALTH) )
 	{
 		G_FreeEdict (self);
 		return;

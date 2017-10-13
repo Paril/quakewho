@@ -22,8 +22,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "g_local.h"
 #include "m_actor.h"
 
-#define	MAX_ACTOR_NAMES		8
-char *actor_names[MAX_ACTOR_NAMES] =
+char *actor_names[] =
 {
 	"Hellrot",
 	"Tokay",
@@ -251,7 +250,7 @@ void actor_pain (edict_t *self, edict_t *other, float kick, int damage)
 			self->monsterinfo.currentmove = &actor_move_flipoff;
 		else
 			self->monsterinfo.currentmove = &actor_move_taunt;
-		name = actor_names[(self - g_edicts)%MAX_ACTOR_NAMES];
+		name = actor_names[(self - g_edicts) % lengthof(actor_names)];
 		gi.cprintf (other, PRINT_CHAT, "%s: %s!\n", name, messages[lengthof(messages) - 1]);
 		return;
 	}
@@ -515,7 +514,7 @@ void target_actor_touch (edict_t *self, edict_t *other, cplane_t *plane, csurfac
 			ent = &g_edicts[n];
 			if (!ent->inuse)
 				continue;
-			gi.cprintf (ent, PRINT_CHAT, "%s: %s\n", actor_names[(other - g_edicts)%MAX_ACTOR_NAMES], self->message);
+			gi.cprintf (ent, PRINT_CHAT, "%s: %s\n", actor_names[(other - g_edicts) % lengthof(actor_names)], self->message);
 		}
 	}
 

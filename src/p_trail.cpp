@@ -36,15 +36,14 @@ the player has been recently.  It is used by monsters for pursuit.
 */
 
 
-#define	TRAIL_LENGTH	8
+const size_t TRAIL_LENGTH	= 8;
 
 edict_t		*trail[TRAIL_LENGTH];
 int			trail_head;
 bool		trail_active = false;
 
-#define NEXT(n)		(((n) + 1) & (TRAIL_LENGTH - 1))
-#define PREV(n)		(((n) - 1) & (TRAIL_LENGTH - 1))
-
+inline int NEXT(const int &n) { return (n + 1) % TRAIL_LENGTH; }
+inline int PREV(const int &n) { return (n - 1) % TRAIL_LENGTH; }
 
 void PlayerTrail_Init (void)
 {

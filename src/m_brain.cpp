@@ -29,20 +29,20 @@ brain
 #include "m_brain.h"
 
 
-static int	sound_chest_open;
-static int	sound_tentacles_extend;
-static int	sound_tentacles_retract;
-static int	sound_death;
-static int	sound_idle1;
-static int	sound_idle2;
-static int	sound_idle3;
-static int	sound_pain1;
-static int	sound_pain2;
-static int	sound_sight;
-static int	sound_search;
-static int	sound_melee1;
-static int	sound_melee2;
-static int	sound_melee3;
+static soundindex_t	sound_chest_open;
+static soundindex_t	sound_tentacles_extend;
+static soundindex_t	sound_tentacles_retract;
+static soundindex_t	sound_death;
+static soundindex_t	sound_idle1;
+static soundindex_t	sound_idle2;
+static soundindex_t	sound_idle3;
+static soundindex_t	sound_pain1;
+static soundindex_t	sound_pain2;
+static soundindex_t	sound_sight;
+static soundindex_t	sound_search;
+static soundindex_t	sound_melee1;
+static soundindex_t	sound_melee2;
+static soundindex_t	sound_melee3;
 
 
 void brain_sight (edict_t *self, edict_t *other)
@@ -585,7 +585,7 @@ void brain_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage
 {
 	int		n;
 
-	self->s.effects = 0;
+	self->s.effects = EF_NONE;
 	self->monsterinfo.power_armor_type = POWER_ARMOR_NONE;
 
 // check for gib

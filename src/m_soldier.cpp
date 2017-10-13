@@ -29,16 +29,16 @@ SOLDIER
 #include "m_soldier.h"
 
 
-static int	sound_idle;
-static int	sound_sight1;
-static int	sound_sight2;
-static int	sound_pain_light;
-static int	sound_pain;
-static int	sound_pain_ss;
-static int	sound_death_light;
-static int	sound_death;
-static int	sound_death_ss;
-static int	sound_cock;
+static soundindex_t	sound_idle;
+static soundindex_t	sound_sight1;
+static soundindex_t	sound_sight2;
+static soundindex_t	sound_pain_light;
+static soundindex_t	sound_pain;
+static soundindex_t	sound_pain_ss;
+static soundindex_t	sound_death_light;
+static soundindex_t	sound_death;
+static soundindex_t	sound_death_ss;
+static soundindex_t	sound_cock;
 
 
 void soldier_idle (edict_t *self)

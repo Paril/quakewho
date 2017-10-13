@@ -28,14 +28,14 @@ SUPERTANK
 #include "g_local.h"
 #include "m_supertank.h"
 
-static int	sound_pain1;
-static int	sound_pain2;
-static int	sound_pain3;
-static int	sound_death;
-static int	sound_search1;
-static int	sound_search2;
+static soundindex_t	sound_pain1;
+static soundindex_t	sound_pain2;
+static soundindex_t	sound_pain3;
+static soundindex_t	sound_death;
+static soundindex_t	sound_search1;
+static soundindex_t	sound_search2;
 
-static	int	tread_sound;
+static soundindex_t	tread_sound;
 
 void BossExplode (edict_t *self);
 
@@ -632,7 +632,7 @@ void BossExplode (edict_t *self)
 		org[1] -= 48;
 		break;
 	case 8:
-		self->s.sound = 0;
+		self->s.sound = SOUND_NONE;
 		for (n= 0; n < 4; n++)
 			ThrowGib (self, "models/objects/gibs/sm_meat/tris.md2", 500, GIB_ORGANIC);
 		for (n= 0; n < 8; n++)

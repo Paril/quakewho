@@ -30,20 +30,20 @@ jorg
 
 void SP_monster_makron (edict_t *self);
 
-static int	sound_pain1;
-static int	sound_pain2;
-static int	sound_pain3;
-static int	sound_idle;
-static int	sound_death;
-static int	sound_search1;
-static int	sound_search2;
-static int	sound_search3;
-static int	sound_attack1;
-static int	sound_attack2;
-static int	sound_firegun;
-static int	sound_step_left;
-static int	sound_step_right;
-static int	sound_death_hit;
+static soundindex_t	sound_pain1;
+static soundindex_t	sound_pain2;
+static soundindex_t	sound_pain3;
+static soundindex_t	sound_idle;
+static soundindex_t	sound_death;
+static soundindex_t	sound_search1;
+static soundindex_t	sound_search2;
+static soundindex_t	sound_search3;
+static soundindex_t	sound_attack1;
+static soundindex_t	sound_attack2;
+static soundindex_t	sound_firegun;
+static soundindex_t	sound_step_left;
+static soundindex_t	sound_step_right;
+static soundindex_t	sound_death_hit;
 
 void BossExplode (edict_t *self);
 void MakronToss (edict_t *self);
@@ -395,12 +395,12 @@ void jorg_reattack1(edict_t *self)
 			self->monsterinfo.currentmove = &jorg_move_attack1;
 		else
 		{
-			self->s.sound = 0;
+			self->s.sound = SOUND_NONE;
 			self->monsterinfo.currentmove = &jorg_move_end_attack1;	
 		}
 	else
 	{
-		self->s.sound = 0;
+		self->s.sound = SOUND_NONE;
 		self->monsterinfo.currentmove = &jorg_move_end_attack1;	
 	}
 }
@@ -412,11 +412,10 @@ void jorg_attack1(edict_t *self)
 
 void jorg_pain (edict_t *self, edict_t *other, float kick, int damage)
 {
-
 	if (self->health < (self->max_health / 2))
-			self->s.skinnum = 1;
+		self->s.skinnum = 1;
 	
-	self->s.sound = 0;
+	self->s.sound = SOUND_NONE;
 
 	if (level.time < self->pain_debounce_time)
 			return;
@@ -588,7 +587,7 @@ void jorg_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage,
 	gi.sound (self, CHAN_VOICE, sound_death, 1, ATTN_NORM, 0);
 	self->deadflag = DEAD_DEAD;
 	self->takedamage = DAMAGE_NO;
-	self->s.sound = 0;
+	self->s.sound = SOUND_NONE;
 	self->count = 0;
 	self->monsterinfo.currentmove = &jorg_move_death;
 }
