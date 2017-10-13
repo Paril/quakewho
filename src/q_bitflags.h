@@ -1,6 +1,6 @@
 #pragma once
 
-#include <condition_variable>
+#include <type_traits>
 
 #define BITFLAG_TYPE(T) std::underlying_type_t<T>
 #define MAKE_BITFLAGS(T) \

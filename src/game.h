@@ -24,9 +24,15 @@ const int	GAME_API_VERSION	= 3;
 
 // edict->svflags
 
-const int32_t SVF_NOCLIENT			= bit(0);		// don't send entity to clients, even if it has effects
-const int32_t SVF_DEADMONSTER		= bit(1);	// treat as CONTENTS_DEADMONSTER for collision
-const int32_t SVF_MONSTER			= bit(2);	// treat as CONTENTS_MONSTER for collision
+enum svflags_t
+{
+	SVF_NONE			= 0,
+	SVF_NOCLIENT		= bit(0),		// don't send entity to clients, even if it has effects
+	SVF_DEADMONSTER		= bit(1),	// treat as CONTENTS_DEADMONSTER for collision
+	SVF_MONSTER			= bit(2)	// treat as CONTENTS_MONSTER for collision
+};
+
+MAKE_BITFLAGS(svflags_t);
 
 // edict->solid values
 
@@ -79,11 +85,11 @@ struct edict_t
 
 	//================================
 
-	int			svflags;			// SVF_NOCLIENT, SVF_DEADMONSTER, SVF_MONSTER, etc
+	svflags_t	svflags;			// SVF_NOCLIENT, SVF_DEADMONSTER, SVF_MONSTER, etc
 	vec3_t		mins, maxs;
 	vec3_t		absmin, absmax, size;
 	solid_t		solid;
-	int			clipmask;
+	brushcontents_t	clipmask;
 	edict_t		*owner;
 
 	// the game dll can add anything it wants after
@@ -123,7 +129,7 @@ struct game_import_t
 	void	(*setmodel) (edict_t *ent, char *name);
 
 	// collision detection
-	trace_t	(*trace) (const vec3_t start, const vec3_t mins, const vec3_t maxs, const vec3_t end, edict_t *passent, int contentmask);
+	trace_t	(*trace) (const vec3_t start, const vec3_t mins, const vec3_t maxs, const vec3_t end, edict_t *passent, brushcontents_t contentmask);
 	brushcontents_t	(*pointcontents) (vec3_t point);
 	qboolean	(*inPVS) (const vec3_t p1, const vec3_t p2);
 	qboolean	(*inPHS) (const vec3_t p1, const vec3_t p2);

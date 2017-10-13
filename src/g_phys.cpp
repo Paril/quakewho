@@ -49,7 +49,7 @@ SV_TestEntityPosition
 edict_t	*SV_TestEntityPosition (edict_t *ent)
 {
 	trace_t	trace;
-	int		mask;
+	brushcontents_t	mask;
 
 	if (ent->clipmask)
 		mask = ent->clipmask;
@@ -180,7 +180,7 @@ Returns the clipflags if the velocity was modified (hit something solid)
 ============
 */
 const size_t MAX_CLIP_PLANES	= 5;
-int SV_FlyMove (edict_t *ent, float time, int mask)
+int SV_FlyMove (edict_t *ent, float time, brushcontents_t mask)
 {
 	edict_t		*hit;
 	int			bumpcount, numbumps;
@@ -344,7 +344,7 @@ trace_t SV_PushEntity (edict_t *ent, vec3_t push)
 	trace_t	trace;
 	vec3_t	start;
 	vec3_t	end;
-	int		mask;
+	brushcontents_t	mask;
 
 	VectorCopy (ent->s.origin, start);
 	VectorAdd (start, push, end);
@@ -821,7 +821,7 @@ void SV_Physics_Step (edict_t *ent)
 	float		speed, newspeed, control;
 	float		friction;
 	edict_t		*groundentity;
-	int			mask;
+	brushcontents_t mask;
 
 	// airborn monsters should always check for ground
 	if (!ent->groundentity)

@@ -417,7 +417,7 @@ SV_CalcBlend
 */
 void SV_CalcBlend (edict_t *ent)
 {
-	int		contents;
+	brushcontents_t contents;
 	vec3_t	vieworg;
 	int		remaining;
 

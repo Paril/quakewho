@@ -117,7 +117,7 @@ bool SV_movestep (edict_t *ent, vec3_t move, bool relink)
 	int			i;
 	float		stepsize;
 	vec3_t		test;
-	int			contents;
+	brushcontents_t contents;
 
 // try the move	
 	VectorCopy (ent->s.origin, oldorg);

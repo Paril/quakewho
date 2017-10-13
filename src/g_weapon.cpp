@@ -141,7 +141,7 @@ static void fire_lead (edict_t *self, vec3_t start, vec3_t aimdir, int damage, i
 	float		u;
 	vec3_t		water_start;
 	bool		water = false;
-	int			content_mask = MASK_SHOT | MASK_WATER;
+	brushcontents_t	content_mask = MASK_SHOT | MASK_WATER;
 
 	tr = gi.trace (self->s.origin, NULL, NULL, start, self, MASK_SHOT);
 	if (!(tr.fraction < 1.0))
@@ -661,7 +661,7 @@ void fire_rail (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick
 	vec3_t		end;
 	trace_t		tr;
 	edict_t		*ignore;
-	int			mask;
+	brushcontents_t	mask;
 	bool		water;
 
 	VectorMA (start, 8192, aimdir, end);

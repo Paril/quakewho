@@ -1075,11 +1075,11 @@ struct edict_t
 
 	//================================
 
-	int			svflags;
+	svflags_t	svflags;
 	vec3_t		mins, maxs;
 	vec3_t		absmin, absmax, size;
 	solid_t		solid;
-	int			clipmask;
+	brushcontents_t	clipmask;
 	edict_t		*owner;
 
 
@@ -1087,7 +1087,7 @@ struct edict_t
 	// EXPECTS THE FIELDS IN THAT ORDER!
 
 	//================================
-	int			movetype;
+	movetype_t		movetype;
 	edictflags_t	flags;
 
 	char		*model;
