@@ -24,38 +24,37 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 // edict->svflags
 
-#define	SVF_NOCLIENT			0x00000001	// don't send entity to clients, even if it has effects
-#define	SVF_DEADMONSTER			0x00000002	// treat as CONTENTS_DEADMONSTER for collision
-#define	SVF_MONSTER				0x00000004	// treat as CONTENTS_MONSTER for collision
+const int32_t SVF_NOCLIENT			= bit(0);		// don't send entity to clients, even if it has effects
+const int32_t SVF_DEADMONSTER		= bit(1);	// treat as CONTENTS_DEADMONSTER for collision
+const int32_t SVF_MONSTER			= bit(2);	// treat as CONTENTS_MONSTER for collision
 
 // edict->solid values
 
-typedef enum
+enum solid_t
 {
-SOLID_NOT,			// no interaction with other objects
-SOLID_TRIGGER,		// only touch when inside, after moving
-SOLID_BBOX,			// touch on edge
-SOLID_BSP			// bsp clip, touch on edge
-} solid_t;
+	SOLID_NOT,			// no interaction with other objects
+	SOLID_TRIGGER,		// only touch when inside, after moving
+	SOLID_BBOX,			// touch on edge
+	SOLID_BSP			// bsp clip, touch on edge
+};
 
 //===============================================================
 
 // link_t is only used for entity area links now
-typedef struct link_s
+struct link_t
 {
-	struct link_s	*prev, *next;
-} link_t;
+	link_t *prev, *next;
+};
 
-#define	MAX_ENT_CLUSTERS	16
+const int32_t	MAX_ENT_CLUSTERS	= 16;
 
-
-typedef struct edict_s edict_t;
-typedef struct gclient_s gclient_t;
+struct edict_t;
+struct gclient_t;
 
 
 #ifndef GAME_INCLUDE
 
-struct gclient_s
+struct gclient_t
 {
 	player_state_t	ps;		// communicated by server to clients
 	int				ping;
@@ -64,10 +63,10 @@ struct gclient_s
 };
 
 
-struct edict_s
+struct edict_t
 {
 	entity_state_t	s;
-	struct gclient_s	*client;
+	gclient_t	*client;
 	qboolean	inuse;
 	int			linkcount;
 
@@ -99,7 +98,7 @@ struct edict_s
 //
 // functions provided by the main engine
 //
-typedef struct
+struct game_import_t
 {
 	// special messages
 	void	(*bprintf) (int printlevel, char *fmt, ...);
@@ -159,9 +158,9 @@ typedef struct
 	void	(*FreeTags) (int tag);
 
 	// console variable interaction
-	cvar_t	*(*cvar) (char *var_name, char *value, int flags);
-	cvar_t	*(*cvar_set) (char *var_name, char *value);
-	cvar_t	*(*cvar_forceset) (char *var_name, char *value);
+	cvar_t	*(*cvar) (char *var_name, const char *value, int flags);
+	cvar_t	*(*cvar_set) (char *var_name, const char *value);
+	cvar_t	*(*cvar_forceset) (char *var_name, const char *value);
 
 	// ClientCommand and ServerCommand parameter access
 	int		(*argc) (void);
@@ -170,15 +169,15 @@ typedef struct
 
 	// add commands to the server console as if they were typed in
 	// for map changing, etc
-	void	(*AddCommandString) (char *text);
+	void	(*AddCommandString) (const char *text);
 
 	void	(*DebugGraph) (float value, int color);
-} game_import_t;
+};
 
 //
 // functions exported by the game subsystem
 //
-typedef struct
+struct game_export_t
 {
 	int			apiversion;
 
@@ -226,10 +225,10 @@ typedef struct
 	// can vary in size from one game to another.
 	// 
 	// The size will be fixed when ge->Init() is called
-	struct edict_s	*edicts;
+	edict_t		*edicts;
 	int			edict_size;
 	int			num_edicts;		// current number, <= max_edicts
 	int			max_edicts;
-} game_export_t;
+};
 
 game_export_t *GetGameApi (game_import_t *import);

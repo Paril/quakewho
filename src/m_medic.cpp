@@ -28,9 +28,6 @@ MEDIC
 #include "g_local.h"
 #include "m_medic.h"
 
-qboolean visible (edict_t *self, edict_t *other);
-
-
 static int	sound_idle1;
 static int	sound_pain1;
 static int	sound_pain2;
@@ -645,7 +642,7 @@ void medic_cable_attack (edict_t *self)
 	VectorCopy (self->enemy->s.origin, end);
 	end[2] = self->enemy->absmin[2] + self->enemy->size[2] / 2;
 
-	gi.WriteByte (svc_temp_entity);
+	gi.WriteByte (SVC_TEMP_ENTITY);
 	gi.WriteByte (TE_MEDIC_CABLE_ATTACK);
 	gi.WriteShort (self - g_edicts);
 	gi.WritePosition (start);
@@ -701,7 +698,7 @@ void medic_attack(edict_t *self)
 		self->monsterinfo.currentmove = &medic_move_attackBlaster;
 }
 
-qboolean medic_checkattack (edict_t *self)
+bool medic_checkattack (edict_t *self)
 {
 	if (self->monsterinfo.aiflags & AI_MEDIC)
 	{

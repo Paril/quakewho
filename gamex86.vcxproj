@@ -164,6 +164,7 @@
     <ClInclude Include="src\m_soldier.h" />
     <ClInclude Include="src\m_supertank.h" />
     <ClInclude Include="src\m_tank.h" />
+    <ClInclude Include="src\q_bitflags.h" />
     <ClInclude Include="src\q_random.h" />
     <ClInclude Include="src\q_shared.h" />
   </ItemGroup>

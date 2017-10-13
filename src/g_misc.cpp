@@ -305,7 +305,7 @@ void ThrowDebris (edict_t *self, char *modelname, float speed, vec3_t origin)
 	chunk->think = G_FreeEdict;
 	chunk->nextthink = level.time + irandom(5, 10);
 	chunk->s.frame = 0;
-	chunk->flags = 0;
+	chunk->flags = FL_NONE;
 	chunk->classname = "debris";
 	chunk->takedamage = DAMAGE_YES;
 	chunk->die = debris_die;
@@ -315,7 +315,7 @@ void ThrowDebris (edict_t *self, char *modelname, float speed, vec3_t origin)
 
 void BecomeExplosion1 (edict_t *self)
 {
-	gi.WriteByte (svc_temp_entity);
+	gi.WriteByte (SVC_TEMP_ENTITY);
 	gi.WriteByte (TE_EXPLOSION1);
 	gi.WritePosition (self->s.origin);
 	gi.multicast (self->s.origin, MULTICAST_PVS);
@@ -326,7 +326,7 @@ void BecomeExplosion1 (edict_t *self)
 
 void BecomeExplosion2 (edict_t *self)
 {
-	gi.WriteByte (svc_temp_entity);
+	gi.WriteByte (SVC_TEMP_ENTITY);
 	gi.WriteByte (TE_EXPLOSION2);
 	gi.WritePosition (self->s.origin);
 	gi.multicast (self->s.origin, MULTICAST_PVS);

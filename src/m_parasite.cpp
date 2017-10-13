@@ -294,7 +294,7 @@ void parasite_pain (edict_t *self, edict_t *other, float kick, int damage)
 }
 
 
-static qboolean parasite_drain_attack_ok (vec3_t start, vec3_t end)
+static bool parasite_drain_attack_ok (vec3_t start, vec3_t end)
 {
 	vec3_t	dir, angles;
 
@@ -352,7 +352,7 @@ void parasite_drain_attack (edict_t *self)
 		damage = 2;
 	}
 
-	gi.WriteByte (svc_temp_entity);
+	gi.WriteByte (SVC_TEMP_ENTITY);
 	gi.WriteByte (TE_PARASITE_ATTACK);
 	gi.WriteShort (self - g_edicts);
 	gi.WritePosition (start);

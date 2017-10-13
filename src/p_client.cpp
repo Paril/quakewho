@@ -182,7 +182,7 @@ void player_pain (edict_t *self, edict_t *other, float kick, int damage)
 }
 
 
-qboolean IsFemale (edict_t *ent)
+bool IsFemale (edict_t *ent)
 {
 	char		*info;
 
@@ -195,7 +195,7 @@ qboolean IsFemale (edict_t *ent)
 	return false;
 }
 
-qboolean IsNeutral (edict_t *ent)
+bool IsNeutral (edict_t *ent)
 {
 	char		*info;
 
@@ -213,7 +213,7 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 	int			mod;
 	char		*message;
 	char		*message2;
-	qboolean	ff;
+	bool		ff;
 
 	if (coop->value && attacker->client)
 		meansOfDeath |= MOD_FRIENDLY_FIRE;
@@ -411,7 +411,7 @@ void TossClientWeapon (edict_t *self)
 {
 	gitem_t		*item;
 	edict_t		*drop;
-	qboolean	quad;
+	bool		quad;
 	float		spread;
 
 	if (!deathmatch->value)
@@ -1021,7 +1021,7 @@ void spectator_respawn (edict_t *ent)
 			strcmp(spectator_password->string, value)) {
 			gi.cprintf(ent, PRINT_HIGH, "Spectator password incorrect.\n");
 			ent->client->pers.spectator = false;
-			gi.WriteByte (svc_stufftext);
+			gi.WriteByte (SVC_STUFFTEXT);
 			gi.WriteString ("spectator 0\n");
 			gi.unicast(ent, true);
 			return;
@@ -1036,7 +1036,7 @@ void spectator_respawn (edict_t *ent)
 			gi.cprintf(ent, PRINT_HIGH, "Server spectator limit is full.");
 			ent->client->pers.spectator = false;
 			// reset his spectator var
-			gi.WriteByte (svc_stufftext);
+			gi.WriteByte (SVC_STUFFTEXT);
 			gi.WriteString ("spectator 0\n");
 			gi.unicast(ent, true);
 			return;
@@ -1049,7 +1049,7 @@ void spectator_respawn (edict_t *ent)
 			strcmp(password->string, value)) {
 			gi.cprintf(ent, PRINT_HIGH, "Password incorrect.\n");
 			ent->client->pers.spectator = true;
-			gi.WriteByte (svc_stufftext);
+			gi.WriteByte (SVC_STUFFTEXT);
 			gi.WriteString ("spectator 1\n");
 			gi.unicast(ent, true);
 			return;
@@ -1065,7 +1065,7 @@ void spectator_respawn (edict_t *ent)
 	// add a teleportation effect
 	if (!ent->client->pers.spectator)  {
 		// send effect
-		gi.WriteByte (svc_muzzleflash);
+		gi.WriteByte (SVC_MUZZLEFLASH);
 		gi.WriteShort (ent-g_edicts);
 		gi.WriteByte (MZ_LOGIN);
 		gi.multicast (ent->s.origin, MULTICAST_PVS);
@@ -1281,7 +1281,7 @@ void ClientBeginDeathmatch (edict_t *ent)
 	else
 	{
 		// send effect
-		gi.WriteByte (svc_muzzleflash);
+		gi.WriteByte (SVC_MUZZLEFLASH);
 		gi.WriteShort (ent-g_edicts);
 		gi.WriteByte (MZ_LOGIN);
 		gi.multicast (ent->s.origin, MULTICAST_PVS);
@@ -1345,7 +1345,7 @@ void ClientBegin (edict_t *ent)
 		// send effect if in a multiplayer game
 		if (game.maxclients > 1)
 		{
-			gi.WriteByte (svc_muzzleflash);
+			gi.WriteByte (SVC_MUZZLEFLASH);
 			gi.WriteShort (ent-g_edicts);
 			gi.WriteByte (MZ_LOGIN);
 			gi.multicast (ent->s.origin, MULTICAST_PVS);
@@ -1521,7 +1521,7 @@ void ClientDisconnect (edict_t *ent)
 	gi.bprintf (PRINT_HIGH, "%s disconnected\n", ent->client->pers.netname);
 
 	// send effect
-	gi.WriteByte (svc_muzzleflash);
+	gi.WriteByte (SVC_MUZZLEFLASH);
 	gi.WriteShort (ent-g_edicts);
 	gi.WriteByte (MZ_LOGOUT);
 	gi.multicast (ent->s.origin, MULTICAST_PVS);

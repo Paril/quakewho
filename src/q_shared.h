@@ -29,17 +29,21 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <cmath>
 #include <cstdint>
 
-template <size_t SIZE, typename T>
-inline constexpr size_t lengthof(T (&arr)[SIZE]) { return SIZE; }
+#include "q_bitflags.h"
 
-typedef unsigned char 		byte;
+template <size_t size, typename T>
+inline constexpr size_t lengthof(T (&arr)[size]) { return size; }
+
+template<typename T>
+inline constexpr T bit(const T &place) { return 1u << place; }
+
+// type used for interop, but shouldn't be used by game. Use bool.
 typedef int	qboolean;
 
+// this exists elsewhere
+struct edict_t;
 
-#ifndef NULL
-#define NULL ((void *)0)
-#endif
-
+typedef uint8_t byte;
 
 // angle indexes
 #define	PITCH				0		// up / down
@@ -225,7 +229,7 @@ char	*va(char *format, ...);
 char *Info_ValueForKey (char *s, char *key);
 void Info_RemoveKey (char *s, char *key);
 void Info_SetValueForKey (char *s, char *key, char *value);
-qboolean Info_Validate (char *s);
+bool Info_Validate (char *s);
 
 /*
 ==============================================================
@@ -237,29 +241,12 @@ SYSTEM SPECIFIC
 
 extern	int	curtime;		// time returned by last Sys_Milliseconds
 
-int		Sys_Milliseconds (void);
-void	Sys_Mkdir (char *path);
-
-// large block stack allocation routines
-void	*Hunk_Begin (int maxsize);
-void	*Hunk_Alloc (int size);
-void	Hunk_Free (void *buf);
-int		Hunk_End (void);
-
 // directory searching
 #define SFF_ARCH    0x01
 #define SFF_HIDDEN  0x02
 #define SFF_RDONLY  0x04
 #define SFF_SUBDIR  0x08
 #define SFF_SYSTEM  0x10
-
-/*
-** pass in an attribute mask of things you wish to REJECT
-*/
-char	*Sys_FindFirst (char *path, unsigned musthave, unsigned canthave );
-char	*Sys_FindNext ( unsigned musthave, unsigned canthave );
-void	Sys_FindClose (void);
-
 
 // this is only here so the functions in q_shared.c and q_shwin.c can link
 void Sys_Error (char *error, ...);
@@ -295,7 +282,6 @@ typedef struct cvar_s
 	float		value;
 	struct cvar_s *next;
 } cvar_t;
-
 #endif		// CVAR
 
 /*
@@ -423,7 +409,7 @@ typedef struct
 	cplane_t	plane;		// surface normal at impact
 	csurface_t	*surface;	// surface hit
 	int			contents;	// contents on other side of surface hit
-	struct edict_s	*ent;		// not set by CM_*() functions
+	edict_t		*ent;		// not set by CM_*() functions
 } trace_t;
 
 
@@ -501,14 +487,14 @@ typedef struct
 
 	// results (out)
 	int			numtouch;
-	struct edict_s	*touchents[MAXTOUCH];
+	edict_t		*touchents[MAXTOUCH];
 
 	vec3_t		viewangles;			// clamped
 	float		viewheight;
 
 	vec3_t		mins, maxs;			// bounding box size
 
-	struct edict_s	*groundentity;
+	edict_t		*groundentity;
 	int			watertype;
 	int			waterlevel;
 

@@ -46,7 +46,7 @@ char *ClientTeam (edict_t *ent)
 	return ++p;
 }
 
-qboolean OnSameTeam (edict_t *ent1, edict_t *ent2)
+bool OnSameTeam (edict_t *ent1, edict_t *ent2)
 {
 	char	ent1Team [512];
 	char	ent2Team [512];
@@ -155,7 +155,7 @@ void Cmd_Give_f (edict_t *ent)
 	gitem_t		*it;
 	int			index;
 	int			i;
-	qboolean	give_all;
+	bool		give_all;
 	edict_t		*it_ent;
 
 	if (deathmatch->value && !sv_cheats->value)
@@ -481,7 +481,7 @@ void Cmd_Inven_f (edict_t *ent)
 
 	cl->showinventory = true;
 
-	gi.WriteByte (svc_inventory);
+	gi.WriteByte (SVC_INVENTORY);
 	for (i=0 ; i<MAX_ITEMS ; i++)
 	{
 		gi.WriteShort (cl->pers.inventory[i]);
@@ -784,7 +784,7 @@ void Cmd_Wave_f (edict_t *ent)
 Cmd_Say_f
 ==================
 */
-void Cmd_Say_f (edict_t *ent, qboolean team, qboolean arg0)
+void Cmd_Say_f (edict_t *ent, bool team, bool arg0)
 {
 	int		i, j;
 	edict_t	*other;

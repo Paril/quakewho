@@ -28,8 +28,6 @@ SUPERTANK
 #include "g_local.h"
 #include "m_supertank.h"
 
-qboolean visible (edict_t *self, edict_t *other);
-
 static int	sound_pain1;
 static int	sound_pain2;
 static int	sound_pain3;
@@ -645,7 +643,7 @@ void BossExplode (edict_t *self)
 		return;
 	}
 
-	gi.WriteByte (svc_temp_entity);
+	gi.WriteByte (SVC_TEMP_ENTITY);
 	gi.WriteByte (TE_EXPLOSION1);
 	gi.WritePosition (org);
 	gi.multicast (self->s.origin, MULTICAST_PVS);

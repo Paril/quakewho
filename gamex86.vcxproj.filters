@@ -242,5 +242,8 @@
     <ClInclude Include="src\q_random.h">
       <Filter>inc</Filter>
     </ClInclude>
+    <ClInclude Include="src\q_bitflags.h">
+      <Filter>inc</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

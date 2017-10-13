@@ -28,9 +28,6 @@ hover
 #include "g_local.h"
 #include "m_hover.h"
 
-qboolean visible (edict_t *self, edict_t *other);
-
-
 static int	sound_pain1;
 static int	sound_pain2;
 static int	sound_death1;

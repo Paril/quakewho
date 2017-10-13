@@ -295,8 +295,6 @@ void turret_driver_die (edict_t *self, edict_t *inflictor, edict_t *attacker, in
 	infantry_die (self, inflictor, attacker, damage, point);
 }
 
-qboolean FindTarget (edict_t *self);
-
 void turret_driver_think (edict_t *self)
 {
 	vec3_t	target;
