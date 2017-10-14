@@ -63,7 +63,7 @@ void MoveClientToIntermission (edict_t *ent)
 
 	if (deathmatch->value || coop->value)
 	{
-		DeathmatchScoreboardMessage (ent, NULL);
+		DeathmatchScoreboardMessage (ent, nullptr);
 		gi.unicast (ent, true);
 	}
 
@@ -122,12 +122,12 @@ void BeginIntermission (edict_t *targ)
 	level.exitintermission = 0;
 
 	// find an intermission spot
-	ent = G_Find (NULL, FOFS(classname), "info_player_intermission");
+	ent = G_Find (nullptr, FOFS(classname), "info_player_intermission");
 	if (!ent)
 	{	// the map creator forgot to put in an intermission point...
-		ent = G_Find (NULL, FOFS(classname), "info_player_start");
+		ent = G_Find (nullptr, FOFS(classname), "info_player_start");
 		if (!ent)
-			ent = G_Find (NULL, FOFS(classname), "info_player_deathmatch");
+			ent = G_Find (nullptr, FOFS(classname), "info_player_deathmatch");
 	}
 	else
 	{	// chose one of four spots
@@ -222,7 +222,7 @@ void DeathmatchScoreboardMessage (edict_t *ent, edict_t *killer)
 		else if (cl_ent == killer)
 			tag = "tag2";
 		else
-			tag = NULL;
+			tag = nullptr;
 		if (tag)
 		{
 			Com_sprintf (entry, sizeof(entry),

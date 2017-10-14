@@ -265,7 +265,7 @@ spawn_t	spawns[] = {
 	{"turret_base", SP_turret_base},
 	{"turret_driver", SP_turret_driver},
 
-	{NULL, NULL}
+	{nullptr, nullptr}
 };
 
 /*
@@ -283,7 +283,7 @@ void ED_CallSpawn (edict_t *ent)
 
 	if (!ent->classname)
 	{
-		gi.dprintf ("ED_CallSpawn: NULL classname\n");
+		gi.dprintf ("ED_CallSpawn: nullptr classname\n");
 		return;
 	}
 
@@ -547,7 +547,7 @@ void SpawnEntities (char *mapname, char *entities, char *spawnpoint)
 	for (i=0 ; i<game.maxclients ; i++)
 		g_edicts[i+1].client = game.clients + i;
 
-	ent = NULL;
+	ent = nullptr;
 	inhibit = 0;
 
 // parse ents

@@ -23,7 +23,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 void	Svcmd_Test_f (void)
 {
-	gi.cprintf (NULL, PRINT_HIGH, "Svcmd_Test_f()\n");
+	gi.cprintf (nullptr, PRINT_HIGH, "Svcmd_Test_f()\n");
 }
 
 /*
@@ -90,7 +90,7 @@ static bool StringToFilter (char *s, ipfilter_t *f)
 	{
 		if (*s < '0' || *s > '9')
 		{
-			gi.cprintf(NULL, PRINT_HIGH, "Bad filter address: %s\n", s);
+			gi.cprintf(nullptr, PRINT_HIGH, "Bad filter address: %s\n", s);
 			return false;
 		}
 		
@@ -160,7 +160,7 @@ void SVCmd_AddIP_f (void)
 	int		i;
 	
 	if (gi.argc() < 3) {
-		gi.cprintf(NULL, PRINT_HIGH, "Usage:  addip <ip-mask>\n");
+		gi.cprintf(nullptr, PRINT_HIGH, "Usage:  addip <ip-mask>\n");
 		return;
 	}
 
@@ -171,7 +171,7 @@ void SVCmd_AddIP_f (void)
 	{
 		if (numipfilters == MAX_IPFILTERS)
 		{
-			gi.cprintf (NULL, PRINT_HIGH, "IP filter list is full\n");
+			gi.cprintf (nullptr, PRINT_HIGH, "IP filter list is full\n");
 			return;
 		}
 		numipfilters++;
@@ -192,7 +192,7 @@ void SVCmd_RemoveIP_f (void)
 	int			i, j;
 
 	if (gi.argc() < 3) {
-		gi.cprintf(NULL, PRINT_HIGH, "Usage:  sv removeip <ip-mask>\n");
+		gi.cprintf(nullptr, PRINT_HIGH, "Usage:  sv removeip <ip-mask>\n");
 		return;
 	}
 
@@ -206,10 +206,10 @@ void SVCmd_RemoveIP_f (void)
 			for (j=i+1 ; j<numipfilters ; j++)
 				ipfilters[j-1] = ipfilters[j];
 			numipfilters--;
-			gi.cprintf (NULL, PRINT_HIGH, "Removed.\n");
+			gi.cprintf (nullptr, PRINT_HIGH, "Removed.\n");
 			return;
 		}
-	gi.cprintf (NULL, PRINT_HIGH, "Didn't find %s.\n", gi.argv(2));
+	gi.cprintf (nullptr, PRINT_HIGH, "Didn't find %s.\n", gi.argv(2));
 }
 
 /*
@@ -222,11 +222,11 @@ void SVCmd_ListIP_f (void)
 	int		i;
 	byte	b[4];
 
-	gi.cprintf (NULL, PRINT_HIGH, "Filter list:\n");
+	gi.cprintf (nullptr, PRINT_HIGH, "Filter list:\n");
 	for (i=0 ; i<numipfilters ; i++)
 	{
 		*(unsigned *)b = ipfilters[i].compare;
-		gi.cprintf (NULL, PRINT_HIGH, "%3i.%3i.%3i.%3i\n", b[0], b[1], b[2], b[3]);
+		gi.cprintf (nullptr, PRINT_HIGH, "%3i.%3i.%3i.%3i\n", b[0], b[1], b[2], b[3]);
 	}
 }
 
@@ -250,12 +250,12 @@ void SVCmd_WriteIP_f (void)
 	else
 		sprintf (name, "%s/listip.cfg", sv_game->string);
 
-	gi.cprintf (NULL, PRINT_HIGH, "Writing %s.\n", name);
+	gi.cprintf (nullptr, PRINT_HIGH, "Writing %s.\n", name);
 
 	f = fopen (name, "wb");
 	if (!f)
 	{
-		gi.cprintf (NULL, PRINT_HIGH, "Couldn't open %s\n", name);
+		gi.cprintf (nullptr, PRINT_HIGH, "Couldn't open %s\n", name);
 		return;
 	}
 	
@@ -295,6 +295,6 @@ void	ServerCommand (void)
 	else if (Q_stricmp (cmd, "writeip") == 0)
 		SVCmd_WriteIP_f ();
 	else
-		gi.cprintf (NULL, PRINT_HIGH, "Unknown server command \"%s\"\n", cmd);
+		gi.cprintf (nullptr, PRINT_HIGH, "Unknown server command \"%s\"\n", cmd);
 }
 

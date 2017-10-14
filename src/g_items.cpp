@@ -63,7 +63,7 @@ GetItemByIndex
 gitem_t	*GetItemByIndex (int index)
 {
 	if (index == 0 || index >= game.num_items)
-		return NULL;
+		return nullptr;
 
 	return &itemlist[index];
 }
@@ -89,7 +89,7 @@ gitem_t	*FindItemByClassname (char *classname)
 			return it;
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 /*
@@ -112,7 +112,7 @@ gitem_t	*FindItem (char *pickup_name)
 			return it;
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 //======================================================================
@@ -866,7 +866,7 @@ edict_t *Drop_Item (edict_t *ent, gitem_t *item)
 	{
 		trace_t	trace;
 
-		AngleVectors (ent->client->v_angle, forward, right, NULL);
+		AngleVectors (ent->client->v_angle, forward, right, nullptr);
 		VectorSet(offset, 24, 0, -16);
 		G_ProjectSource (ent->s.origin, offset, forward, right, dropped->s.origin);
 		trace = gi.trace (ent->s.origin, dropped->mins, dropped->maxs,
@@ -875,7 +875,7 @@ edict_t *Drop_Item (edict_t *ent, gitem_t *item)
 	}
 	else
 	{
-		AngleVectors (ent->s.angles, forward, right, NULL);
+		AngleVectors (ent->s.angles, forward, right, nullptr);
 		VectorCopy (ent->s.origin, dropped->s.origin);
 	}
 
@@ -893,12 +893,12 @@ edict_t *Drop_Item (edict_t *ent, gitem_t *item)
 void Use_Item (edict_t *ent, edict_t *other, edict_t *activator)
 {
 	ent->svflags &= ~SVF_NOCLIENT;
-	ent->use = NULL;
+	ent->use = nullptr;
 
 	if (ent->spawnflags & ITEM_NO_TOUCH)
 	{
 		ent->solid = SOLID_BBOX;
-		ent->touch = NULL;
+		ent->touch = nullptr;
 	}
 	else
 	{
@@ -952,7 +952,7 @@ void droptofloor (edict_t *ent)
 	{
 		ent->flags &= ~FL_TEAMSLAVE;
 		ent->chain = ent->teamchain;
-		ent->teamchain = NULL;
+		ent->teamchain = nullptr;
 
 		ent->svflags |= SVF_NOCLIENT;
 		ent->solid = SOLID_NOT;
@@ -966,7 +966,7 @@ void droptofloor (edict_t *ent)
 	if (ent->spawnflags & ITEM_NO_TOUCH)
 	{
 		ent->solid = SOLID_BBOX;
-		ent->touch = NULL;
+		ent->touch = nullptr;
 		ent->s.effects &= ~EF_ROTATE;
 		ent->s.renderfx &= ~RF_GLOW;
 	}
@@ -1118,7 +1118,7 @@ void SpawnItem (edict_t *ent, gitem_t *item)
 	// don't let them drop items that stay in a coop game
 	if ((coop->value) && (item->flags & IT_STAY_COOP))
 	{
-		item->drop = NULL;
+		item->drop = nullptr;
 	}
 
 	ent->item = item;
@@ -1145,17 +1145,17 @@ gitem_t	itemlist[] =
 	{
 		"item_armor_body", 
 		Pickup_Armor,
-		NULL,
-		NULL,
-		NULL,
+		nullptr,
+		nullptr,
+		nullptr,
 		"misc/ar1_pkup.wav",
 		"models/items/armor/body/tris.md2", EF_ROTATE,
-		NULL,
+		nullptr,
 /* icon */		"i_bodyarmor",
 /* pickup */	"Body Armor",
 /* width */		3,
 		0,
-		NULL,
+		nullptr,
 		IT_ARMOR,
 		WEAP_NONE,
 		&bodyarmor_info,
@@ -1168,17 +1168,17 @@ gitem_t	itemlist[] =
 	{
 		"item_armor_combat", 
 		Pickup_Armor,
-		NULL,
-		NULL,
-		NULL,
+		nullptr,
+		nullptr,
+		nullptr,
 		"misc/ar1_pkup.wav",
 		"models/items/armor/combat/tris.md2", EF_ROTATE,
-		NULL,
+		nullptr,
 /* icon */		"i_combatarmor",
 /* pickup */	"Combat Armor",
 /* width */		3,
 		0,
-		NULL,
+		nullptr,
 		IT_ARMOR,
 		WEAP_NONE,
 		&combatarmor_info,
@@ -1191,17 +1191,17 @@ gitem_t	itemlist[] =
 	{
 		"item_armor_jacket", 
 		Pickup_Armor,
-		NULL,
-		NULL,
-		NULL,
+		nullptr,
+		nullptr,
+		nullptr,
 		"misc/ar1_pkup.wav",
 		"models/items/armor/jacket/tris.md2", EF_ROTATE,
-		NULL,
+		nullptr,
 /* icon */		"i_jacketarmor",
 /* pickup */	"Jacket Armor",
 /* width */		3,
 		0,
-		NULL,
+		nullptr,
 		IT_ARMOR,
 		WEAP_NONE,
 		&jacketarmor_info,
@@ -1214,20 +1214,20 @@ gitem_t	itemlist[] =
 	{
 		"item_armor_shard", 
 		Pickup_Armor,
-		NULL,
-		NULL,
-		NULL,
+		nullptr,
+		nullptr,
+		nullptr,
 		"misc/ar2_pkup.wav",
 		"models/items/armor/shard/tris.md2", EF_ROTATE,
-		NULL,
+		nullptr,
 /* icon */		"i_jacketarmor",
 /* pickup */	"Armor Shard",
 /* width */		3,
 		0,
-		NULL,
+		nullptr,
 		IT_ARMOR,
 		WEAP_NONE,
-		NULL,
+		nullptr,
 		ARMOR_SHARD,
 /* precache */ ""
 	},
@@ -1240,18 +1240,18 @@ gitem_t	itemlist[] =
 		Pickup_PowerArmor,
 		Use_PowerArmor,
 		Drop_PowerArmor,
-		NULL,
+		nullptr,
 		"misc/ar3_pkup.wav",
 		"models/items/armor/screen/tris.md2", EF_ROTATE,
-		NULL,
+		nullptr,
 /* icon */		"i_powerscreen",
 /* pickup */	"Power Screen",
 /* width */		0,
 		60,
-		NULL,
+		nullptr,
 		IT_ARMOR,
 		WEAP_NONE,
-		NULL,
+		nullptr,
 		0,
 /* precache */ ""
 	},
@@ -1263,18 +1263,18 @@ gitem_t	itemlist[] =
 		Pickup_PowerArmor,
 		Use_PowerArmor,
 		Drop_PowerArmor,
-		NULL,
+		nullptr,
 		"misc/ar3_pkup.wav",
 		"models/items/armor/shield/tris.md2", EF_ROTATE,
-		NULL,
+		nullptr,
 /* icon */		"i_powershield",
 /* pickup */	"Power Shield",
 /* width */		0,
 		60,
-		NULL,
+		nullptr,
 		IT_ARMOR,
 		WEAP_NONE,
-		NULL,
+		nullptr,
 		0,
 /* precache */ "misc/power2.wav misc/power1.wav"
 	},
@@ -1289,21 +1289,21 @@ always owned, never in the world
 */
 	{
 		"weapon_blaster", 
-		NULL,
+		nullptr,
 		Use_Weapon,
-		NULL,
+		nullptr,
 		Weapon_Blaster,
 		"misc/w_pkup.wav",
-		NULL, EF_NONE,
+		nullptr, EF_NONE,
 		"models/weapons/v_blast/tris.md2",
 /* icon */		"w_blaster",
 /* pickup */	"Blaster",
 		0,
 		0,
-		NULL,
+		nullptr,
 		IT_WEAPON|IT_STAY_COOP,
 		WEAP_BLASTER,
-		NULL,
+		nullptr,
 		0,
 /* precache */ "weapons/blastf1a.wav misc/lasfly.wav"
 	},
@@ -1326,7 +1326,7 @@ always owned, never in the world
 		"Shells",
 		IT_WEAPON|IT_STAY_COOP,
 		WEAP_SHOTGUN,
-		NULL,
+		nullptr,
 		0,
 /* precache */ "weapons/shotgf1b.wav weapons/shotgr1b.wav"
 	},
@@ -1349,7 +1349,7 @@ always owned, never in the world
 		"Shells",
 		IT_WEAPON|IT_STAY_COOP,
 		WEAP_SUPERSHOTGUN,
-		NULL,
+		nullptr,
 		0,
 /* precache */ "weapons/sshotf1b.wav"
 	},
@@ -1372,7 +1372,7 @@ always owned, never in the world
 		"Bullets",
 		IT_WEAPON|IT_STAY_COOP,
 		WEAP_MACHINEGUN,
-		NULL,
+		nullptr,
 		0,
 /* precache */ "weapons/machgf1b.wav weapons/machgf2b.wav weapons/machgf3b.wav weapons/machgf4b.wav weapons/machgf5b.wav"
 	},
@@ -1395,7 +1395,7 @@ always owned, never in the world
 		"Bullets",
 		IT_WEAPON|IT_STAY_COOP,
 		WEAP_CHAINGUN,
-		NULL,
+		nullptr,
 		0,
 /* precache */ "weapons/chngnu1a.wav weapons/chngnl1a.wav weapons/machgf3b.wav` weapons/chngnd1a.wav"
 	},
@@ -1418,7 +1418,7 @@ always owned, never in the world
 		"grenades",
 		IT_AMMO|IT_WEAPON,
 		WEAP_GRENADES,
-		NULL,
+		nullptr,
 		AMMO_GRENADES,
 /* precache */ "weapons/hgrent1a.wav weapons/hgrena1b.wav weapons/hgrenc1b.wav weapons/hgrenb1a.wav weapons/hgrenb2a.wav "
 	},
@@ -1441,7 +1441,7 @@ always owned, never in the world
 		"Grenades",
 		IT_WEAPON|IT_STAY_COOP,
 		WEAP_GRENADELAUNCHER,
-		NULL,
+		nullptr,
 		0,
 /* precache */ "models/objects/grenade/tris.md2 weapons/grenlf1a.wav weapons/grenlr1b.wav weapons/grenlb1b.wav"
 	},
@@ -1464,7 +1464,7 @@ always owned, never in the world
 		"Rockets",
 		IT_WEAPON|IT_STAY_COOP,
 		WEAP_ROCKETLAUNCHER,
-		NULL,
+		nullptr,
 		0,
 /* precache */ "models/objects/rocket/tris.md2 weapons/rockfly.wav weapons/rocklf1a.wav weapons/rocklr1b.wav models/objects/debris2/tris.md2"
 	},
@@ -1487,7 +1487,7 @@ always owned, never in the world
 		"Cells",
 		IT_WEAPON|IT_STAY_COOP,
 		WEAP_HYPERBLASTER,
-		NULL,
+		nullptr,
 		0,
 /* precache */ "weapons/hyprbu1a.wav weapons/hyprbl1a.wav weapons/hyprbf1a.wav weapons/hyprbd1a.wav misc/lasfly.wav"
 	},
@@ -1510,7 +1510,7 @@ always owned, never in the world
 		"Slugs",
 		IT_WEAPON|IT_STAY_COOP,
 		WEAP_RAILGUN,
-		NULL,
+		nullptr,
 		0,
 /* precache */ "weapons/rg_hum.wav"
 	},
@@ -1533,7 +1533,7 @@ always owned, never in the world
 		"Cells",
 		IT_WEAPON|IT_STAY_COOP,
 		WEAP_BFG,
-		NULL,
+		nullptr,
 		0,
 /* precache */ "sprites/s_bfg1.sp2 sprites/s_bfg2.sp2 sprites/s_bfg3.sp2 weapons/bfg__f1y.wav weapons/bfg__l1a.wav weapons/bfg__x1b.wav weapons/bfg_hum.wav"
 	},
@@ -1547,20 +1547,20 @@ always owned, never in the world
 	{
 		"ammo_shells",
 		Pickup_Ammo,
-		NULL,
+		nullptr,
 		Drop_Ammo,
-		NULL,
+		nullptr,
 		"misc/am_pkup.wav",
 		"models/items/ammo/shells/medium/tris.md2", EF_NONE,
-		NULL,
+		nullptr,
 /* icon */		"a_shells",
 /* pickup */	"Shells",
 /* width */		3,
 		10,
-		NULL,
+		nullptr,
 		IT_AMMO,
 		WEAP_NONE,
-		NULL,
+		nullptr,
 		AMMO_SHELLS,
 /* precache */ ""
 	},
@@ -1570,20 +1570,20 @@ always owned, never in the world
 	{
 		"ammo_bullets",
 		Pickup_Ammo,
-		NULL,
+		nullptr,
 		Drop_Ammo,
-		NULL,
+		nullptr,
 		"misc/am_pkup.wav",
 		"models/items/ammo/bullets/medium/tris.md2", EF_NONE,
-		NULL,
+		nullptr,
 /* icon */		"a_bullets",
 /* pickup */	"Bullets",
 /* width */		3,
 		50,
-		NULL,
+		nullptr,
 		IT_AMMO,
 		WEAP_NONE,
-		NULL,
+		nullptr,
 		AMMO_BULLETS,
 /* precache */ ""
 	},
@@ -1593,20 +1593,20 @@ always owned, never in the world
 	{
 		"ammo_cells",
 		Pickup_Ammo,
-		NULL,
+		nullptr,
 		Drop_Ammo,
-		NULL,
+		nullptr,
 		"misc/am_pkup.wav",
 		"models/items/ammo/cells/medium/tris.md2", EF_NONE,
-		NULL,
+		nullptr,
 /* icon */		"a_cells",
 /* pickup */	"Cells",
 /* width */		3,
 		50,
-		NULL,
+		nullptr,
 		IT_AMMO,
 		WEAP_NONE,
-		NULL,
+		nullptr,
 		AMMO_CELLS,
 /* precache */ ""
 	},
@@ -1616,20 +1616,20 @@ always owned, never in the world
 	{
 		"ammo_rockets",
 		Pickup_Ammo,
-		NULL,
+		nullptr,
 		Drop_Ammo,
-		NULL,
+		nullptr,
 		"misc/am_pkup.wav",
 		"models/items/ammo/rockets/medium/tris.md2", EF_NONE,
-		NULL,
+		nullptr,
 /* icon */		"a_rockets",
 /* pickup */	"Rockets",
 /* width */		3,
 		5,
-		NULL,
+		nullptr,
 		IT_AMMO,
 		WEAP_NONE,
-		NULL,
+		nullptr,
 		AMMO_ROCKETS,
 /* precache */ ""
 	},
@@ -1639,20 +1639,20 @@ always owned, never in the world
 	{
 		"ammo_slugs",
 		Pickup_Ammo,
-		NULL,
+		nullptr,
 		Drop_Ammo,
-		NULL,
+		nullptr,
 		"misc/am_pkup.wav",
 		"models/items/ammo/slugs/medium/tris.md2", EF_NONE,
-		NULL,
+		nullptr,
 /* icon */		"a_slugs",
 /* pickup */	"Slugs",
 /* width */		3,
 		10,
-		NULL,
+		nullptr,
 		IT_AMMO,
 		WEAP_NONE,
-		NULL,
+		nullptr,
 		AMMO_SLUGS,
 /* precache */ ""
 	},
@@ -1668,18 +1668,18 @@ always owned, never in the world
 		Pickup_Powerup,
 		Use_Quad,
 		Drop_General,
-		NULL,
+		nullptr,
 		"items/pkup.wav",
 		"models/items/quaddama/tris.md2", EF_ROTATE,
-		NULL,
+		nullptr,
 /* icon */		"p_quad",
 /* pickup */	"Quad Damage",
 /* width */		2,
 		60,
-		NULL,
+		nullptr,
 		IT_POWERUP,
 		WEAP_NONE,
-		NULL,
+		nullptr,
 		0,
 /* precache */ "items/damage.wav items/damage2.wav items/damage3.wav"
 	},
@@ -1691,18 +1691,18 @@ always owned, never in the world
 		Pickup_Powerup,
 		Use_Invulnerability,
 		Drop_General,
-		NULL,
+		nullptr,
 		"items/pkup.wav",
 		"models/items/invulner/tris.md2", EF_ROTATE,
-		NULL,
+		nullptr,
 /* icon */		"p_invulnerability",
 /* pickup */	"Invulnerability",
 /* width */		2,
 		300,
-		NULL,
+		nullptr,
 		IT_POWERUP,
 		WEAP_NONE,
-		NULL,
+		nullptr,
 		0,
 /* precache */ "items/protect.wav items/protect2.wav items/protect4.wav"
 	},
@@ -1714,18 +1714,18 @@ always owned, never in the world
 		Pickup_Powerup,
 		Use_Silencer,
 		Drop_General,
-		NULL,
+		nullptr,
 		"items/pkup.wav",
 		"models/items/silencer/tris.md2", EF_ROTATE,
-		NULL,
+		nullptr,
 /* icon */		"p_silencer",
 /* pickup */	"Silencer",
 /* width */		2,
 		60,
-		NULL,
+		nullptr,
 		IT_POWERUP,
 		WEAP_NONE,
-		NULL,
+		nullptr,
 		0,
 /* precache */ ""
 	},
@@ -1737,18 +1737,18 @@ always owned, never in the world
 		Pickup_Powerup,
 		Use_Breather,
 		Drop_General,
-		NULL,
+		nullptr,
 		"items/pkup.wav",
 		"models/items/breather/tris.md2", EF_ROTATE,
-		NULL,
+		nullptr,
 /* icon */		"p_rebreather",
 /* pickup */	"Rebreather",
 /* width */		2,
 		60,
-		NULL,
+		nullptr,
 		IT_STAY_COOP|IT_POWERUP,
 		WEAP_NONE,
-		NULL,
+		nullptr,
 		0,
 /* precache */ "items/airout.wav"
 	},
@@ -1760,18 +1760,18 @@ always owned, never in the world
 		Pickup_Powerup,
 		Use_Envirosuit,
 		Drop_General,
-		NULL,
+		nullptr,
 		"items/pkup.wav",
 		"models/items/enviro/tris.md2", EF_ROTATE,
-		NULL,
+		nullptr,
 /* icon */		"p_envirosuit",
 /* pickup */	"Environment Suit",
 /* width */		2,
 		60,
-		NULL,
+		nullptr,
 		IT_STAY_COOP|IT_POWERUP,
 		WEAP_NONE,
-		NULL,
+		nullptr,
 		0,
 /* precache */ "items/airout.wav"
 	},
@@ -1782,20 +1782,20 @@ Special item that gives +2 to maximum health
 	{
 		"item_ancient_head",
 		Pickup_AncientHead,
-		NULL,
-		NULL,
-		NULL,
+		nullptr,
+		nullptr,
+		nullptr,
 		"items/pkup.wav",
 		"models/items/c_head/tris.md2", EF_ROTATE,
-		NULL,
+		nullptr,
 /* icon */		"i_fixme",
 /* pickup */	"Ancient Head",
 /* width */		2,
 		60,
-		NULL,
+		nullptr,
 		IT_NONE,
 		WEAP_NONE,
-		NULL,
+		nullptr,
 		0,
 /* precache */ ""
 	},
@@ -1806,20 +1806,20 @@ gives +1 to maximum health
 	{
 		"item_adrenaline",
 		Pickup_Adrenaline,
-		NULL,
-		NULL,
-		NULL,
+		nullptr,
+		nullptr,
+		nullptr,
 		"items/pkup.wav",
 		"models/items/adrenal/tris.md2", EF_ROTATE,
-		NULL,
+		nullptr,
 /* icon */		"p_adrenaline",
 /* pickup */	"Adrenaline",
 /* width */		2,
 		60,
-		NULL,
+		nullptr,
 		IT_NONE,
 		WEAP_NONE,
-		NULL,
+		nullptr,
 		0,
 /* precache */ ""
 	},
@@ -1829,20 +1829,20 @@ gives +1 to maximum health
 	{
 		"item_bandolier",
 		Pickup_Bandolier,
-		NULL,
-		NULL,
-		NULL,
+		nullptr,
+		nullptr,
+		nullptr,
 		"items/pkup.wav",
 		"models/items/band/tris.md2", EF_ROTATE,
-		NULL,
+		nullptr,
 /* icon */		"p_bandolier",
 /* pickup */	"Bandolier",
 /* width */		2,
 		60,
-		NULL,
+		nullptr,
 		IT_NONE,
 		WEAP_NONE,
-		NULL,
+		nullptr,
 		0,
 /* precache */ ""
 	},
@@ -1852,20 +1852,20 @@ gives +1 to maximum health
 	{
 		"item_pack",
 		Pickup_Pack,
-		NULL,
-		NULL,
-		NULL,
+		nullptr,
+		nullptr,
+		nullptr,
 		"items/pkup.wav",
 		"models/items/pack/tris.md2", EF_ROTATE,
-		NULL,
+		nullptr,
 /* icon */		"i_pack",
 /* pickup */	"Ammo Pack",
 /* width */		2,
 		180,
-		NULL,
+		nullptr,
 		IT_NONE,
 		WEAP_NONE,
-		NULL,
+		nullptr,
 		0,
 /* precache */ ""
 	},
@@ -1879,20 +1879,20 @@ key for computer centers
 	{
 		"key_data_cd",
 		Pickup_Key,
-		NULL,
+		nullptr,
 		Drop_General,
-		NULL,
+		nullptr,
 		"items/pkup.wav",
 		"models/items/keys/data_cd/tris.md2", EF_ROTATE,
-		NULL,
+		nullptr,
 		"k_datacd",
 		"Data CD",
 		2,
 		0,
-		NULL,
+		nullptr,
 		IT_STAY_COOP|IT_KEY,
 		WEAP_NONE,
-		NULL,
+		nullptr,
 		0,
 /* precache */ ""
 	},
@@ -1903,20 +1903,20 @@ warehouse circuits
 	{
 		"key_power_cube",
 		Pickup_Key,
-		NULL,
+		nullptr,
 		Drop_General,
-		NULL,
+		nullptr,
 		"items/pkup.wav",
 		"models/items/keys/power/tris.md2", EF_ROTATE,
-		NULL,
+		nullptr,
 		"k_powercube",
 		"Power Cube",
 		2,
 		0,
-		NULL,
+		nullptr,
 		IT_STAY_COOP|IT_KEY,
 		WEAP_NONE,
-		NULL,
+		nullptr,
 		0,
 /* precache */ ""
 	},
@@ -1927,20 +1927,20 @@ key for the entrance of jail3
 	{
 		"key_pyramid",
 		Pickup_Key,
-		NULL,
+		nullptr,
 		Drop_General,
-		NULL,
+		nullptr,
 		"items/pkup.wav",
 		"models/items/keys/pyramid/tris.md2", EF_ROTATE,
-		NULL,
+		nullptr,
 		"k_pyramid",
 		"Pyramid Key",
 		2,
 		0,
-		NULL,
+		nullptr,
 		IT_STAY_COOP|IT_KEY,
 		WEAP_NONE,
-		NULL,
+		nullptr,
 		0,
 /* precache */ ""
 	},
@@ -1951,20 +1951,20 @@ key for the city computer
 	{
 		"key_data_spinner",
 		Pickup_Key,
-		NULL,
+		nullptr,
 		Drop_General,
-		NULL,
+		nullptr,
 		"items/pkup.wav",
 		"models/items/keys/spinner/tris.md2", EF_ROTATE,
-		NULL,
+		nullptr,
 		"k_dataspin",
 		"Data Spinner",
 		2,
 		0,
-		NULL,
+		nullptr,
 		IT_STAY_COOP|IT_KEY,
 		WEAP_NONE,
-		NULL,
+		nullptr,
 		0,
 /* precache */ ""
 	},
@@ -1975,20 +1975,20 @@ security pass for the security level
 	{
 		"key_pass",
 		Pickup_Key,
-		NULL,
+		nullptr,
 		Drop_General,
-		NULL,
+		nullptr,
 		"items/pkup.wav",
 		"models/items/keys/pass/tris.md2", EF_ROTATE,
-		NULL,
+		nullptr,
 		"k_security",
 		"Security Pass",
 		2,
 		0,
-		NULL,
+		nullptr,
 		IT_STAY_COOP|IT_KEY,
 		WEAP_NONE,
-		NULL,
+		nullptr,
 		0,
 /* precache */ ""
 	},
@@ -1999,20 +1999,20 @@ normal door key - blue
 	{
 		"key_blue_key",
 		Pickup_Key,
-		NULL,
+		nullptr,
 		Drop_General,
-		NULL,
+		nullptr,
 		"items/pkup.wav",
 		"models/items/keys/key/tris.md2", EF_ROTATE,
-		NULL,
+		nullptr,
 		"k_bluekey",
 		"Blue Key",
 		2,
 		0,
-		NULL,
+		nullptr,
 		IT_STAY_COOP|IT_KEY,
 		WEAP_NONE,
-		NULL,
+		nullptr,
 		0,
 /* precache */ ""
 	},
@@ -2023,20 +2023,20 @@ normal door key - red
 	{
 		"key_red_key",
 		Pickup_Key,
-		NULL,
+		nullptr,
 		Drop_General,
-		NULL,
+		nullptr,
 		"items/pkup.wav",
 		"models/items/keys/red_key/tris.md2", EF_ROTATE,
-		NULL,
+		nullptr,
 		"k_redkey",
 		"Red Key",
 		2,
 		0,
-		NULL,
+		nullptr,
 		IT_STAY_COOP|IT_KEY,
 		WEAP_NONE,
-		NULL,
+		nullptr,
 		0,
 /* precache */ ""
 	},
@@ -2047,20 +2047,20 @@ tank commander's head
 	{
 		"key_commander_head",
 		Pickup_Key,
-		NULL,
+		nullptr,
 		Drop_General,
-		NULL,
+		nullptr,
 		"items/pkup.wav",
 		"models/monsters/commandr/head/tris.md2", EF_GIB,
-		NULL,
+		nullptr,
 /* icon */		"k_comhead",
 /* pickup */	"Commander's Head",
 /* width */		2,
 		0,
-		NULL,
+		nullptr,
 		IT_STAY_COOP|IT_KEY,
 		WEAP_NONE,
-		NULL,
+		nullptr,
 		0,
 /* precache */ ""
 	},
@@ -2071,47 +2071,47 @@ tank commander's head
 	{
 		"key_airstrike_target",
 		Pickup_Key,
-		NULL,
+		nullptr,
 		Drop_General,
-		NULL,
+		nullptr,
 		"items/pkup.wav",
 		"models/items/keys/target/tris.md2", EF_ROTATE,
-		NULL,
+		nullptr,
 /* icon */		"i_airstrike",
 /* pickup */	"Airstrike Marker",
 /* width */		2,
 		0,
-		NULL,
+		nullptr,
 		IT_STAY_COOP|IT_KEY,
 		WEAP_NONE,
-		NULL,
+		nullptr,
 		0,
 /* precache */ ""
 	},
 
 	{
-		NULL,
+		nullptr,
 		Pickup_Health,
-		NULL,
-		NULL,
-		NULL,
+		nullptr,
+		nullptr,
+		nullptr,
 		"items/pkup.wav",
-		NULL, EF_NONE,
-		NULL,
+		nullptr, EF_NONE,
+		nullptr,
 /* icon */		"i_health",
 /* pickup */	"Health",
 /* width */		3,
 		0,
-		NULL,
+		nullptr,
 		IT_NONE,
 		WEAP_NONE,
-		NULL,
+		nullptr,
 		0,
 /* precache */ "items/s_health.wav items/n_health.wav items/l_health.wav items/m_health.wav"
 	},
 
 	// end of list marker
-	{NULL}
+	{nullptr}
 };
 
 

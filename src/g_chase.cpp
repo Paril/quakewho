@@ -36,7 +36,7 @@ void UpdateChaseCam(edict_t *ent)
 		edict_t *old = ent->client->chase_target;
 		ChaseNext(ent);
 		if (ent->client->chase_target == old) {
-			ent->client->chase_target = NULL;
+			ent->client->chase_target = nullptr;
 			ent->client->ps.pmove.pm_flags &= ~PMF_NO_PREDICTION;
 			return;
 		}
@@ -52,7 +52,7 @@ void UpdateChaseCam(edict_t *ent)
 	VectorCopy(targ->client->v_angle, angles);
 	if (angles[PITCH] > 56)
 		angles[PITCH] = 56;
-	AngleVectors (angles, forward, right, NULL);
+	AngleVectors (angles, forward, right, nullptr);
 	VectorNormalize(forward);
 	VectorMA(ownerv, -30, forward, o);
 

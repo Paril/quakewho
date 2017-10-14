@@ -118,7 +118,7 @@ void Killed (edict_t *targ, edict_t *inflictor, edict_t *attacker, int damage, v
 
 	if ((targ->svflags & SVF_MONSTER) && (targ->deadflag != DEAD_DEAD))
 	{
-		targ->touch = NULL;
+		targ->touch = nullptr;
 		monster_death_use (targ);
 	}
 
@@ -216,7 +216,7 @@ static int CheckPowerArmor (edict_t *ent, vec3_t point, vec3_t normal, int damag
 		vec3_t		forward;
 
 		// only works if damage point is in front
-		AngleVectors (ent->s.angles, forward, NULL, NULL);
+		AngleVectors (ent->s.angles, forward, nullptr, nullptr);
 		VectorSubtract (point, ent->s.origin, vec);
 		VectorNormalize (vec);
 		dot = DotProduct (vec, forward);
@@ -547,11 +547,11 @@ T_RadiusDamage
 void T_RadiusDamage (edict_t *inflictor, edict_t *attacker, float damage, edict_t *ignore, float radius, meansofdeath_t mod)
 {
 	float	points;
-	edict_t	*ent = NULL;
+	edict_t	*ent = nullptr;
 	vec3_t	v;
 	vec3_t	dir;
 
-	while ((ent = findradius(ent, inflictor->s.origin, radius)) != NULL)
+	while ((ent = findradius(ent, inflictor->s.origin, radius)) != nullptr)
 	{
 		if (ent == ignore)
 			continue;

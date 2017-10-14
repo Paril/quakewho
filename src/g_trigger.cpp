@@ -58,7 +58,7 @@ void multi_trigger (edict_t *ent)
 	else
 	{	// we can't just remove (self) here, because this is a touch function
 		// called while looping through area links...
-		ent->touch = NULL;
+		ent->touch = nullptr;
 		ent->nextthink = level.time + FRAMETIME;
 		ent->think = G_FreeEdict;
 	}
@@ -89,7 +89,7 @@ void Touch_Multi (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *su
 	{
 		vec3_t	forward;
 
-		AngleVectors(other->s.angles, forward, NULL, NULL);
+		AngleVectors(other->s.angles, forward, nullptr, nullptr);
 
 		if (DotProduct(forward, self->movedir) < 0)
 			return;
@@ -278,7 +278,7 @@ void trigger_key_use (edict_t *self, edict_t *other, edict_t *activator)
 
 	G_UseTargets (self, activator);
 
-	self->use = NULL;
+	self->use = nullptr;
 }
 
 void SP_trigger_key (edict_t *self)
@@ -463,7 +463,7 @@ void hurt_use (edict_t *self, edict_t *other, edict_t *activator)
 	gi.linkentity (self);
 
 	if (!(self->spawnflags & 2))
-		self->use = NULL;
+		self->use = nullptr;
 }
 
 
@@ -581,7 +581,7 @@ void trigger_monsterjump_touch (edict_t *self, edict_t *other, cplane_t *plane, 
 	if (!other->groundentity)
 		return;
 	
-	other->groundentity = NULL;
+	other->groundentity = nullptr;
 	other->velocity[2] = self->movedir[2];
 }
 

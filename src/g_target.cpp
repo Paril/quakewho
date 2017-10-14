@@ -234,7 +234,7 @@ void target_explosion_explode (edict_t *self)
 	gi.WritePosition (self->s.origin);
 	gi.multicast (self->s.origin, MULTICAST_PHS);
 
-	T_RadiusDamage (self, self->activator, self->dmg, NULL, self->dmg+40, MOD_EXPLOSIVE);
+	T_RadiusDamage (self, self->activator, self->dmg, nullptr, self->dmg+40, MOD_EXPLOSIVE);
 
 	save = self->delay;
 	self->delay = 0;
@@ -347,7 +347,7 @@ void use_target_splash (edict_t *self, edict_t *other, edict_t *activator)
 	gi.multicast (self->s.origin, MULTICAST_PVS);
 
 	if (self->dmg)
-		T_RadiusDamage (self, activator, self->dmg, NULL, self->dmg+40, MOD_SPLASH);
+		T_RadiusDamage (self, activator, self->dmg, nullptr, self->dmg+40, MOD_SPLASH);
 }
 
 void SP_target_splash (edict_t *self)
@@ -523,7 +523,7 @@ void target_laser_think (edict_t *self)
 	VectorMA (start, 2048, self->movedir, end);
 	while(1)
 	{
-		tr = gi.trace (start, NULL, NULL, end, ignore, CONTENTS_SOLID|CONTENTS_MONSTER|CONTENTS_DEADMONSTER);
+		tr = gi.trace (start, nullptr, nullptr, end, ignore, CONTENTS_SOLID|CONTENTS_MONSTER|CONTENTS_DEADMONSTER);
 
 		if (!tr.ent)
 			break;
@@ -614,7 +614,7 @@ void target_laser_start (edict_t *self)
 	{
 		if (self->target)
 		{
-			ent = G_Find (NULL, FOFS(targetname), self->target);
+			ent = G_Find (nullptr, FOFS(targetname), self->target);
 			if (!ent)
 				gi.dprintf ("%s at %s: %s is a bad target\n", self->classname, vtos(self->s.origin), self->target);
 			self->enemy = ent;
@@ -684,7 +684,7 @@ void target_lightramp_use (edict_t *self, edict_t *other, edict_t *activator)
 		edict_t		*e;
 
 		// check all the targets
-		e = NULL;
+		e = nullptr;
 		while (1)
 		{
 			e = G_Find (e, FOFS(targetname), self->target);
@@ -773,7 +773,7 @@ void target_earthquake_think (edict_t *self)
 		if (!e->groundentity)
 			continue;
 
-		e->groundentity = NULL;
+		e->groundentity = nullptr;
 		e->velocity[0] += crandom()* 150;
 		e->velocity[1] += crandom()* 150;
 		e->velocity[2] = self->speed * (100.0 / e->mass);

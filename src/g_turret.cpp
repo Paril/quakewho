@@ -285,12 +285,12 @@ void turret_driver_die (edict_t *self, edict_t *inflictor, edict_t *attacker, in
 	// remove the driver from the end of them team chain
 	for (ent = self->target_ent->teammaster; ent->teamchain != self; ent = ent->teamchain)
 		;
-	ent->teamchain = NULL;
-	self->teammaster = NULL;
+	ent->teamchain = nullptr;
+	self->teammaster = nullptr;
 	self->flags &= ~FL_TEAMSLAVE;
 
-	self->target_ent->owner = NULL;
-	self->target_ent->teammaster->owner = NULL;
+	self->target_ent->owner = nullptr;
+	self->target_ent->teammaster->owner = nullptr;
 
 	infantry_die (self, inflictor, attacker, damage, point);
 }
@@ -304,7 +304,7 @@ void turret_driver_think (edict_t *self)
 	self->nextthink = level.time + FRAMETIME;
 
 	if (self->enemy && (!self->enemy->inuse || self->enemy->health <= 0))
-		self->enemy = NULL;
+		self->enemy = nullptr;
 
 	if (!self->enemy)
 	{

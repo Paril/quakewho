@@ -475,7 +475,7 @@ char *COM_Parse (char **data_p)
 	
 	if (!data)
 	{
-		*data_p = NULL;
+		*data_p = nullptr;
 		return "";
 	}
 		
@@ -485,7 +485,7 @@ skipwhite:
 	{
 		if (c == 0)
 		{
-			*data_p = NULL;
+			*data_p = nullptr;
 			return "";
 		}
 		data++;

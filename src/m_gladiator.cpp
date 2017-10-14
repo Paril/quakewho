@@ -63,15 +63,15 @@ void gladiator_cleaver_swing (edict_t *self)
 
 mframe_t gladiator_frames_stand [] =
 {
-	ai_stand, 0, NULL,
-	ai_stand, 0, NULL,
-	ai_stand, 0, NULL,
-	ai_stand, 0, NULL,
-	ai_stand, 0, NULL,
-	ai_stand, 0, NULL,
-	ai_stand, 0, NULL
+	ai_stand, 0, nullptr,
+	ai_stand, 0, nullptr,
+	ai_stand, 0, nullptr,
+	ai_stand, 0, nullptr,
+	ai_stand, 0, nullptr,
+	ai_stand, 0, nullptr,
+	ai_stand, 0, nullptr
 };
-mmove_t gladiator_move_stand = {FRAME_stand1, FRAME_stand7, gladiator_frames_stand, NULL};
+mmove_t gladiator_move_stand = {FRAME_stand1, FRAME_stand7, gladiator_frames_stand, nullptr};
 
 void gladiator_stand (edict_t *self)
 {
@@ -81,24 +81,24 @@ void gladiator_stand (edict_t *self)
 
 mframe_t gladiator_frames_walk [] =
 {
-	ai_walk, 15, NULL,
-	ai_walk, 7,  NULL,
-	ai_walk, 6,  NULL,
-	ai_walk, 5,  NULL,
-	ai_walk, 2,  NULL,
-	ai_walk, 0,  NULL,
-	ai_walk, 2,  NULL,
-	ai_walk, 8,  NULL,
-	ai_walk, 12, NULL,
-	ai_walk, 8,  NULL,
-	ai_walk, 5,  NULL,
-	ai_walk, 5,  NULL,
-	ai_walk, 2,  NULL,
-	ai_walk, 2,  NULL,
-	ai_walk, 1,  NULL,
-	ai_walk, 8,  NULL
+	ai_walk, 15, nullptr,
+	ai_walk, 7,  nullptr,
+	ai_walk, 6,  nullptr,
+	ai_walk, 5,  nullptr,
+	ai_walk, 2,  nullptr,
+	ai_walk, 0,  nullptr,
+	ai_walk, 2,  nullptr,
+	ai_walk, 8,  nullptr,
+	ai_walk, 12, nullptr,
+	ai_walk, 8,  nullptr,
+	ai_walk, 5,  nullptr,
+	ai_walk, 5,  nullptr,
+	ai_walk, 2,  nullptr,
+	ai_walk, 2,  nullptr,
+	ai_walk, 1,  nullptr,
+	ai_walk, 8,  nullptr
 };
-mmove_t gladiator_move_walk = {FRAME_walk1, FRAME_walk16, gladiator_frames_walk, NULL};
+mmove_t gladiator_move_walk = {FRAME_walk1, FRAME_walk16, gladiator_frames_walk, nullptr};
 
 void gladiator_walk (edict_t *self)
 {
@@ -108,14 +108,14 @@ void gladiator_walk (edict_t *self)
 
 mframe_t gladiator_frames_run [] =
 {
-	ai_run, 23,	NULL,
-	ai_run, 14,	NULL,
-	ai_run, 14,	NULL,
-	ai_run, 21,	NULL,
-	ai_run, 12,	NULL,
-	ai_run, 13,	NULL
+	ai_run, 23,	nullptr,
+	ai_run, 14,	nullptr,
+	ai_run, 14,	nullptr,
+	ai_run, 21,	nullptr,
+	ai_run, 12,	nullptr,
+	ai_run, 13,	nullptr
 };
-mmove_t gladiator_move_run = {FRAME_run1, FRAME_run6, gladiator_frames_run, NULL};
+mmove_t gladiator_move_run = {FRAME_run1, FRAME_run6, gladiator_frames_run, nullptr};
 
 void gladiator_run (edict_t *self)
 {
@@ -139,23 +139,23 @@ void GaldiatorMelee (edict_t *self)
 
 mframe_t gladiator_frames_attack_melee [] =
 {
-	ai_charge, 0, NULL,
-	ai_charge, 0, NULL,
-	ai_charge, 0, NULL,
-	ai_charge, 0, NULL,
+	ai_charge, 0, nullptr,
+	ai_charge, 0, nullptr,
+	ai_charge, 0, nullptr,
+	ai_charge, 0, nullptr,
 	ai_charge, 0, gladiator_cleaver_swing,
-	ai_charge, 0, NULL,
+	ai_charge, 0, nullptr,
 	ai_charge, 0, GaldiatorMelee,
-	ai_charge, 0, NULL,
-	ai_charge, 0, NULL,
-	ai_charge, 0, NULL,
+	ai_charge, 0, nullptr,
+	ai_charge, 0, nullptr,
+	ai_charge, 0, nullptr,
 	ai_charge, 0, gladiator_cleaver_swing,
-	ai_charge, 0, NULL,
-	ai_charge, 0, NULL,
+	ai_charge, 0, nullptr,
+	ai_charge, 0, nullptr,
 	ai_charge, 0, GaldiatorMelee,
-	ai_charge, 0, NULL,
-	ai_charge, 0, NULL,
-	ai_charge, 0, NULL
+	ai_charge, 0, nullptr,
+	ai_charge, 0, nullptr,
+	ai_charge, 0, nullptr
 };
 mmove_t gladiator_move_attack_melee = {FRAME_melee1, FRAME_melee17, gladiator_frames_attack_melee, gladiator_run};
 
@@ -171,7 +171,7 @@ void GladiatorGun (edict_t *self)
 	vec3_t	dir;
 	vec3_t	forward, right;
 
-	AngleVectors (self->s.angles, forward, right, NULL);
+	AngleVectors (self->s.angles, forward, right, nullptr);
 	G_ProjectSource (self->s.origin, monster_flash_offset[MZ2_GLADIATOR_RAILGUN_1], forward, right, start);
 
 	// calc direction to where we targted
@@ -183,15 +183,15 @@ void GladiatorGun (edict_t *self)
 
 mframe_t gladiator_frames_attack_gun [] =
 {
-	ai_charge, 0, NULL,
-	ai_charge, 0, NULL,
-	ai_charge, 0, NULL,
+	ai_charge, 0, nullptr,
+	ai_charge, 0, nullptr,
+	ai_charge, 0, nullptr,
 	ai_charge, 0, GladiatorGun,
-	ai_charge, 0, NULL,
-	ai_charge, 0, NULL,
-	ai_charge, 0, NULL,
-	ai_charge, 0, NULL,
-	ai_charge, 0, NULL
+	ai_charge, 0, nullptr,
+	ai_charge, 0, nullptr,
+	ai_charge, 0, nullptr,
+	ai_charge, 0, nullptr,
+	ai_charge, 0, nullptr
 };
 mmove_t gladiator_move_attack_gun = {FRAME_attack1, FRAME_attack9, gladiator_frames_attack_gun, gladiator_run};
 
@@ -216,24 +216,24 @@ void gladiator_attack(edict_t *self)
 
 mframe_t gladiator_frames_pain [] =
 {
-	ai_move, 0, NULL,
-	ai_move, 0, NULL,
-	ai_move, 0, NULL,
-	ai_move, 0, NULL,
-	ai_move, 0, NULL,
-	ai_move, 0, NULL
+	ai_move, 0, nullptr,
+	ai_move, 0, nullptr,
+	ai_move, 0, nullptr,
+	ai_move, 0, nullptr,
+	ai_move, 0, nullptr,
+	ai_move, 0, nullptr
 };
 mmove_t gladiator_move_pain = {FRAME_pain1, FRAME_pain6, gladiator_frames_pain, gladiator_run};
 
 mframe_t gladiator_frames_pain_air [] =
 {
-	ai_move, 0, NULL,
-	ai_move, 0, NULL,
-	ai_move, 0, NULL,
-	ai_move, 0, NULL,
-	ai_move, 0, NULL,
-	ai_move, 0, NULL,
-	ai_move, 0, NULL
+	ai_move, 0, nullptr,
+	ai_move, 0, nullptr,
+	ai_move, 0, nullptr,
+	ai_move, 0, nullptr,
+	ai_move, 0, nullptr,
+	ai_move, 0, nullptr,
+	ai_move, 0, nullptr
 };
 mmove_t gladiator_move_pain_air = {FRAME_painup1, FRAME_painup7, gladiator_frames_pain_air, gladiator_run};
 
@@ -280,28 +280,28 @@ void gladiator_dead (edict_t *self)
 
 mframe_t gladiator_frames_death [] =
 {
-	ai_move, 0, NULL,
-	ai_move, 0, NULL,
-	ai_move, 0, NULL,
-	ai_move, 0, NULL,
-	ai_move, 0, NULL,
-	ai_move, 0, NULL,
-	ai_move, 0, NULL,
-	ai_move, 0, NULL,
-	ai_move, 0, NULL,
-	ai_move, 0, NULL,
-	ai_move, 0, NULL,
-	ai_move, 0, NULL,
-	ai_move, 0, NULL,
-	ai_move, 0, NULL,
-	ai_move, 0, NULL,
-	ai_move, 0, NULL,
-	ai_move, 0, NULL,
-	ai_move, 0, NULL,
-	ai_move, 0, NULL,
-	ai_move, 0, NULL,
-	ai_move, 0, NULL,
-	ai_move, 0, NULL
+	ai_move, 0, nullptr,
+	ai_move, 0, nullptr,
+	ai_move, 0, nullptr,
+	ai_move, 0, nullptr,
+	ai_move, 0, nullptr,
+	ai_move, 0, nullptr,
+	ai_move, 0, nullptr,
+	ai_move, 0, nullptr,
+	ai_move, 0, nullptr,
+	ai_move, 0, nullptr,
+	ai_move, 0, nullptr,
+	ai_move, 0, nullptr,
+	ai_move, 0, nullptr,
+	ai_move, 0, nullptr,
+	ai_move, 0, nullptr,
+	ai_move, 0, nullptr,
+	ai_move, 0, nullptr,
+	ai_move, 0, nullptr,
+	ai_move, 0, nullptr,
+	ai_move, 0, nullptr,
+	ai_move, 0, nullptr,
+	ai_move, 0, nullptr
 };
 mmove_t gladiator_move_death = {FRAME_death1, FRAME_death22, gladiator_frames_death, gladiator_dead};
 
@@ -372,7 +372,7 @@ void SP_monster_gladiator (edict_t *self)
 	self->monsterinfo.stand = gladiator_stand;
 	self->monsterinfo.walk = gladiator_walk;
 	self->monsterinfo.run = gladiator_run;
-	self->monsterinfo.dodge = NULL;
+	self->monsterinfo.dodge = nullptr;
 	self->monsterinfo.attack = gladiator_attack;
 	self->monsterinfo.melee = gladiator_melee;
 	self->monsterinfo.sight = gladiator_sight;

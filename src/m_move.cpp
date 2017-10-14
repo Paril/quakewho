@@ -250,7 +250,7 @@ bool SV_movestep (edict_t *ent, vec3_t move, bool relink)
 				gi.linkentity (ent);
 				G_TouchTriggers (ent);
 			}
-			ent->groundentity = NULL;
+			ent->groundentity = nullptr;
 			return true;
 		}
 	

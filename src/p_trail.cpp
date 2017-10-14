@@ -98,7 +98,7 @@ edict_t *PlayerTrail_PickFirst (edict_t *self)
 	int		n;
 
 	if (!trail_active)
-		return NULL;
+		return nullptr;
 
 	for (marker = trail_head, n = TRAIL_LENGTH; n; n--)
 	{
@@ -127,7 +127,7 @@ edict_t *PlayerTrail_PickNext (edict_t *self)
 	int		n;
 
 	if (!trail_active)
-		return NULL;
+		return nullptr;
 
 	for (marker = trail_head, n = TRAIL_LENGTH; n; n--)
 	{

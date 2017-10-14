@@ -60,7 +60,7 @@ edict_t	*SV_TestEntityPosition (edict_t *ent)
 	if (trace.startsolid)
 		return g_edicts;
 		
-	return NULL;
+	return nullptr;
 }
 
 
@@ -104,7 +104,7 @@ bool SV_RunThink (edict_t *ent)
 	
 	ent->nextthink = 0;
 	if (!ent->think)
-		gi.error ("NULL ent->think");
+		gi.error ("nullptr ent->think");
 	ent->think (ent);
 
 	return false;
@@ -128,7 +128,7 @@ void SV_Impact (edict_t *e1, trace_t *trace)
 		e1->touch (e1, e2, &trace->plane, trace->surface);
 	
 	if (e2->touch && e2->solid != SOLID_NOT)
-		e2->touch (e2, e1, NULL, NULL);
+		e2->touch (e2, e1, nullptr, nullptr);
 }
 
 
@@ -204,7 +204,7 @@ int SV_FlyMove (edict_t *ent, float time, brushcontents_t mask)
 	
 	time_left = time;
 
-	ent->groundentity = NULL;
+	ent->groundentity = nullptr;
 	for (bumpcount=0 ; bumpcount<numbumps ; bumpcount++)
 	{
 		for (i=0 ; i<3 ; i++)
@@ -503,7 +503,7 @@ bool SV_Push (edict_t *pusher, vec3_t move, vec3_t amove)
 
 			// may have pushed them off an edge
 			if (check->groundentity != pusher)
-				check->groundentity = NULL;
+				check->groundentity = nullptr;
 
 			block = SV_TestEntityPosition (check);
 			if (!block)
@@ -686,12 +686,12 @@ void SV_Physics_Toss (edict_t *ent)
 		return;
 
 	if (ent->velocity[2] > 0)
-		ent->groundentity = NULL;
+		ent->groundentity = nullptr;
 
 // check for the groundentity going away
 	if (ent->groundentity)
 		if (!ent->groundentity->inuse)
-			ent->groundentity = NULL;
+			ent->groundentity = nullptr;
 
 // if onground, return without moving
 	if ( ent->groundentity )

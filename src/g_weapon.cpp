@@ -44,7 +44,7 @@ static void check_dodge (edict_t *self, vec3_t start, vec3_t dir, int speed)
 			return;
 	}
 	VectorMA (start, 8192, dir, end);
-	tr = gi.trace (start, NULL, NULL, end, self, MASK_SHOT);
+	tr = gi.trace (start, nullptr, nullptr, end, self, MASK_SHOT);
 	if ((tr.ent) && (tr.ent->svflags & SVF_MONSTER) && (tr.ent->health > 0) && (tr.ent->monsterinfo.dodge) && infront(tr.ent, self))
 	{
 		VectorSubtract (tr.endpos, start, v);
@@ -92,7 +92,7 @@ bool fire_hit (edict_t *self, vec3_t aim, int damage, int kick)
 
 	VectorMA (self->s.origin, range, dir, point);
 
-	tr = gi.trace (self->s.origin, NULL, NULL, point, self, MASK_SHOT);
+	tr = gi.trace (self->s.origin, nullptr, nullptr, point, self, MASK_SHOT);
 	if (tr.fraction < 1)
 	{
 		if (!tr.ent->takedamage)
@@ -120,7 +120,7 @@ bool fire_hit (edict_t *self, vec3_t aim, int damage, int kick)
 	VectorNormalize (v);
 	VectorMA (self->enemy->velocity, kick, v, self->enemy->velocity);
 	if (self->enemy->velocity[2] > 0)
-		self->enemy->groundentity = NULL;
+		self->enemy->groundentity = nullptr;
 	return true;
 }
 
@@ -144,7 +144,7 @@ static void fire_lead (edict_t *self, vec3_t start, vec3_t aimdir, int damage, i
 	bool		water = false;
 	brushcontents_t	content_mask = MASK_SHOT | MASK_WATER;
 
-	tr = gi.trace (self->s.origin, NULL, NULL, start, self, MASK_SHOT);
+	tr = gi.trace (self->s.origin, nullptr, nullptr, start, self, MASK_SHOT);
 	if (!(tr.fraction < 1.0))
 	{
 		vectoangles (aimdir, dir);
@@ -163,7 +163,7 @@ static void fire_lead (edict_t *self, vec3_t start, vec3_t aimdir, int damage, i
 			content_mask &= ~MASK_WATER;
 		}
 
-		tr = gi.trace (start, NULL, NULL, end, self, content_mask);
+		tr = gi.trace (start, nullptr, nullptr, end, self, content_mask);
 
 		// see if we hit water
 		if (tr.contents & MASK_WATER)
@@ -212,7 +212,7 @@ static void fire_lead (edict_t *self, vec3_t start, vec3_t aimdir, int damage, i
 			}
 
 			// re-trace ignoring water this time
-			tr = gi.trace (water_start, NULL, NULL, end, self, MASK_SHOT);
+			tr = gi.trace (water_start, nullptr, nullptr, end, self, MASK_SHOT);
 		}
 	}
 
@@ -253,7 +253,7 @@ static void fire_lead (edict_t *self, vec3_t start, vec3_t aimdir, int damage, i
 		if (gi.pointcontents (pos) & MASK_WATER)
 			VectorCopy (pos, tr.endpos);
 		else
-			tr = gi.trace (pos, NULL, NULL, water_start, tr.ent, MASK_WATER);
+			tr = gi.trace (pos, nullptr, nullptr, water_start, tr.ent, MASK_WATER);
 
 		VectorAdd (water_start, tr.endpos, pos);
 		VectorScale (pos, 0.5, pos);
@@ -382,11 +382,11 @@ void fire_blaster (edict_t *self, vec3_t start, vec3_t dir, int damage, int spee
 	if (self->client)
 		check_dodge (self, bolt->s.origin, dir, speed);
 
-	tr = gi.trace (self->s.origin, NULL, NULL, bolt->s.origin, bolt, MASK_SHOT);
+	tr = gi.trace (self->s.origin, nullptr, nullptr, bolt->s.origin, bolt, MASK_SHOT);
 	if (tr.fraction < 1.0)
 	{
 		VectorMA (bolt->s.origin, -10, dir, bolt->s.origin);
-		bolt->touch (bolt, tr.ent, NULL, NULL);
+		bolt->touch (bolt, tr.ent, nullptr, nullptr);
 	}
 }	
 
@@ -672,7 +672,7 @@ void fire_rail (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick
 	mask = MASK_SHOT|CONTENTS_SLIME|CONTENTS_LAVA;
 	while (ignore)
 	{
-		tr = gi.trace (from, NULL, NULL, end, ignore, mask);
+		tr = gi.trace (from, nullptr, nullptr, end, ignore, mask);
 
 		if (tr.contents & (CONTENTS_SLIME|CONTENTS_LAVA))
 		{
@@ -686,7 +686,7 @@ void fire_rail (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick
 				(tr.ent->solid == SOLID_BBOX))
 				ignore = tr.ent;
 			else
-				ignore = NULL;
+				ignore = nullptr;
 
 			if ((tr.ent != self) && (tr.ent->takedamage))
 				T_Damage (tr.ent, self, self, aimdir, tr.endpos, tr.plane.normal, damage, kick, DAMAGE_NONE, MOD_RAILGUN);
@@ -731,8 +731,8 @@ void bfg_explode (edict_t *self)
 	if (self->s.frame == 0)
 	{
 		// the BFG effect
-		ent = NULL;
-		while ((ent = findradius(ent, self->s.origin, self->dmg_radius)) != NULL)
+		ent = nullptr;
+		while ((ent = findradius(ent, self->s.origin, self->dmg_radius)) != nullptr)
 		{
 			if (!ent->takedamage)
 				continue;
@@ -786,7 +786,7 @@ void bfg_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf
 
 	gi.sound (self, CHAN_VOICE, gi.soundindex ("weapons/bfg__x1b.wav"), 1, ATTN_NORM, 0);
 	self->solid = SOLID_NOT;
-	self->touch = NULL;
+	self->touch = nullptr;
 	VectorMA (self->s.origin, -1 * FRAMETIME, self->velocity, self->s.origin);
 	VectorClear (self->velocity);
 	self->s.modelindex = gi.modelindex ("sprites/s_bfg3.sp2");
@@ -820,8 +820,8 @@ void bfg_think (edict_t *self)
 	else
 		dmg = 10;
 
-	ent = NULL;
-	while ((ent = findradius(ent, self->s.origin, 256)) != NULL)
+	ent = nullptr;
+	while ((ent = findradius(ent, self->s.origin, 256)) != nullptr)
 	{
 		if (ent == self)
 			continue;
@@ -845,7 +845,7 @@ void bfg_think (edict_t *self)
 		VectorMA (start, 2048, dir, end);
 		while(1)
 		{
-			tr = gi.trace (start, NULL, NULL, end, ignore, CONTENTS_SOLID|CONTENTS_MONSTER|CONTENTS_DEADMONSTER);
+			tr = gi.trace (start, nullptr, nullptr, end, ignore, CONTENTS_SOLID|CONTENTS_MONSTER|CONTENTS_DEADMONSTER);
 
 			if (!tr.ent)
 				break;
@@ -910,7 +910,7 @@ void fire_bfg (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, f
 	bfg->think = bfg_think;
 	bfg->nextthink = level.time + FRAMETIME;
 	bfg->teammaster = bfg;
-	bfg->teamchain = NULL;
+	bfg->teamchain = nullptr;
 
 	if (self->client)
 		check_dodge (self, bfg->s.origin, dir, speed);

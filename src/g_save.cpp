@@ -126,7 +126,7 @@ field_t		levelfields[] =
 	{"sound_entity", LLOFS(sound_entity), F_EDICT},
 	{"sound2_entity", LLOFS(sound2_entity), F_EDICT},
 
-	{NULL, 0, F_INT}
+	{nullptr, 0, F_INT}
 };
 
 field_t		clientfields[] =
@@ -135,7 +135,7 @@ field_t		clientfields[] =
 	{"pers.lastweapon", CLOFS(pers.lastweapon), F_ITEM},
 	{"newweapon", CLOFS(newweapon), F_ITEM},
 
-	{NULL, 0, F_INT}
+	{nullptr, 0, F_INT}
 };
 
 /*
@@ -250,21 +250,21 @@ void WriteField1 (FILE *f, field_t *field, byte *base)
 		*(int *)p = (int) len;
 		break;
 	case F_EDICT:
-		if ( *(edict_t **)p == NULL)
+		if ( *(edict_t **)p == nullptr)
 			index = -1;
 		else
 			index = *(edict_t **)p - g_edicts;
 		*(int *)p = index;
 		break;
 	case F_CLIENT:
-		if ( *(gclient_t **)p == NULL)
+		if ( *(gclient_t **)p == nullptr)
 			index = -1;
 		else
 			index = *(gclient_t **)p - game.clients;
 		*(int *)p = index;
 		break;
 	case F_ITEM:
-		if ( *(edict_t **)p == NULL)
+		if ( *(edict_t **)p == nullptr)
 			index = -1;
 		else
 			index = *(gitem_t **)p - itemlist;
@@ -273,7 +273,7 @@ void WriteField1 (FILE *f, field_t *field, byte *base)
 
 	//relative to code segment
 	case F_FUNCTION:
-		if (*(byte **)p == NULL)
+		if (*(byte **)p == nullptr)
 			index = 0;
 		else
 			index = *(byte **)p - ((byte *)InitGame);
@@ -282,7 +282,7 @@ void WriteField1 (FILE *f, field_t *field, byte *base)
 
 	//relative to data segment
 	case F_MMOVE:
-		if (*(byte **)p == NULL)
+		if (*(byte **)p == nullptr)
 			index = 0;
 		else
 			index = *(byte **)p - (byte *)&mmove_reloc;
@@ -341,7 +341,7 @@ void ReadField (FILE *f, field_t *field, byte *base)
 	case F_LSTRING:
 		len = (size_t) *(int *)p;
 		if (!len)
-			*(char **)p = NULL;
+			*(char **)p = nullptr;
 		else
 		{
 			*(char **)p = (char *) gi.TagMalloc ((int) len, TAG_LEVEL);
@@ -351,21 +351,21 @@ void ReadField (FILE *f, field_t *field, byte *base)
 	case F_EDICT:
 		index = *(int *)p;
 		if ( index == -1 )
-			*(edict_t **)p = NULL;
+			*(edict_t **)p = nullptr;
 		else
 			*(edict_t **)p = &g_edicts[index];
 		break;
 	case F_CLIENT:
 		index = *(int *)p;
 		if ( index == -1 )
-			*(gclient_t **)p = NULL;
+			*(gclient_t **)p = nullptr;
 		else
 			*(gclient_t **)p = &game.clients[index];
 		break;
 	case F_ITEM:
 		index = *(int *)p;
 		if ( index == -1 )
-			*(gitem_t **)p = NULL;
+			*(gitem_t **)p = nullptr;
 		else
 			*(gitem_t **)p = &itemlist[index];
 		break;
@@ -374,7 +374,7 @@ void ReadField (FILE *f, field_t *field, byte *base)
 	case F_FUNCTION:
 		index = *(int *)p;
 		if ( index == 0 )
-			*(byte **)p = NULL;
+			*(byte **)p = nullptr;
 		else
 			*(byte **)p = ((byte *)InitGame) + index;
 		break;
@@ -383,7 +383,7 @@ void ReadField (FILE *f, field_t *field, byte *base)
 	case F_MMOVE:
 		index = *(int *)p;
 		if (index == 0)
-			*(byte **)p = NULL;
+			*(byte **)p = nullptr;
 		else
 			*(byte **)p = (byte *)&mmove_reloc + index;
 		break;

@@ -37,8 +37,8 @@ G_Find
 Searches all active entities for the next one that holds
 the matching string at fieldofs (use the FOFS() macro) in the structure.
 
-Searches beginning at the edict after from, or the beginning if NULL
-NULL will be returned if the end of the list is reached.
+Searches beginning at the edict after from, or the beginning if nullptr
+nullptr will be returned if the end of the list is reached.
 
 =============
 */
@@ -62,7 +62,7 @@ edict_t *G_Find (edict_t *from, int fieldofs, char *match)
 			return from;
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 
@@ -97,7 +97,7 @@ edict_t *findradius (edict_t *from, vec3_t org, float rad)
 		return from;
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 
@@ -108,8 +108,8 @@ G_PickTarget
 Searches all active entities for the next one that holds
 the matching string at fieldofs (use the FOFS() macro) in the structure.
 
-Searches beginning at the edict after from, or the beginning if NULL
-NULL will be returned if the end of the list is reached.
+Searches beginning at the edict after from, or the beginning if nullptr
+nullptr will be returned if the end of the list is reached.
 
 =============
 */
@@ -117,14 +117,14 @@ const size_t MAXCHOICES	= 8;
 
 edict_t *G_PickTarget (char *targetname)
 {
-	edict_t	*ent = NULL;
+	edict_t	*ent = nullptr;
 	int		num_choices = 0;
 	edict_t	*choice[MAXCHOICES];
 
 	if (!targetname)
 	{
-		gi.dprintf("G_PickTarget called with NULL targetname\n");
-		return NULL;
+		gi.dprintf("G_PickTarget called with nullptr targetname\n");
+		return nullptr;
 	}
 
 	while(1)
@@ -140,7 +140,7 @@ edict_t *G_PickTarget (char *targetname)
 	if (!num_choices)
 	{
 		gi.dprintf("G_PickTarget: target %s not found\n", targetname);
-		return NULL;
+		return nullptr;
 	}
 
 	return choice[irandom(num_choices - 1)];
@@ -211,7 +211,7 @@ void G_UseTargets (edict_t *ent, edict_t *activator)
 //
 	if (ent->killtarget)
 	{
-		t = NULL;
+		t = nullptr;
 		while ((t = G_Find (t, FOFS(targetname), ent->killtarget)))
 		{
 			G_FreeEdict (t);
@@ -228,7 +228,7 @@ void G_UseTargets (edict_t *ent, edict_t *activator)
 //
 	if (ent->target)
 	{
-		t = NULL;
+		t = nullptr;
 		while ((t = G_Find (t, FOFS(targetname), ent->target)))
 		{
 			// doors fire area portals in a specific way
@@ -323,7 +323,7 @@ void G_SetMovedir (vec3_t angles, vec3_t movedir)
 	}
 	else
 	{
-		AngleVectors (angles, movedir, NULL, NULL);
+		AngleVectors (angles, movedir, nullptr, nullptr);
 	}
 
 	VectorClear (angles);
@@ -493,7 +493,7 @@ void	G_TouchTriggers (edict_t *ent)
 			continue;
 		if (!hit->touch)
 			continue;
-		hit->touch (hit, ent, NULL, NULL);
+		hit->touch (hit, ent, nullptr, nullptr);
 	}
 }
 
@@ -521,7 +521,7 @@ void	G_TouchSolids (edict_t *ent)
 		if (!hit->inuse)
 			continue;
 		if (ent->touch)
-			ent->touch (hit, ent, NULL, NULL);
+			ent->touch (hit, ent, nullptr, nullptr);
 		if (!ent->inuse)
 			break;
 	}
@@ -552,7 +552,7 @@ bool KillBox (edict_t *ent)
 
 	while (1)
 	{
-		tr = gi.trace (ent->s.origin, ent->mins, ent->maxs, ent->s.origin, NULL, MASK_PLAYERSOLID);
+		tr = gi.trace (ent->s.origin, ent->mins, ent->maxs, ent->s.origin, nullptr, MASK_PLAYERSOLID);
 		if (!tr.ent)
 			break;
 

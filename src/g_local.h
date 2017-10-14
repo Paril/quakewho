@@ -1056,7 +1056,7 @@ struct gclient_t
 struct edict_t
 {
 	entity_state_t	s;
-	gclient_t	*client;	// NULL if not a player
+	gclient_t	*client;	// nullptr if not a player
 									// the server expects the first part
 									// of gclient_t to be a player_state_t
 									// but the rest of it is opaque

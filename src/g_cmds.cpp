@@ -236,7 +236,7 @@ void Cmd_Give_f (edict_t *ent)
 		it_ent = G_Spawn();
 		it_ent->classname = it->classname;
 		SpawnItem (it_ent, it);
-		Touch_Item (it_ent, ent, NULL, NULL);
+		Touch_Item (it_ent, ent, nullptr, nullptr);
 		if (it_ent->inuse)
 			G_FreeEdict(it_ent);
 
@@ -290,7 +290,7 @@ void Cmd_Give_f (edict_t *ent)
 		it_ent = G_Spawn();
 		it_ent->classname = it->classname;
 		SpawnItem (it_ent, it);
-		Touch_Item (it_ent, ent, NULL, NULL);
+		Touch_Item (it_ent, ent, nullptr, nullptr);
 		if (it_ent->inuse)
 			G_FreeEdict(it_ent);
 	}
@@ -852,7 +852,7 @@ void Cmd_Say_f (edict_t *ent, bool team, bool arg0)
 	}
 
 	if (dedicated->value)
-		gi.cprintf(NULL, PRINT_CHAT, "%s", text);
+		gi.cprintf(nullptr, PRINT_CHAT, "%s", text);
 
 	for (j = 1; j <= game.maxclients; j++)
 	{

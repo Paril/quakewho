@@ -109,14 +109,14 @@ void gib_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf
 	if (!self->groundentity)
 		return;
 
-	self->touch = NULL;
+	self->touch = nullptr;
 
 	if (plane)
 	{
 		gi.sound (self, CHAN_VOICE, gi.soundindex ("misc/fhit3.wav"), 1, ATTN_NORM, 0);
 
 		vectoangles (plane->normal, normal_angles);
-		AngleVectors (normal_angles, NULL, right, NULL);
+		AngleVectors (normal_angles, nullptr, right, nullptr);
 		vectoangles (right, self->s.angles);
 
 		if (self->s.modelindex == sm_meat_index)
@@ -266,7 +266,7 @@ void ThrowClientHead (edict_t *self, int damage)
 	}
 	else
 	{
-		self->think = NULL;
+		self->think = nullptr;
 		self->nextthink = 0;
 	}
 
@@ -364,7 +364,7 @@ void path_corner_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface
 	if (self->target)
 		next = G_PickTarget(self->target);
 	else
-		next = NULL;
+		next = nullptr;
 
 	if ((next) && (next->spawnflags & 1))
 	{
@@ -436,7 +436,7 @@ void point_combat_touch (edict_t *self, edict_t *other, cplane_t *plane, csurfac
 			gi.dprintf("%s at %s target %s does not exist\n", self->classname, vtos(self->s.origin), self->target);
 			other->movetarget = self;
 		}
-		self->target = NULL;
+		self->target = nullptr;
 	}
 	else if ((self->spawnflags & 1) && !(other->flags & (FL_SWIM|FL_FLY)))
 	{
@@ -447,8 +447,8 @@ void point_combat_touch (edict_t *self, edict_t *other, cplane_t *plane, csurfac
 
 	if (other->movetarget == self)
 	{
-		other->target = NULL;
-		other->movetarget = NULL;
+		other->target = nullptr;
+		other->movetarget = nullptr;
 		other->goalentity = other->enemy;
 		other->monsterinfo.aiflags &= ~AI_COMBAT_POINT;
 	}
@@ -607,7 +607,7 @@ void func_wall_use (edict_t *self, edict_t *other, edict_t *activator)
 	gi.linkentity (self);
 
 	if (!(self->spawnflags & 2))
-		self->use = NULL;
+		self->use = nullptr;
 }
 
 void SP_func_wall (edict_t *self)
@@ -685,7 +685,7 @@ void func_object_use (edict_t *self, edict_t *other, edict_t *activator)
 {
 	self->solid = SOLID_BSP;
 	self->svflags &= ~SVF_NOCLIENT;
-	self->use = NULL;
+	self->use = nullptr;
 	KillBox (self);
 	func_object_release (self);
 }
@@ -759,7 +759,7 @@ void func_explosive_explode (edict_t *self, edict_t *inflictor, edict_t *attacke
 	self->takedamage = DAMAGE_NO;
 
 	if (self->dmg)
-		T_RadiusDamage (self, attacker, self->dmg, NULL, self->dmg+40, MOD_EXPLOSIVE);
+		T_RadiusDamage (self, attacker, self->dmg, nullptr, self->dmg+40, MOD_EXPLOSIVE);
 
 	VectorSubtract (self->s.origin, inflictor->s.origin, self->velocity);
 	VectorNormalize (self->velocity);
@@ -816,7 +816,7 @@ void func_explosive_spawn (edict_t *self, edict_t *other, edict_t *activator)
 {
 	self->solid = SOLID_BSP;
 	self->svflags &= ~SVF_NOCLIENT;
-	self->use = NULL;
+	self->use = nullptr;
 	KillBox (self);
 	gi.linkentity (self);
 }
@@ -891,7 +891,7 @@ void barrel_explode (edict_t *self)
 	float	spd;
 	vec3_t	save;
 
-	T_RadiusDamage (self, self->activator, self->dmg, NULL, self->dmg+40, MOD_BARREL);
+	T_RadiusDamage (self, self->activator, self->dmg, nullptr, self->dmg+40, MOD_BARREL);
 
 	VectorCopy (self->s.origin, save);
 	VectorMA (self->absmin, 0.5, self->size, self->s.origin);
@@ -1333,7 +1333,7 @@ void misc_viper_bomb_touch (edict_t *self, edict_t *other, cplane_t *plane, csur
 	G_UseTargets (self, self->activator);
 
 	self->s.origin[2] = self->absmin[2] + 1;
-	T_RadiusDamage (self, self, self->dmg, NULL, self->dmg+40, MOD_BOMB);
+	T_RadiusDamage (self, self, self->dmg, nullptr, self->dmg+40, MOD_BOMB);
 	BecomeExplosion2 (self);
 }
 
@@ -1342,7 +1342,7 @@ void misc_viper_bomb_prethink (edict_t *self)
 	vec3_t	v;
 	float	diff;
 
-	self->groundentity = NULL;
+	self->groundentity = nullptr;
 
 	diff = self->timestamp - level.time;
 	if (diff < -1.0)
@@ -1363,13 +1363,13 @@ void misc_viper_bomb_use (edict_t *self, edict_t *other, edict_t *activator)
 	self->solid = SOLID_BBOX;
 	self->svflags &= ~SVF_NOCLIENT;
 	self->s.effects |= EF_ROCKET;
-	self->use = NULL;
+	self->use = nullptr;
 	self->movetype = MOVETYPE_TOSS;
 	self->prethink = misc_viper_bomb_prethink;
 	self->touch = misc_viper_bomb_touch;
 	self->activator = activator;
 
-	viper = G_Find (NULL, FOFS(classname), "misc_viper");
+	viper = G_Find (nullptr, FOFS(classname), "misc_viper");
 	VectorScale (viper->moveinfo.dir, viper->moveinfo.speed, self->velocity);
 
 	self->timestamp = level.time;
@@ -1633,7 +1633,7 @@ const size_t CLOCK_MESSAGE_SIZE	= 16;
 
 static void func_clock_reset (edict_t *self)
 {
-	self->activator = NULL;
+	self->activator = nullptr;
 	if (self->spawnflags & 1)
 	{
 		self->health = 0;
@@ -1677,7 +1677,7 @@ void func_clock_think (edict_t *self)
 {
 	if (!self->enemy)
 	{
-		self->enemy = G_Find (NULL, FOFS(targetname), self->target);
+		self->enemy = G_Find (nullptr, FOFS(targetname), self->target);
 		if (!self->enemy)
 			return;
 	}
@@ -1720,7 +1720,7 @@ void func_clock_think (edict_t *self)
 			savetarget = self->target;
 			savemessage = self->message;
 			self->target = self->pathtarget;
-			self->message = NULL;
+			self->message = nullptr;
 			G_UseTargets (self, self->activator);
 			self->target = savetarget;
 			self->message = savemessage;
@@ -1741,7 +1741,7 @@ void func_clock_think (edict_t *self)
 void func_clock_use (edict_t *self, edict_t *other, edict_t *activator)
 {
 	if (!(self->spawnflags & 8))
-		self->use = NULL;
+		self->use = nullptr;
 	if (self->activator)
 		return;
 	self->activator = activator;
@@ -1788,7 +1788,7 @@ void teleporter_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_
 
 	if (!other->client)
 		return;
-	dest = G_Find (NULL, FOFS(targetname), self->target);
+	dest = G_Find (nullptr, FOFS(targetname), self->target);
 	if (!dest)
 	{
 		gi.dprintf ("Couldn't find destination\n");

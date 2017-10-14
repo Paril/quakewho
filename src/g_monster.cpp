@@ -148,7 +148,7 @@ void M_CheckGround (edict_t *ent)
 
 	if (ent->velocity[2] > 100)
 	{
-		ent->groundentity = NULL;
+		ent->groundentity = nullptr;
 		return;
 	}
 
@@ -162,7 +162,7 @@ void M_CheckGround (edict_t *ent)
 	// check steepness
 	if ( trace.plane.normal[2] < 0.7 && !trace.startsolid)
 	{
-		ent->groundentity = NULL;
+		ent->groundentity = nullptr;
 		return;
 	}
 
@@ -476,7 +476,7 @@ void monster_triggered_spawn (edict_t *self)
 	}
 	else
 	{
-		self->enemy = NULL;
+		self->enemy = nullptr;
 	}
 }
 
@@ -516,7 +516,7 @@ void monster_death_use (edict_t *self)
 	if (self->item)
 	{
 		Drop_Item (self, self->item);
-		self->item = NULL;
+		self->item = nullptr;
 	}
 
 	if (self->deathtarget)
@@ -594,10 +594,10 @@ void monster_start_go (edict_t *self)
 		bool		fixup;
 		edict_t		*target;
 
-		target = NULL;
+		target = nullptr;
 		notcombat = false;
 		fixup = false;
-		while ((target = G_Find (target, FOFS(targetname), self->target)) != NULL)
+		while ((target = G_Find (target, FOFS(targetname), self->target)) != nullptr)
 		{
 			if (strcmp(target->classname, "point_combat") == 0)
 			{
@@ -612,7 +612,7 @@ void monster_start_go (edict_t *self)
 		if (notcombat && self->combattarget)
 			gi.dprintf("%s at %s has target with mixed types\n", self->classname, vtos(self->s.origin));
 		if (fixup)
-			self->target = NULL;
+			self->target = nullptr;
 	}
 
 	// validate combattarget
@@ -620,8 +620,8 @@ void monster_start_go (edict_t *self)
 	{
 		edict_t		*target;
 
-		target = NULL;
-		while ((target = G_Find (target, FOFS(targetname), self->combattarget)) != NULL)
+		target = nullptr;
+		while ((target = G_Find (target, FOFS(targetname), self->combattarget)) != nullptr)
 		{
 			if (strcmp(target->classname, "point_combat") != 0)
 			{
@@ -639,7 +639,7 @@ void monster_start_go (edict_t *self)
 		if (!self->movetarget)
 		{
 			gi.dprintf ("%s can't find target %s at %s\n", self->classname, self->target, vtos(self->s.origin));
-			self->target = NULL;
+			self->target = nullptr;
 			self->monsterinfo.pausetime = 100000000;
 			self->monsterinfo.stand (self);
 		}
@@ -648,11 +648,11 @@ void monster_start_go (edict_t *self)
 			VectorSubtract (self->goalentity->s.origin, self->s.origin, v);
 			self->ideal_yaw = self->s.angles[YAW] = vectoyaw(v);
 			self->monsterinfo.walk (self);
-			self->target = NULL;
+			self->target = nullptr;
 		}
 		else
 		{
-			self->goalentity = self->movetarget = NULL;
+			self->goalentity = self->movetarget = nullptr;
 			self->monsterinfo.pausetime = 100000000;
 			self->monsterinfo.stand (self);
 		}

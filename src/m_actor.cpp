@@ -37,51 +37,51 @@ char *actor_names[] =
 
 mframe_t actor_frames_stand [] =
 {
-	ai_stand, 0, NULL,
-	ai_stand, 0, NULL,
-	ai_stand, 0, NULL,
-	ai_stand, 0, NULL,
-	ai_stand, 0, NULL,
-	ai_stand, 0, NULL,
-	ai_stand, 0, NULL,
-	ai_stand, 0, NULL,
-	ai_stand, 0, NULL,
-	ai_stand, 0, NULL,
+	ai_stand, 0, nullptr,
+	ai_stand, 0, nullptr,
+	ai_stand, 0, nullptr,
+	ai_stand, 0, nullptr,
+	ai_stand, 0, nullptr,
+	ai_stand, 0, nullptr,
+	ai_stand, 0, nullptr,
+	ai_stand, 0, nullptr,
+	ai_stand, 0, nullptr,
+	ai_stand, 0, nullptr,
 
-	ai_stand, 0, NULL,
-	ai_stand, 0, NULL,
-	ai_stand, 0, NULL,
-	ai_stand, 0, NULL,
-	ai_stand, 0, NULL,
-	ai_stand, 0, NULL,
-	ai_stand, 0, NULL,
-	ai_stand, 0, NULL,
-	ai_stand, 0, NULL,
-	ai_stand, 0, NULL,
+	ai_stand, 0, nullptr,
+	ai_stand, 0, nullptr,
+	ai_stand, 0, nullptr,
+	ai_stand, 0, nullptr,
+	ai_stand, 0, nullptr,
+	ai_stand, 0, nullptr,
+	ai_stand, 0, nullptr,
+	ai_stand, 0, nullptr,
+	ai_stand, 0, nullptr,
+	ai_stand, 0, nullptr,
 
-	ai_stand, 0, NULL,
-	ai_stand, 0, NULL,
-	ai_stand, 0, NULL,
-	ai_stand, 0, NULL,
-	ai_stand, 0, NULL,
-	ai_stand, 0, NULL,
-	ai_stand, 0, NULL,
-	ai_stand, 0, NULL,
-	ai_stand, 0, NULL,
-	ai_stand, 0, NULL,
+	ai_stand, 0, nullptr,
+	ai_stand, 0, nullptr,
+	ai_stand, 0, nullptr,
+	ai_stand, 0, nullptr,
+	ai_stand, 0, nullptr,
+	ai_stand, 0, nullptr,
+	ai_stand, 0, nullptr,
+	ai_stand, 0, nullptr,
+	ai_stand, 0, nullptr,
+	ai_stand, 0, nullptr,
 
-	ai_stand, 0, NULL,
-	ai_stand, 0, NULL,
-	ai_stand, 0, NULL,
-	ai_stand, 0, NULL,
-	ai_stand, 0, NULL,
-	ai_stand, 0, NULL,
-	ai_stand, 0, NULL,
-	ai_stand, 0, NULL,
-	ai_stand, 0, NULL,
-	ai_stand, 0, NULL
+	ai_stand, 0, nullptr,
+	ai_stand, 0, nullptr,
+	ai_stand, 0, nullptr,
+	ai_stand, 0, nullptr,
+	ai_stand, 0, nullptr,
+	ai_stand, 0, nullptr,
+	ai_stand, 0, nullptr,
+	ai_stand, 0, nullptr,
+	ai_stand, 0, nullptr,
+	ai_stand, 0, nullptr
 };
-mmove_t actor_move_stand = {FRAME_stand101, FRAME_stand140, actor_frames_stand, NULL};
+mmove_t actor_move_stand = {FRAME_stand101, FRAME_stand140, actor_frames_stand, nullptr};
 
 void actor_stand (edict_t *self)
 {
@@ -95,19 +95,19 @@ void actor_stand (edict_t *self)
 
 mframe_t actor_frames_walk [] =
 {
-	ai_walk, 0,  NULL,
-	ai_walk, 6,  NULL,
-	ai_walk, 10, NULL,
-	ai_walk, 3,  NULL,
-	ai_walk, 2,  NULL,
-	ai_walk, 7,  NULL,
-	ai_walk, 10, NULL,
-	ai_walk, 1,  NULL,
-	ai_walk, 4,  NULL,
-	ai_walk, 0,  NULL,
-	ai_walk, 0,  NULL
+	ai_walk, 0,  nullptr,
+	ai_walk, 6,  nullptr,
+	ai_walk, 10, nullptr,
+	ai_walk, 3,  nullptr,
+	ai_walk, 2,  nullptr,
+	ai_walk, 7,  nullptr,
+	ai_walk, 10, nullptr,
+	ai_walk, 1,  nullptr,
+	ai_walk, 4,  nullptr,
+	ai_walk, 0,  nullptr,
+	ai_walk, 0,  nullptr
 };
-mmove_t actor_move_walk = {FRAME_walk01, FRAME_walk08, actor_frames_walk, NULL};
+mmove_t actor_move_walk = {FRAME_walk01, FRAME_walk08, actor_frames_walk, nullptr};
 
 void actor_walk (edict_t *self)
 {
@@ -117,20 +117,20 @@ void actor_walk (edict_t *self)
 
 mframe_t actor_frames_run [] =
 {
-	ai_run, 4,  NULL,
-	ai_run, 15, NULL,
-	ai_run, 15, NULL,
-	ai_run, 8,  NULL,
-	ai_run, 20, NULL,
-	ai_run, 15, NULL,
-	ai_run, 8,  NULL,
-	ai_run, 17, NULL,
-	ai_run, 12, NULL,
-	ai_run, -2, NULL,
-	ai_run, -2, NULL,
-	ai_run, -1, NULL
+	ai_run, 4,  nullptr,
+	ai_run, 15, nullptr,
+	ai_run, 15, nullptr,
+	ai_run, 8,  nullptr,
+	ai_run, 20, nullptr,
+	ai_run, 15, nullptr,
+	ai_run, 8,  nullptr,
+	ai_run, 17, nullptr,
+	ai_run, 12, nullptr,
+	ai_run, -2, nullptr,
+	ai_run, -2, nullptr,
+	ai_run, -1, nullptr
 };
-mmove_t actor_move_run = {FRAME_run02, FRAME_run07, actor_frames_run, NULL};
+mmove_t actor_move_run = {FRAME_run02, FRAME_run07, actor_frames_run, nullptr};
 
 void actor_run (edict_t *self)
 {
@@ -155,66 +155,66 @@ void actor_run (edict_t *self)
 
 mframe_t actor_frames_pain1 [] =
 {
-	ai_move, -5, NULL,
-	ai_move, 4,  NULL,
-	ai_move, 1,  NULL
+	ai_move, -5, nullptr,
+	ai_move, 4,  nullptr,
+	ai_move, 1,  nullptr
 };
 mmove_t actor_move_pain1 = {FRAME_pain101, FRAME_pain103, actor_frames_pain1, actor_run};
 
 mframe_t actor_frames_pain2 [] =
 {
-	ai_move, -4, NULL,
-	ai_move, 4,  NULL,
-	ai_move, 0,  NULL
+	ai_move, -4, nullptr,
+	ai_move, 4,  nullptr,
+	ai_move, 0,  nullptr
 };
 mmove_t actor_move_pain2 = {FRAME_pain201, FRAME_pain203, actor_frames_pain2, actor_run};
 
 mframe_t actor_frames_pain3 [] =
 {
-	ai_move, -1, NULL,
-	ai_move, 1,  NULL,
-	ai_move, 0,  NULL
+	ai_move, -1, nullptr,
+	ai_move, 1,  nullptr,
+	ai_move, 0,  nullptr
 };
 mmove_t actor_move_pain3 = {FRAME_pain301, FRAME_pain303, actor_frames_pain3, actor_run};
 
 mframe_t actor_frames_flipoff [] =
 {
-	ai_turn, 0,  NULL,
-	ai_turn, 0,  NULL,
-	ai_turn, 0,  NULL,
-	ai_turn, 0,  NULL,
-	ai_turn, 0,  NULL,
-	ai_turn, 0,  NULL,
-	ai_turn, 0,  NULL,
-	ai_turn, 0,  NULL,
-	ai_turn, 0,  NULL,
-	ai_turn, 0,  NULL,
-	ai_turn, 0,  NULL,
-	ai_turn, 0,  NULL,
-	ai_turn, 0,  NULL,
-	ai_turn, 0,  NULL
+	ai_turn, 0,  nullptr,
+	ai_turn, 0,  nullptr,
+	ai_turn, 0,  nullptr,
+	ai_turn, 0,  nullptr,
+	ai_turn, 0,  nullptr,
+	ai_turn, 0,  nullptr,
+	ai_turn, 0,  nullptr,
+	ai_turn, 0,  nullptr,
+	ai_turn, 0,  nullptr,
+	ai_turn, 0,  nullptr,
+	ai_turn, 0,  nullptr,
+	ai_turn, 0,  nullptr,
+	ai_turn, 0,  nullptr,
+	ai_turn, 0,  nullptr
 };
 mmove_t actor_move_flipoff = {FRAME_flip01, FRAME_flip14, actor_frames_flipoff, actor_run};
 
 mframe_t actor_frames_taunt [] =
 {
-	ai_turn, 0,  NULL,
-	ai_turn, 0,  NULL,
-	ai_turn, 0,  NULL,
-	ai_turn, 0,  NULL,
-	ai_turn, 0,  NULL,
-	ai_turn, 0,  NULL,
-	ai_turn, 0,  NULL,
-	ai_turn, 0,  NULL,
-	ai_turn, 0,  NULL,
-	ai_turn, 0,  NULL,
-	ai_turn, 0,  NULL,
-	ai_turn, 0,  NULL,
-	ai_turn, 0,  NULL,
-	ai_turn, 0,  NULL,
-	ai_turn, 0,  NULL,
-	ai_turn, 0,  NULL,
-	ai_turn, 0,  NULL
+	ai_turn, 0,  nullptr,
+	ai_turn, 0,  nullptr,
+	ai_turn, 0,  nullptr,
+	ai_turn, 0,  nullptr,
+	ai_turn, 0,  nullptr,
+	ai_turn, 0,  nullptr,
+	ai_turn, 0,  nullptr,
+	ai_turn, 0,  nullptr,
+	ai_turn, 0,  nullptr,
+	ai_turn, 0,  nullptr,
+	ai_turn, 0,  nullptr,
+	ai_turn, 0,  nullptr,
+	ai_turn, 0,  nullptr,
+	ai_turn, 0,  nullptr,
+	ai_turn, 0,  nullptr,
+	ai_turn, 0,  nullptr,
+	ai_turn, 0,  nullptr
 };
 mmove_t actor_move_taunt = {FRAME_taunt01, FRAME_taunt17, actor_frames_taunt, actor_run};
 
@@ -270,7 +270,7 @@ void actorMachineGun (edict_t *self)
 	vec3_t	start, target;
 	vec3_t	forward, right;
 
-	AngleVectors (self->s.angles, forward, right, NULL);
+	AngleVectors (self->s.angles, forward, right, nullptr);
 	G_ProjectSource (self->s.origin, monster_flash_offset[MZ2_ACTOR_MACHINEGUN_1], forward, right, start);
 	if (self->enemy)
 	{
@@ -289,7 +289,7 @@ void actorMachineGun (edict_t *self)
 	}
 	else
 	{
-		AngleVectors (self->s.angles, forward, NULL, NULL);
+		AngleVectors (self->s.angles, forward, nullptr, nullptr);
 	}
 	monster_fire_bullet (self, start, forward, 3, 4, DEFAULT_BULLET_HSPREAD, DEFAULT_BULLET_VSPREAD, MZ2_ACTOR_MACHINEGUN_1);
 }
@@ -307,31 +307,31 @@ void actor_dead (edict_t *self)
 
 mframe_t actor_frames_death1 [] =
 {
-	ai_move, 0,   NULL,
-	ai_move, 0,   NULL,
-	ai_move, -13, NULL,
-	ai_move, 14,  NULL,
-	ai_move, 3,   NULL,
-	ai_move, -2,  NULL,
-	ai_move, 1,   NULL
+	ai_move, 0,   nullptr,
+	ai_move, 0,   nullptr,
+	ai_move, -13, nullptr,
+	ai_move, 14,  nullptr,
+	ai_move, 3,   nullptr,
+	ai_move, -2,  nullptr,
+	ai_move, 1,   nullptr
 };
 mmove_t actor_move_death1 = {FRAME_death101, FRAME_death107, actor_frames_death1, actor_dead};
 
 mframe_t actor_frames_death2 [] =
 {
-	ai_move, 0,   NULL,
-	ai_move, 7,   NULL,
-	ai_move, -6,  NULL,
-	ai_move, -5,  NULL,
-	ai_move, 1,   NULL,
-	ai_move, 0,   NULL,
-	ai_move, -1,  NULL,
-	ai_move, -2,  NULL,
-	ai_move, -1,  NULL,
-	ai_move, -9,  NULL,
-	ai_move, -13, NULL,
-	ai_move, -13, NULL,
-	ai_move, 0,   NULL
+	ai_move, 0,   nullptr,
+	ai_move, 7,   nullptr,
+	ai_move, -6,  nullptr,
+	ai_move, -5,  nullptr,
+	ai_move, 1,   nullptr,
+	ai_move, 0,   nullptr,
+	ai_move, -1,  nullptr,
+	ai_move, -2,  nullptr,
+	ai_move, -1,  nullptr,
+	ai_move, -9,  nullptr,
+	ai_move, -13, nullptr,
+	ai_move, -13, nullptr,
+	ai_move, 0,   nullptr
 };
 mmove_t actor_move_death2 = {FRAME_death201, FRAME_death213, actor_frames_death2, actor_dead};
 
@@ -381,9 +381,9 @@ void actor_fire (edict_t *self)
 mframe_t actor_frames_attack [] =
 {
 	ai_charge, -2,  actor_fire,
-	ai_charge, -2,  NULL,
-	ai_charge, 3,   NULL,
-	ai_charge, 2,   NULL
+	ai_charge, -2,  nullptr,
+	ai_charge, 3,   nullptr,
+	ai_charge, 2,   nullptr
 };
 mmove_t actor_move_attack = {FRAME_attak01, FRAME_attak04, actor_frames_attack, actor_run};
 
@@ -405,7 +405,7 @@ void actor_use (edict_t *self, edict_t *other, edict_t *activator)
 	if ((!self->movetarget) || (strcmp(self->movetarget->classname, "target_actor") != 0))
 	{
 		gi.dprintf ("%s has bad target %s at %s\n", self->classname, self->target, vtos(self->s.origin));
-		self->target = NULL;
+		self->target = nullptr;
 		self->monsterinfo.pausetime = 100000000;
 		self->monsterinfo.stand (self);
 		return;
@@ -414,7 +414,7 @@ void actor_use (edict_t *self, edict_t *other, edict_t *activator)
 	VectorSubtract (self->goalentity->s.origin, self->s.origin, v);
 	self->ideal_yaw = self->s.angles[YAW] = vectoyaw(v);
 	self->monsterinfo.walk (self);
-	self->target = NULL;
+	self->target = nullptr;
 }
 
 
@@ -460,8 +460,8 @@ void SP_misc_actor (edict_t *self)
 	self->monsterinfo.walk = actor_walk;
 	self->monsterinfo.run = actor_run;
 	self->monsterinfo.attack = actor_attack;
-	self->monsterinfo.melee = NULL;
-	self->monsterinfo.sight = NULL;
+	self->monsterinfo.melee = nullptr;
+	self->monsterinfo.sight = nullptr;
 
 	self->monsterinfo.aiflags |= AI_GOOD_GUY;
 
@@ -502,7 +502,7 @@ void target_actor_touch (edict_t *self, edict_t *other, cplane_t *plane, csurfac
 	if (other->enemy)
 		return;
 
-	other->goalentity = other->movetarget = NULL;
+	other->goalentity = other->movetarget = nullptr;
 
 	if (self->message)
 	{
@@ -525,7 +525,7 @@ void target_actor_touch (edict_t *self, edict_t *other, cplane_t *plane, csurfac
 		
 		if (other->groundentity)
 		{
-			other->groundentity = NULL;
+			other->groundentity = nullptr;
 			other->velocity[2] = self->movedir[2];
 			gi.sound(other, CHAN_VOICE, gi.soundindex("player/male/jump1.wav"), 1, ATTN_NORM, 0);
 		}

@@ -42,7 +42,7 @@ static void SP_FixCoopSpots (edict_t *self)
 	edict_t	*spot;
 	vec3_t	d;
 
-	spot = NULL;
+	spot = nullptr;
 
 	while(1)
 	{
@@ -223,7 +223,7 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 	{
 		ff = meansOfDeath & MOD_FRIENDLY_FIRE;
 		mod = meansOfDeath & ~MOD_FRIENDLY_FIRE;
-		message = NULL;
+		message = nullptr;
 		message2 = "";
 
 		switch (mod)
@@ -309,7 +309,7 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 			gi.bprintf (PRINT_MEDIUM, "%s %s.\n", self->client->pers.netname, message);
 			if (deathmatch->value)
 				self->client->resp.score--;
-			self->enemy = NULL;
+			self->enemy = nullptr;
 			return;
 		}
 
@@ -424,9 +424,9 @@ void TossClientWeapon (edict_t *self)
 
 	item = self->client->pers.weapon;
 	if (! self->client->pers.inventory[self->client->ammo_index] )
-		item = NULL;
+		item = nullptr;
 	if (item && (strcmp (item->pickup_name, "Blaster") == 0))
-		item = NULL;
+		item = nullptr;
 
 	if (!((dmflags_t)dmflags->value & DF_QUAD_DROP))
 		quad = false;
@@ -742,11 +742,11 @@ edict_t *SelectRandomDeathmatchSpawnPoint (void)
 	int		selection;
 	float	range, range1, range2;
 
-	spot = NULL;
+	spot = nullptr;
 	range1 = range2 = 99999;
-	spot1 = spot2 = NULL;
+	spot1 = spot2 = nullptr;
 
-	while ((spot = G_Find (spot, FOFS(classname), "info_player_deathmatch")) != NULL)
+	while ((spot = G_Find (spot, FOFS(classname), "info_player_deathmatch")) != nullptr)
 	{
 		count++;
 		range = PlayersRangeFromSpot(spot);
@@ -763,18 +763,18 @@ edict_t *SelectRandomDeathmatchSpawnPoint (void)
 	}
 
 	if (!count)
-		return NULL;
+		return nullptr;
 
 	if (count <= 2)
 	{
-		spot1 = spot2 = NULL;
+		spot1 = spot2 = nullptr;
 	}
 	else
 		count -= 2;
 
 	selection = irandom(count - 1);
 
-	spot = NULL;
+	spot = nullptr;
 	do
 	{
 		spot = G_Find (spot, FOFS(classname), "info_player_deathmatch");
@@ -798,10 +798,10 @@ edict_t *SelectFarthestDeathmatchSpawnPoint (void)
 	edict_t	*spot;
 
 
-	spot = NULL;
-	bestspot = NULL;
+	spot = nullptr;
+	bestspot = nullptr;
 	bestdistance = 0;
-	while ((spot = G_Find (spot, FOFS(classname), "info_player_deathmatch")) != NULL)
+	while ((spot = G_Find (spot, FOFS(classname), "info_player_deathmatch")) != nullptr)
 	{
 		bestplayerdistance = PlayersRangeFromSpot (spot);
 
@@ -819,7 +819,7 @@ edict_t *SelectFarthestDeathmatchSpawnPoint (void)
 
 	// if there is a player just spawned on each and every start spot
 	// we have no choice to turn one into a telefrag meltdown
-	spot = G_Find (NULL, FOFS(classname), "info_player_deathmatch");
+	spot = G_Find (nullptr, FOFS(classname), "info_player_deathmatch");
 
 	return spot;
 }
@@ -836,23 +836,23 @@ edict_t *SelectDeathmatchSpawnPoint (void)
 edict_t *SelectCoopSpawnPoint (edict_t *ent)
 {
 	int		index;
-	edict_t	*spot = NULL;
+	edict_t	*spot = nullptr;
 	char	*target;
 
 	index = ent->client - game.clients;
 
 	// player 0 starts in normal player spawn point
 	if (!index)
-		return NULL;
+		return nullptr;
 
-	spot = NULL;
+	spot = nullptr;
 
 	// assume there are four coop spots at each spawnpoint
 	while (1)
 	{
 		spot = G_Find (spot, FOFS(classname), "info_player_coop");
 		if (!spot)
-			return NULL;	// we didn't have enough...
+			return nullptr;	// we didn't have enough...
 
 		target = spot->targetname;
 		if (!target)
@@ -879,7 +879,7 @@ Chooses a player start, deathmatch start, coop start, etc
 */
 void	SelectSpawnPoint (edict_t *ent, vec3_t origin, vec3_t angles)
 {
-	edict_t	*spot = NULL;
+	edict_t	*spot = nullptr;
 
 	if (deathmatch->value)
 		spot = SelectDeathmatchSpawnPoint ();
@@ -889,7 +889,7 @@ void	SelectSpawnPoint (edict_t *ent, vec3_t origin, vec3_t angles)
 	// find a single player start spot
 	if (!spot)
 	{
-		while ((spot = G_Find (spot, FOFS(classname), "info_player_start")) != NULL)
+		while ((spot = G_Find (spot, FOFS(classname), "info_player_start")) != nullptr)
 		{
 			if (!game.spawnpoint[0] && !spot->targetname)
 				break;
@@ -1165,7 +1165,7 @@ void PutClientInServer (edict_t *ent)
 	FetchClientEntData (ent);
 
 	// clear entity values
-	ent->groundentity = NULL;
+	ent->groundentity = nullptr;
 	ent->client = &game.clients[index];
 	ent->takedamage = DAMAGE_AIM;
 	ent->movetype = MOVETYPE_WALK;
@@ -1238,7 +1238,7 @@ void PutClientInServer (edict_t *ent)
 
 	// spawn a spectator
 	if (client->pers.spectator) {
-		client->chase_target = NULL;
+		client->chase_target = nullptr;
 
 		client->resp.spectator = true;
 
@@ -1705,7 +1705,7 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 				continue;	// duplicated
 			if (!other->touch)
 				continue;
-			other->touch (other, ent, NULL, NULL);
+			other->touch (other, ent, nullptr, nullptr);
 		}
 
 	}
@@ -1726,7 +1726,7 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 			client->latched_buttons = BUTTON_NONE;
 
 			if (client->chase_target) {
-				client->chase_target = NULL;
+				client->chase_target = nullptr;
 				client->ps.pmove.pm_flags &= ~PMF_NO_PREDICTION;
 			} else
 				GetChaseTarget(ent);

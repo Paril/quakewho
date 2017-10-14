@@ -185,7 +185,7 @@ void ChangeWeapon (edict_t *ent)
 
 	ent->client->pers.lastweapon = ent->client->pers.weapon;
 	ent->client->pers.weapon = ent->client->newweapon;
-	ent->client->newweapon = NULL;
+	ent->client->newweapon = nullptr;
 	ent->client->machinegun_shots = 0;
 
 	// set visible model
@@ -284,7 +284,7 @@ void Think_Weapon (edict_t *ent)
 	// if just died, put the weapon away
 	if (ent->health < 1)
 	{
-		ent->client->newweapon = NULL;
+		ent->client->newweapon = nullptr;
 		ChangeWeapon (ent);
 	}
 
@@ -558,7 +558,7 @@ void weapon_grenade_fire (edict_t *ent, bool held)
 		damage *= 4;
 
 	VectorSet(offset, 8, 8, ent->viewheight-8);
-	AngleVectors (ent->client->v_angle, forward, right, NULL);
+	AngleVectors (ent->client->v_angle, forward, right, nullptr);
 	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
 
 	timer = ent->client->grenade_time - level.time;
@@ -719,7 +719,7 @@ void weapon_grenadelauncher_fire (edict_t *ent)
 		damage *= 4;
 
 	VectorSet(offset, 8, 8, ent->viewheight-8);
-	AngleVectors (ent->client->v_angle, forward, right, NULL);
+	AngleVectors (ent->client->v_angle, forward, right, nullptr);
 	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
 
 	VectorScale (forward, -2, ent->client->kick_origin);
@@ -773,7 +773,7 @@ void Weapon_RocketLauncher_Fire (edict_t *ent)
 		radius_damage *= 4;
 	}
 
-	AngleVectors (ent->client->v_angle, forward, right, NULL);
+	AngleVectors (ent->client->v_angle, forward, right, nullptr);
 
 	VectorScale (forward, -2, ent->client->kick_origin);
 	ent->client->kick_angles[0] = -1;
@@ -821,7 +821,7 @@ void Blaster_Fire (edict_t *ent, vec3_t g_offset, int damage, bool hyper, entity
 
 	if (is_quad)
 		damage *= 4;
-	AngleVectors (ent->client->v_angle, forward, right, NULL);
+	AngleVectors (ent->client->v_angle, forward, right, nullptr);
 	VectorSet(offset, 24, 8, ent->viewheight-8);
 	VectorAdd (offset, g_offset, offset);
 	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
@@ -1008,7 +1008,7 @@ void Machinegun_Fire (edict_t *ent)
 
 	// get start / end positions
 	VectorAdd (ent->client->v_angle, ent->client->kick_angles, angles);
-	AngleVectors (angles, forward, right, NULL);
+	AngleVectors (angles, forward, right, nullptr);
 	VectorSet(offset, 0, 8, ent->viewheight-8);
 	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
 	fire_bullet (ent, start, forward, damage, kick, DEFAULT_BULLET_HSPREAD, DEFAULT_BULLET_VSPREAD, MOD_MACHINEGUN);
@@ -1195,7 +1195,7 @@ void weapon_shotgun_fire (edict_t *ent)
 		return;
 	}
 
-	AngleVectors (ent->client->v_angle, forward, right, NULL);
+	AngleVectors (ent->client->v_angle, forward, right, nullptr);
 
 	VectorScale (forward, -2, ent->client->kick_origin);
 	ent->client->kick_angles[0] = -2;
@@ -1245,7 +1245,7 @@ void weapon_supershotgun_fire (edict_t *ent)
 	int			damage = 6;
 	int			kick = 12;
 
-	AngleVectors (ent->client->v_angle, forward, right, NULL);
+	AngleVectors (ent->client->v_angle, forward, right, nullptr);
 
 	VectorScale (forward, -2, ent->client->kick_origin);
 	ent->client->kick_angles[0] = -2;
@@ -1262,10 +1262,10 @@ void weapon_supershotgun_fire (edict_t *ent)
 	v[PITCH] = ent->client->v_angle[PITCH];
 	v[YAW]   = ent->client->v_angle[YAW] - 5;
 	v[ROLL]  = ent->client->v_angle[ROLL];
-	AngleVectors (v, forward, NULL, NULL);
+	AngleVectors (v, forward, nullptr, nullptr);
 	fire_shotgun (ent, start, forward, damage, kick, DEFAULT_SHOTGUN_HSPREAD, DEFAULT_SHOTGUN_VSPREAD, DEFAULT_SSHOTGUN_COUNT/2, MOD_SSHOTGUN);
 	v[YAW]   = ent->client->v_angle[YAW] + 5;
-	AngleVectors (v, forward, NULL, NULL);
+	AngleVectors (v, forward, nullptr, nullptr);
 	fire_shotgun (ent, start, forward, damage, kick, DEFAULT_SHOTGUN_HSPREAD, DEFAULT_SHOTGUN_VSPREAD, DEFAULT_SSHOTGUN_COUNT/2, MOD_SSHOTGUN);
 
 	// send muzzle flash
@@ -1324,7 +1324,7 @@ void weapon_railgun_fire (edict_t *ent)
 		kick *= 4;
 	}
 
-	AngleVectors (ent->client->v_angle, forward, right, NULL);
+	AngleVectors (ent->client->v_angle, forward, right, nullptr);
 
 	VectorScale (forward, -3, ent->client->kick_origin);
 	ent->client->kick_angles[0] = -3;
@@ -1401,7 +1401,7 @@ void weapon_bfg_fire (edict_t *ent)
 	if (is_quad)
 		damage *= 4;
 
-	AngleVectors (ent->client->v_angle, forward, right, NULL);
+	AngleVectors (ent->client->v_angle, forward, right, nullptr);
 
 	VectorScale (forward, -2, ent->client->kick_origin);
 

@@ -608,7 +608,7 @@ void rotating_use (edict_t *self, edict_t *other, edict_t *activator)
 	{
 		self->s.sound = SOUND_NONE;
 		VectorClear (self->avelocity);
-		self->touch = NULL;
+		self->touch = nullptr;
 	}
 	else
 	{
@@ -652,7 +652,7 @@ void SP_func_rotating (edict_t *ent)
 		ent->blocked = rotating_blocked;
 
 	if (ent->spawnflags & 1)
-		ent->use (ent, NULL, NULL);
+		ent->use (ent, nullptr, nullptr);
 
 	if (ent->spawnflags & 64)
 		ent->s.effects |= EF_ANIM_ALL;
@@ -850,7 +850,7 @@ NOMONSTER	monsters will not trigger this door
 
 void door_use_areaportals (edict_t *self, bool open)
 {
-	edict_t	*t = NULL;
+	edict_t	*t = nullptr;
 
 	if (!self->target)
 		return;
@@ -959,8 +959,8 @@ void door_use (edict_t *self, edict_t *other, edict_t *activator)
 			// trigger all paired doors
 			for (ent = self ; ent ; ent = ent->teamchain)
 			{
-				ent->message = NULL;
-				ent->touch = NULL;
+				ent->message = nullptr;
+				ent->touch = nullptr;
 				door_go_down (ent);
 			}
 			return;
@@ -970,8 +970,8 @@ void door_use (edict_t *self, edict_t *other, edict_t *activator)
 	// trigger all paired doors
 	for (ent = self ; ent ; ent = ent->teamchain)
 	{
-		ent->message = NULL;
-		ent->touch = NULL;
+		ent->message = nullptr;
+		ent->touch = nullptr;
 		door_go_up (ent, activator);
 	}
 };
