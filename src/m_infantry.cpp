@@ -26,7 +26,6 @@ INFANTRY
 */
 
 #include "q_shared.h"
-#include "g_local.h"
 #include "m_infantry.h"
 
 void InfantryMachineGun (edict_t *self);

@@ -26,7 +26,6 @@ flyer
 */
 
 #include "q_shared.h"
-#include "g_local.h"
 #include "m_flyer.h"
 
 static flyeraction_t	nextmove;			// Used for start/stop frames

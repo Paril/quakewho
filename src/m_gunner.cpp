@@ -26,7 +26,6 @@ GUNNER
 */
 
 #include "q_shared.h"
-#include "g_local.h"
 #include "m_gunner.h"
 
 

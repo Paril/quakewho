@@ -26,7 +26,6 @@ MEDIC
 */
 
 #include "q_shared.h"
-#include "g_local.h"
 #include "m_medic.h"
 
 static soundindex_t	sound_idle1;

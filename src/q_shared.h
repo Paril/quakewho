@@ -1317,3 +1317,5 @@ struct player_state_t
 
 	short		stats[MAX_STATS];		// fast status bar updates
 };
+
+#include "g_local.h"

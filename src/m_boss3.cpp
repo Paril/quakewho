@@ -26,7 +26,6 @@ boss3
 */
 
 #include "q_shared.h"
-#include "g_local.h"
 #include "m_boss32.h"
 
 void Use_Boss3 (edict_t *ent, edict_t *other, edict_t *activator)

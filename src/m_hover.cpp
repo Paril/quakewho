@@ -26,7 +26,6 @@ hover
 */
 
 #include "q_shared.h"
-#include "g_local.h"
 #include "m_hover.h"
 
 static soundindex_t	sound_pain1;

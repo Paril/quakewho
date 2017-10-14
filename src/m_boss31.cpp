@@ -26,7 +26,6 @@ jorg
 */
 
 #include "q_shared.h"
-#include "g_local.h"
 #include "m_boss31.h"
 
 void SP_monster_makron (edict_t *self);

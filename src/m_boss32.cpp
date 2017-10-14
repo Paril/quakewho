@@ -26,7 +26,6 @@ Makron -- Final Boss
 */
 
 #include "q_shared.h"
-#include "g_local.h"
 #include "m_boss32.h"
 
 void MakronRailgun (edict_t *self);

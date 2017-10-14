@@ -26,7 +26,6 @@ boss2
 */
 
 #include "q_shared.h"
-#include "g_local.h"
 #include "m_boss2.h"
 
 void BossExplode (edict_t *self);

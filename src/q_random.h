@@ -15,5 +15,3 @@ inline float crandom(const float &max) { return random(-max, max); }
 
 inline bool prandom(const int &pct) { return irandom(100) < pct; }
 inline bool prandom(const float &pct) { return random(100) < pct; }
-
-#pragma deprecated(rand)

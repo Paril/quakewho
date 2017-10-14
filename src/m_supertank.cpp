@@ -26,7 +26,6 @@ SUPERTANK
 */
 
 #include "q_shared.h"
-#include "g_local.h"
 #include "m_supertank.h"
 
 static soundindex_t	sound_pain1;
