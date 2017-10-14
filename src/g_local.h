@@ -178,54 +178,12 @@ enum aistate_t : uint8_t
 	AS_MISSILE
 };
 
-// armor types
-enum armortype_t
-{
-	ARMOR_NONE,
-	ARMOR_JACKET,
-	ARMOR_COMBAT,
-	ARMOR_BODY,
-	ARMOR_SHARD
-};
-
-// power armor types
-enum powerarmor_t : uint8_t
-{
-	POWER_ARMOR_NONE,
-	POWER_ARMOR_SCREEN,
-	POWER_ARMOR_SHIELD
-};
-
 // handedness values
 enum handedness_t : uint8_t
 {
 	RIGHT_HANDED,
 	LEFT_HANDED,
 	CENTER_HANDED
-};
-
-// game.serverflags values
-enum serverflags_t : uint8_t
-{
-	SFL_CROSS_TRIGGER_1 = bit(0),
-	SFL_CROSS_TRIGGER_2 = bit(1),
-	SFL_CROSS_TRIGGER_3 = bit(2),
-	SFL_CROSS_TRIGGER_4 = bit(3),
-	SFL_CROSS_TRIGGER_5 = bit(4),
-	SFL_CROSS_TRIGGER_6 = bit(5),
-	SFL_CROSS_TRIGGER_7 = bit(6),
-	SFL_CROSS_TRIGGER_8 = bit(7),
-	SFL_CROSS_TRIGGER_MASK = 0xFF
-};
-
-MAKE_BITFLAGS(serverflags_t);
-
-// noise types for PlayerNoise
-enum playernoise_t : uint8_t
-{
-	PNOISE_SELF,
-	PNOISE_WEAPON,
-	PNOISE_IMPACT,
 };
 
 // edict->movetype values
@@ -244,17 +202,13 @@ enum movetype_t : uint8_t
 	MOVETYPE_BOUNCE
 };
 
-
-
-struct gitem_armor_t
+// power armor types
+enum powerarmor_t : uint8_t
 {
-	int32_t		base_count;
-	int32_t		max_count;
-	vec_t	normal_protection;
-	vec_t	energy_protection;
-	int32_t		armor;
+	POWER_ARMOR_NONE,
+	POWER_ARMOR_SCREEN,
+	POWER_ARMOR_SHIELD
 };
-
 
 // gitem_t->flags
 enum gitem_flags_t : uint8_t
@@ -289,34 +243,27 @@ enum gitem_weapmodel_t : uint8_t
 
 struct gitem_t
 {
-	char		*classname;	// spawning name
-	bool		(*pickup)(edict_t *ent, edict_t *other);
-	void		(*use)(edict_t *ent, gitem_t *item);
-	void		(*drop)(edict_t *ent, gitem_t *item);
-	void		(*weaponthink)(edict_t *ent);
-	char		*pickup_sound;
-	char		*world_model;
-	entity_effects_t world_model_flags;
-	char		*view_model;
+	char				*classname;	// spawning name
+	void				(*use)(edict_t *ent, gitem_t *item);
+	void				(*weaponthink)(edict_t *ent);
+	char				*view_model;
 
 	// client side info
-	char		*icon;
-	char		*pickup_name;	// for printing on pickup
-	int32_t			count_width;		// number of digits to display by icon
+	char				*icon;
+	char				*pickup_name;	// for printing on pickup
+	int32_t				count_width;		// number of digits to display by icon
 
-	int32_t			quantity;		// for ammo how much, for weapons how much is used per shot
-	char		*ammo;			// for weapons
-	gitem_flags_t flags;			// IT_* flags
+	int32_t				quantity;		// for ammo how much, for weapons how much is used per shot
+	char				*ammo;			// for weapons
+	gitem_flags_t		flags;			// IT_* flags
 
-	gitem_weapmodel_t weapmodel;		// weapon model index (for weapons)
+	gitem_weapmodel_t	weapmodel;		// weapon model index (for weapons)
 
-	void		*info;
-	int32_t			tag;
+	void				*info;
+	int32_t				tag;
 
-	char		*precaches;		// string of all models, sounds, and images this item will use
+	char				*precaches;		// string of all models, sounds, and images this item will use
 };
-
-
 
 //
 // this structure is left intact through an entire game
@@ -325,28 +272,14 @@ struct gitem_t
 //
 struct game_locals_t
 {
-	char		helpmessage1[512];
-	char		helpmessage2[512];
-	int32_t			helpchanged;	// flash F1 icon if non 0, play sound
-								// and increment only if 1, 2, or 3
-
 	gclient_t	*clients;		// [maxclients]
 
-	// can't store spawnpoint in level, because
-	// it would get overwritten by the savegame restore
-	char		spawnpoint[512];	// needed for coop respawns
-
 	// store latched cvars here that we want to get at often
-	int32_t			maxclients;
-	int32_t			maxentities;
-
-	// cross level triggers
-	serverflags_t serverflags;
+	int32_t		maxclients;
+	int32_t		maxentities;
 
 	// items
-	int32_t			num_items;
-
-	bool		autosaved;
+	int32_t		num_items;
 };
 
 
@@ -356,7 +289,7 @@ struct game_locals_t
 //
 struct level_locals_t
 {
-	int32_t			framenum;
+	int32_t		framenum;
 	vec_t		time;
 
 	char		level_name[MAX_QPATH];	// the descriptive name (Outer Base, etc)
@@ -366,34 +299,14 @@ struct level_locals_t
 	// intermission state
 	vec_t		intermissiontime;		// time the intermission was started
 	char		*changemap;
-	int32_t			exitintermission;
+	int32_t		exitintermission;
 	vec3_t		intermission_origin;
 	vec3_t		intermission_angle;
 
-	edict_t		*sight_client;	// changed once each frame for coop games
-
-	edict_t		*sight_entity;
-	int32_t			sight_entity_framenum;
-	edict_t		*sound_entity;
-	int32_t			sound_entity_framenum;
-	edict_t		*sound2_entity;
-	int32_t			sound2_entity_framenum;
-
-	int32_t			pic_health;
-
-	int32_t			total_secrets;
-	int32_t			found_secrets;
-
-	int32_t			total_goals;
-	int32_t			found_goals;
-
-	int32_t			total_monsters;
-	int32_t			killed_monsters;
+	int32_t		pic_health;
 
 	edict_t		*current_entity;	// entity running from G_RunFrame
-	int32_t			body_que;			// dead bodies
-
-	int32_t			power_cubes;		// ugly necessity for coop
+	int32_t		body_que;			// dead bodies
 };
 
 
@@ -408,9 +321,9 @@ struct spawn_temp_t
 	vec3_t		skyaxis;
 	char		*nextmap;
 
-	int32_t			lip;
-	int32_t			distance;
-	int32_t			height;
+	int32_t		lip;
+	int32_t		distance;
+	int32_t		height;
 	char		*noise;
 	vec_t		pausetime;
 	char		*item;
@@ -470,8 +383,8 @@ struct mframe_t
 
 struct mmove_t
 {
-	int32_t			firstframe;
-	int32_t			lastframe;
+	int32_t		firstframe;
+	int32_t		lastframe;
 	mframe_t	*frame;
 	void		(*endfunc)(edict_t *self);
 };
@@ -480,7 +393,7 @@ struct monsterinfo_t
 {
 	mmove_t		*currentmove;
 	aiflags_t	aiflags;
-	int32_t			nextframe;
+	int32_t		nextframe;
 	vec_t		scale;
 
 	void		(*stand)(edict_t *self);
@@ -504,13 +417,11 @@ struct monsterinfo_t
 	aistate_t	attack_state;
 	bool		lefty;
 	vec_t		idle_time;
-	int32_t			linkcount;
+	int32_t		linkcount;
 
 	powerarmor_t power_armor_type;
-	int32_t			power_armor_power;
+	int32_t		power_armor_power;
 };
-
-
 
 extern	game_locals_t	game;
 extern	level_locals_t	level;
@@ -668,8 +579,6 @@ struct field_t
 	fieldflags_t flags;
 };
 
-
-extern	field_t fields[];
 extern	gitem_t	itemlist[];
 
 
@@ -682,22 +591,15 @@ void Cmd_Score_f (edict_t *ent);
 //
 // g_items.c
 //
-void PrecacheItem (gitem_t *it);
 void InitItems (void);
 void SetItemNames (void);
+void PrecacheItem (gitem_t *item);
 gitem_t	*FindItem (char *pickup_name);
 gitem_t	*FindItemByClassname (char *classname);
 #define	ITEM_INDEX(x) ((x)-itemlist)
-edict_t *Drop_Item (edict_t *ent, gitem_t *item);
-void SetRespawn (edict_t *ent, vec_t delay);
 void ChangeWeapon (edict_t *ent);
-void SpawnItem (edict_t *ent, gitem_t *item);
 void Think_Weapon (edict_t *ent);
-int32_t ArmorIndex (edict_t *ent);
-powerarmor_t PowerArmorType (edict_t *ent);
 gitem_t	*GetItemByIndex (int32_t index);
-bool Add_Ammo (edict_t *ent, gitem_t *item, int32_t count);
-void Touch_Item (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf);
 
 //
 // g_utils.c
@@ -789,8 +691,6 @@ void BecomeExplosion1(edict_t *self);
 //
 // g_ai.c
 //
-void AI_SetSightClient (void);
-
 void ai_stand (edict_t *self, vec_t dist);
 void ai_move (edict_t *self, vec_t dist);
 void ai_walk (edict_t *self, vec_t dist);
@@ -856,11 +756,6 @@ void G_SetSpectatorStats (edict_t *ent);
 void G_CheckChaseStats (edict_t *ent);
 void ValidateSelectedItem (edict_t *ent);
 void DeathmatchScoreboardMessage (edict_t *client, edict_t *killer);
-
-//
-// g_pweapon.c
-//
-void PlayerNoise(edict_t *who, vec3_t where, playernoise_t type);
 
 //
 // m_move.c
@@ -932,11 +827,7 @@ struct client_persistant_t
 	gitem_t		*weapon;
 	gitem_t		*lastweapon;
 
-	int32_t		power_cubes;	// used for tracking the cubes in coop games
 	int32_t		score;			// for calculating total unit score in coop games
-
-	int32_t		game_helpchanged;
-	int32_t		helpchanged;
 
 	bool		spectator;			// client is a spectator
 };
@@ -944,7 +835,6 @@ struct client_persistant_t
 // client data that stays across deathmatch respawns
 struct client_respawn_t
 {
-	client_persistant_t	coop_respawn;	// what to set client->pers to on a respawn
 	int32_t			enterframe;			// level.framenum the client entered the game
 	int32_t			score;				// frags, etc
 	vec3_t			cmd_angles;			// angles sent over in the last command
@@ -968,9 +858,6 @@ struct gclient_t
 	pmove_state_t		old_pmove;	// for detecting out-of-pmove changes
 
 	bool		showscores;			// set layout stat
-	bool		showinventory;		// set layout stat
-	bool		showhelp;
-	bool		showhelpicon;
 
 	int32_t		ammo_index;
 
@@ -984,7 +871,6 @@ struct gclient_t
 
 	// sum up damage over an entire frame, so
 	// shotgun blasts give a single big kick
-	int32_t		damage_armor;		// damage absorbed by armor
 	int32_t		damage_parmor;		// damage absorbed by power armor
 	int32_t		damage_blood;		// damage taken out of health
 	int32_t		damage_knockback;	// impact damage
@@ -1007,9 +893,6 @@ struct gclient_t
 
 	vec_t		next_drown_time;
 	waterlevel_t old_waterlevel;
-	bool		breather_sound;
-
-	int32_t		machinegun_shots;	// for weapon raising
 
 	// animation vars
 	int32_t		anim_end;
@@ -1017,14 +900,6 @@ struct gclient_t
 	bool		anim_duck;
 	bool		anim_run;
 
-	// powerup timers
-	vec_t		quad_framenum;
-	vec_t		invincible_framenum;
-	vec_t		breather_framenum;
-	vec_t		enviro_framenum;
-
-	bool		grenade_blew_up;
-	vec_t		grenade_time;
 	int32_t		silencer_shots;
 	soundindex_t weapon_sound;
 
@@ -1157,9 +1032,6 @@ struct edict_t
 	edict_t		*teamchain;
 	edict_t		*teammaster;
 
-	edict_t		*mynoise;		// can go in client only
-	edict_t		*mynoise2;
-
 	soundindex_t noise_index;
 	soundindex_t noise_index2;
 	vec_t		volume;
@@ -1183,10 +1055,7 @@ struct edict_t
 
 	int32_t		style;			// also used as areaportal number
 
-	gitem_t		*item;			// for bonus items
-
 	// common data blocks
 	moveinfo_t		moveinfo;
 	monsterinfo_t	monsterinfo;
 };
-

@@ -113,31 +113,6 @@ void SP_target_speaker (edict_t *ent)
 	gi.linkentity (ent);
 }
 
-
-//==========================================================
-
-/*QUAKED target_help (1 0 1) (-16 -16 -24) (16 16 24) help1
-When fired, the "message" key becomes the current personal computer string, and the message light will be set on all clients status bars.
-*/
-void SP_target_help(edict_t *ent)
-{
-	G_FreeEdict (ent);
-}
-
-//==========================================================
-
-void SP_target_secret (edict_t *ent)
-{
-	G_FreeEdict (ent);
-}
-
-//==========================================================
-
-void SP_target_goal (edict_t *ent)
-{
-	G_FreeEdict (ent);
-}
-
 //==========================================================
 
 
@@ -183,15 +158,6 @@ void SP_target_explosion (edict_t *ent)
 	ent->use = use_target_explosion;
 	ent->svflags = SVF_NOCLIENT;
 }
-
-
-//==========================================================
-
-void SP_target_changelevel (edict_t *ent)
-{
-	G_FreeEdict (ent);
-}
-
 
 //==========================================================
 
@@ -316,19 +282,6 @@ void SP_target_blaster (edict_t *self)
 		self->speed = 1000;
 
 	self->svflags = SVF_NOCLIENT;
-}
-
-
-//==========================================================
-
-void SP_target_crosslevel_trigger (edict_t *self)
-{
-	G_FreeEdict (self);
-}
-
-void SP_target_crosslevel_target (edict_t *self)
-{
-	G_FreeEdict (self);
 }
 
 //==========================================================
@@ -490,13 +443,6 @@ void SP_target_laser (edict_t *self)
 	// let everything else get spawned before we start firing
 	self->think = target_laser_start;
 	self->nextthink = level.time + 1;
-}
-
-//==========================================================
-
-void SP_target_lightramp (edict_t *self)
-{
-	G_FreeEdict (self);
 }
 
 //==========================================================

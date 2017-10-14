@@ -101,7 +101,6 @@ void Killed (edict_t *targ, edict_t *inflictor, edict_t *attacker, int32_t damag
 //		targ->svflags |= SVF_DEADMONSTER;	// now treat as a different content type
 		if (!(targ->monsterinfo.aiflags & AI_GOOD_GUY))
 		{
-			level.killed_monsters++;
 			//if (coop->value && attacker->client)
 			//	attacker->client->resp.score++;
 			// medics won't heal monsters that they kill themselves
@@ -187,16 +186,7 @@ static int32_t CheckPowerArmor (edict_t *ent, const vec3_t point, const vec3_t n
 	if (dflags & DAMAGE_NO_ARMOR)
 		return 0;
 
-	if (client)
-	{
-		power_armor_type = PowerArmorType (ent);
-		if (power_armor_type != POWER_ARMOR_NONE)
-		{
-			index = ITEM_INDEX(FindItem("Cells"));
-			power = client->pers.inventory[index];
-		}
-	}
-	else if (ent->svflags & SVF_MONSTER)
+	if (!client && (ent->svflags & SVF_MONSTER))
 	{
 		power_armor_type = ent->monsterinfo.power_armor_type;
 		power = ent->monsterinfo.power_armor_power;
@@ -249,46 +239,6 @@ static int32_t CheckPowerArmor (edict_t *ent, const vec3_t point, const vec3_t n
 		client->pers.inventory[index] -= power_used;
 	else
 		ent->monsterinfo.power_armor_power -= power_used;
-	return save;
-}
-
-static int32_t CheckArmor (edict_t *ent, const vec3_t point, const vec3_t normal, int32_t damage, int32_t te_sparks, damageflag_t dflags)
-{
-	gclient_t	*client;
-	int32_t			save;
-	int32_t			index;
-	gitem_t		*armor;
-
-	if (!damage)
-		return 0;
-
-	client = ent->client;
-
-	if (!client)
-		return 0;
-
-	if (dflags & DAMAGE_NO_ARMOR)
-		return 0;
-
-	index = ArmorIndex (ent);
-	if (!index)
-		return 0;
-
-	armor = GetItemByIndex (index);
-
-	if (dflags & DAMAGE_ENERGY)
-		save = ceil(((gitem_armor_t *)armor->info)->energy_protection*damage);
-	else
-		save = ceil(((gitem_armor_t *)armor->info)->normal_protection*damage);
-	if (save >= client->pers.inventory[index])
-		save = client->pers.inventory[index];
-
-	if (!save)
-		return 0;
-
-	client->pers.inventory[index] -= save;
-	SpawnDamage (te_sparks, point, normal, save);
-
 	return save;
 }
 
@@ -377,11 +327,10 @@ bool CheckTeamDamage (edict_t *targ, edict_t *attacker)
 void T_Damage (edict_t *targ, edict_t *inflictor, edict_t *attacker, const vec3_t dir, const vec3_t point, const vec3_t normal, int32_t damage, int32_t knockback, damageflag_t dflags, meansofdeath_t mod)
 {
 	gclient_t	*client;
-	int32_t			take;
-	int32_t			save;
-	int32_t			asave;
-	int32_t			psave;
-	int32_t			te_sparks;
+	int32_t		take;
+	int32_t		save;
+	int32_t		psave;
+	int32_t		te_sparks;
 
 	if (!targ->takedamage)
 		return;
@@ -399,6 +348,7 @@ void T_Damage (edict_t *targ, edict_t *inflictor, edict_t *attacker, const vec3_
 				mod |= MOD_FRIENDLY_FIRE;
 		}
 	}
+
 	meansOfDeath = mod;
 
 	client = targ->client;
@@ -439,33 +389,15 @@ void T_Damage (edict_t *targ, edict_t *inflictor, edict_t *attacker, const vec3_
 	save = 0;
 
 	// check for godmode
-	if ( (targ->flags & FL_GODMODE) && !(dflags & DAMAGE_NO_PROTECTION) )
+	if ((targ->flags & FL_GODMODE) && !(dflags & DAMAGE_NO_PROTECTION))
 	{
 		take = 0;
 		save = damage;
 		SpawnDamage (te_sparks, point, normal, save);
 	}
 
-	// check for invincibility
-	if ((client && client->invincible_framenum > level.framenum ) && !(dflags & DAMAGE_NO_PROTECTION))
-	{
-		if (targ->pain_debounce_time < level.time)
-		{
-			gi.sound(targ, CHAN_ITEM, gi.soundindex("items/protect4.wav"), 1, ATTN_NORM, 0);
-			targ->pain_debounce_time = level.time + 2;
-		}
-		take = 0;
-		save = damage;
-	}
-
 	psave = CheckPowerArmor (targ, point, normal, take, dflags);
 	take -= psave;
-
-	asave = CheckArmor (targ, point, normal, take, te_sparks, dflags);
-	take -= asave;
-
-	//treat cheat/powerup savings the same as armor
-	asave += save;
 
 	// team damage avoidance
 	if (!(dflags & DAMAGE_NO_PROTECTION) && CheckTeamDamage (targ, attacker))
@@ -519,7 +451,6 @@ void T_Damage (edict_t *targ, edict_t *inflictor, edict_t *attacker, const vec3_
 	if (client)
 	{
 		client->damage_parmor += psave;
-		client->damage_armor += asave;
 		client->damage_blood += take;
 		client->damage_knockback += knockback;
 		VectorCopy (point, client->damage_from);

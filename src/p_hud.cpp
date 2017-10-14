@@ -41,14 +41,6 @@ void MoveClientToIntermission (edict_t *ent)
 	ent->client->ps.blend[3] = 0;
 	ent->client->ps.rdflags &= ~RDF_UNDERWATER;
 
-	// clean up powerup info
-	ent->client->quad_framenum = 0;
-	ent->client->invincible_framenum = 0;
-	ent->client->breather_framenum = 0;
-	ent->client->enviro_framenum = 0;
-	ent->client->grenade_blew_up = false;
-	ent->client->grenade_time = 0;
-
 	ent->viewheight = 0;
 	ent->s.modelindex = MODEL_NONE;
 	ent->s.modelindex2 = MODEL_NONE;
@@ -70,8 +62,6 @@ void BeginIntermission (edict_t *targ)
 
 	if (level.intermissiontime)
 		return;		// already activated
-
-	game.autosaved = false;
 
 	// respawn any dead clients
 	for (i=0 ; i<maxclients->value ; i++)
@@ -240,9 +230,6 @@ Display the scoreboard
 */
 void Cmd_Score_f (edict_t *ent)
 {
-	ent->client->showinventory = false;
-	ent->client->showhelp = false;
-
 	if (ent->client->showscores)
 	{
 		ent->client->showscores = false;
@@ -277,8 +264,6 @@ G_SetStats
 void G_SetStats (edict_t *ent)
 {
 	gitem_t		*item;
-	int32_t			index, cells = 0;
-	int32_t			power_armor_type;
 
 	//
 	// health
@@ -302,74 +287,12 @@ void G_SetStats (edict_t *ent)
 	}
 	
 	//
-	// armor
-	//
-	power_armor_type = PowerArmorType (ent);
-	if (power_armor_type)
-	{
-		cells = ent->client->pers.inventory[ITEM_INDEX(FindItem ("cells"))];
-		if (cells == 0)
-		{	// ran out of cells for power armor
-			ent->flags &= ~FL_POWER_ARMOR;
-			gi.sound(ent, CHAN_ITEM, gi.soundindex("misc/power2.wav"), 1, ATTN_NORM, 0);
-			power_armor_type = 0;
-		}
-	}
-
-	index = ArmorIndex (ent);
-	if (power_armor_type && (!index || (level.framenum & 8) ) )
-	{	// flash between power armor and other armor icon
-		ent->client->ps.stats[STAT_ARMOR_ICON] = gi.imageindex ("i_powershield");
-		ent->client->ps.stats[STAT_ARMOR] = cells;
-	}
-	else if (index)
-	{
-		item = GetItemByIndex (index);
-		ent->client->ps.stats[STAT_ARMOR_ICON] = gi.imageindex (item->icon);
-		ent->client->ps.stats[STAT_ARMOR] = ent->client->pers.inventory[index];
-	}
-	else
-	{
-		ent->client->ps.stats[STAT_ARMOR_ICON] = 0;
-		ent->client->ps.stats[STAT_ARMOR] = 0;
-	}
-
-	//
 	// pickup message
 	//
 	if (level.time > ent->client->pickup_msg_time)
 	{
 		ent->client->ps.stats[STAT_PICKUP_ICON] = 0;
 		ent->client->ps.stats[STAT_PICKUP_STRING] = 0;
-	}
-
-	//
-	// timers
-	//
-	if (ent->client->quad_framenum > level.framenum)
-	{
-		ent->client->ps.stats[STAT_TIMER_ICON] = gi.imageindex ("p_quad");
-		ent->client->ps.stats[STAT_TIMER] = (ent->client->quad_framenum - level.framenum)/10;
-	}
-	else if (ent->client->invincible_framenum > level.framenum)
-	{
-		ent->client->ps.stats[STAT_TIMER_ICON] = gi.imageindex ("p_invulnerability");
-		ent->client->ps.stats[STAT_TIMER] = (ent->client->invincible_framenum - level.framenum)/10;
-	}
-	else if (ent->client->enviro_framenum > level.framenum)
-	{
-		ent->client->ps.stats[STAT_TIMER_ICON] = gi.imageindex ("p_envirosuit");
-		ent->client->ps.stats[STAT_TIMER] = (ent->client->enviro_framenum - level.framenum)/10;
-	}
-	else if (ent->client->breather_framenum > level.framenum)
-	{
-		ent->client->ps.stats[STAT_TIMER_ICON] = gi.imageindex ("p_rebreather");
-		ent->client->ps.stats[STAT_TIMER] = (ent->client->breather_framenum - level.framenum)/10;
-	}
-	else
-	{
-		ent->client->ps.stats[STAT_TIMER_ICON] = 0;
-		ent->client->ps.stats[STAT_TIMER] = 0;
 	}
 
 	//
@@ -387,27 +310,13 @@ void G_SetStats (edict_t *ent)
 	//
 	ent->client->ps.stats[STAT_LAYOUTS] = 0;
 
-	if (ent->client->pers.health <= 0 || level.intermissiontime
-		|| ent->client->showscores)
+	if (ent->client->pers.health <= 0 || level.intermissiontime || ent->client->showscores)
 		ent->client->ps.stats[STAT_LAYOUTS] |= 1;
-	if (ent->client->showinventory && ent->client->pers.health > 0)
-		ent->client->ps.stats[STAT_LAYOUTS] |= 2;
 
 	//
 	// frags
 	//
 	ent->client->ps.stats[STAT_FRAGS] = ent->client->resp.score;
-
-	//
-	// help icon / current weapon if not shown
-	//
-	if (ent->client->pers.helpchanged && (level.framenum&8) )
-		ent->client->ps.stats[STAT_HELPICON] = gi.imageindex ("i_help");
-	else if ( (ent->client->pers.hand == CENTER_HANDED || ent->client->ps.fov > 91)
-		&& ent->client->pers.weapon)
-		ent->client->ps.stats[STAT_HELPICON] = gi.imageindex (ent->client->pers.weapon->icon);
-	else
-		ent->client->ps.stats[STAT_HELPICON] = 0;
 
 	ent->client->ps.stats[STAT_SPECTATOR] = 0;
 }
@@ -449,8 +358,6 @@ void G_SetSpectatorStats (edict_t *ent)
 	cl->ps.stats[STAT_LAYOUTS] = 0;
 	if (cl->pers.health <= 0 || level.intermissiontime || cl->showscores)
 		cl->ps.stats[STAT_LAYOUTS] |= 1;
-	if (cl->showinventory && cl->pers.health > 0)
-		cl->ps.stats[STAT_LAYOUTS] |= 2;
 
 	if (cl->chase_target && cl->chase_target->inuse)
 		cl->ps.stats[STAT_CHASE] = (int16_t) (CS_PLAYERSKINS + (cl->chase_target - g_edicts) - 1);

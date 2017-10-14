@@ -85,11 +85,9 @@ void P_DamageFeedback (edict_t *player)
 	client->ps.stats[STAT_FLASHES] = 0;
 	if (client->damage_blood)
 		client->ps.stats[STAT_FLASHES] |= 1;
-	if (client->damage_armor && !(player->flags & FL_GODMODE) && (client->invincible_framenum <= level.framenum))
-		client->ps.stats[STAT_FLASHES] |= 2;
 
 	// total points of damage shot at the player this frame
-	count = (client->damage_blood + client->damage_armor + client->damage_parmor);
+	count = (client->damage_blood + client->damage_parmor);
 	if (count == 0)
 		return;		// didn't take any damage
 
@@ -130,7 +128,7 @@ void P_DamageFeedback (edict_t *player)
 		count = 10;	// always make a visible effect
 
 	// play an apropriate pain sound
-	if ((level.time > player->pain_debounce_time) && !(player->flags & FL_GODMODE) && (client->invincible_framenum <= level.framenum))
+	if ((level.time > player->pain_debounce_time) && !(player->flags & FL_GODMODE))
 	{
 		r = 1 + prandom(50);
 		player->pain_debounce_time = level.time + 0.7;
@@ -159,8 +157,6 @@ void P_DamageFeedback (edict_t *player)
 	VectorClear (v);
 	if (client->damage_parmor)
 		VectorMA (v, (vec_t)client->damage_parmor/realcount, power_color, v);
-	if (client->damage_armor)
-		VectorMA (v, (vec_t)client->damage_armor/realcount,  acolor, v);
 	if (client->damage_blood)
 		VectorMA (v, (vec_t)client->damage_blood/realcount,  bcolor, v);
 	VectorCopy (v, client->damage_blend);
@@ -195,7 +191,6 @@ void P_DamageFeedback (edict_t *player)
 	// clear totals
 	//
 	client->damage_blood = 0;
-	client->damage_armor = 0;
 	client->damage_parmor = 0;
 	client->damage_knockback = 0;
 }
@@ -419,7 +414,6 @@ void SV_CalcBlend (edict_t *ent)
 {
 	brushcontents_t contents;
 	vec3_t	vieworg;
-	int32_t		remaining;
 
 	ent->client->ps.blend[0] = ent->client->ps.blend[1] = 
 		ent->client->ps.blend[2] = ent->client->ps.blend[3] = 0;
@@ -438,40 +432,6 @@ void SV_CalcBlend (edict_t *ent)
 		SV_AddBlend (0.0, 0.1, 0.05, 0.6, ent->client->ps.blend);
 	else if (contents & CONTENTS_WATER)
 		SV_AddBlend (0.5, 0.3, 0.2, 0.4, ent->client->ps.blend);
-
-	// add for powerups
-	if (ent->client->quad_framenum > level.framenum)
-	{
-		remaining = ent->client->quad_framenum - level.framenum;
-		if (remaining == 30)	// beginning to fade
-			gi.sound(ent, CHAN_ITEM, gi.soundindex("items/damage2.wav"), 1, ATTN_NORM, 0);
-		if (remaining > 30 || (remaining & 4) )
-			SV_AddBlend (0, 0, 1, 0.08, ent->client->ps.blend);
-	}
-	else if (ent->client->invincible_framenum > level.framenum)
-	{
-		remaining = ent->client->invincible_framenum - level.framenum;
-		if (remaining == 30)	// beginning to fade
-			gi.sound(ent, CHAN_ITEM, gi.soundindex("items/protect2.wav"), 1, ATTN_NORM, 0);
-		if (remaining > 30 || (remaining & 4) )
-			SV_AddBlend (1, 1, 0, 0.08, ent->client->ps.blend);
-	}
-	else if (ent->client->enviro_framenum > level.framenum)
-	{
-		remaining = ent->client->enviro_framenum - level.framenum;
-		if (remaining == 30)	// beginning to fade
-			gi.sound(ent, CHAN_ITEM, gi.soundindex("items/airout.wav"), 1, ATTN_NORM, 0);
-		if (remaining > 30 || (remaining & 4) )
-			SV_AddBlend (0, 1, 0, 0.08, ent->client->ps.blend);
-	}
-	else if (ent->client->breather_framenum > level.framenum)
-	{
-		remaining = ent->client->breather_framenum - level.framenum;
-		if (remaining == 30)	// beginning to fade
-			gi.sound(ent, CHAN_ITEM, gi.soundindex("items/airout.wav"), 1, ATTN_NORM, 0);
-		if (remaining > 30 || (remaining & 4) )
-			SV_AddBlend (0.4, 1, 0.4, 0.04, ent->client->ps.blend);
-	}
 
 	// add for damage
 	if (ent->client->damage_alpha > 0)
@@ -578,8 +538,6 @@ P_WorldEffects
 */
 void P_WorldEffects (void)
 {
-	bool		breather;
-	bool		envirosuit;
 	waterlevel_t waterlevel, old_waterlevel;
 
 	if (current_player->movetype == MOVETYPE_NOCLIP)
@@ -592,15 +550,11 @@ void P_WorldEffects (void)
 	old_waterlevel = current_client->old_waterlevel;
 	current_client->old_waterlevel = waterlevel;
 
-	breather = current_client->breather_framenum > level.framenum;
-	envirosuit = current_client->enviro_framenum > level.framenum;
-
 	//
 	// if just entered a water volume, play a sound
 	//
 	if (!old_waterlevel && waterlevel)
 	{
-		PlayerNoise(current_player, current_player->s.origin, PNOISE_SELF);
 		if (current_player->watertype & CONTENTS_LAVA)
 			gi.sound (current_player, CHAN_BODY, gi.soundindex("player/lava_in.wav"), 1, ATTN_NORM, 0);
 		else if (current_player->watertype & CONTENTS_SLIME)
@@ -618,7 +572,6 @@ void P_WorldEffects (void)
 	//
 	if (old_waterlevel && ! waterlevel)
 	{
-		PlayerNoise(current_player, current_player->s.origin, PNOISE_SELF);
 		gi.sound (current_player, CHAN_BODY, gi.soundindex("player/watr_out.wav"), 1, ATTN_NORM, 0);
 		current_player->flags &= ~FL_INWATER;
 	}
@@ -627,9 +580,7 @@ void P_WorldEffects (void)
 	// check for head just going under water
 	//
 	if (old_waterlevel != WATER_UNDER && waterlevel == WATER_UNDER)
-	{
 		gi.sound (current_player, CHAN_BODY, gi.soundindex("player/watr_un.wav"), 1, ATTN_NORM, 0);
-	}
 
 	//
 	// check for head just coming out of water
@@ -637,14 +588,11 @@ void P_WorldEffects (void)
 	if (old_waterlevel == WATER_UNDER && waterlevel != WATER_UNDER)
 	{
 		if (current_player->air_finished < level.time)
-		{	// gasp for air
+			// gasp for air
 			gi.sound (current_player, CHAN_VOICE, gi.soundindex("player/gasp1.wav"), 1, ATTN_NORM, 0);
-			PlayerNoise(current_player, current_player->s.origin, PNOISE_SELF);
-		}
 		else  if (current_player->air_finished < level.time + 11)
-		{	// just break surface
+			// just break surface
 			gi.sound (current_player, CHAN_VOICE, gi.soundindex("player/gasp2.wav"), 1, ATTN_NORM, 0);
-		}
 	}
 
 	//
@@ -652,23 +600,6 @@ void P_WorldEffects (void)
 	//
 	if (waterlevel == 3)
 	{
-		// breather or envirosuit give air
-		if (breather || envirosuit)
-		{
-			current_player->air_finished = level.time + 10;
-
-			if (((int32_t)(current_client->breather_framenum - level.framenum) % 25) == 0)
-			{
-				if (!current_client->breather_sound)
-					gi.sound (current_player, CHAN_AUTO, gi.soundindex("player/u_breath1.wav"), 1, ATTN_NORM, 0);
-				else
-					gi.sound (current_player, CHAN_AUTO, gi.soundindex("player/u_breath2.wav"), 1, ATTN_NORM, 0);
-				current_client->breather_sound = !current_client->breather_sound;
-				PlayerNoise(current_player, current_player->s.origin, PNOISE_SELF);
-				//FIXME: release a bubble?
-			}
-		}
-
 		// if out of air, start drowning
 		if (current_player->air_finished < level.time)
 		{	// drown!
@@ -710,8 +641,7 @@ void P_WorldEffects (void)
 		if (current_player->watertype & CONTENTS_LAVA)
 		{
 			if (current_player->health > 0
-				&& current_player->pain_debounce_time <= level.time
-				&& current_client->invincible_framenum < level.framenum)
+				&& current_player->pain_debounce_time <= level.time)
 			{
 				if (prandom(50))
 					gi.sound (current_player, CHAN_VOICE, gi.soundindex("player/burn1.wav"), 1, ATTN_NORM, 0);
@@ -720,19 +650,11 @@ void P_WorldEffects (void)
 				current_player->pain_debounce_time = level.time + 1;
 			}
 
-			if (envirosuit)	// take 1/3 damage with envirosuit
-				T_Damage (current_player, world, world, vec3_origin, current_player->s.origin, vec3_origin, 1*waterlevel, 0, DAMAGE_NONE, MOD_LAVA);
-			else
-				T_Damage (current_player, world, world, vec3_origin, current_player->s.origin, vec3_origin, 3*waterlevel, 0, DAMAGE_NONE, MOD_LAVA);
+			T_Damage (current_player, world, world, vec3_origin, current_player->s.origin, vec3_origin, 3*waterlevel, 0, DAMAGE_NONE, MOD_LAVA);
 		}
 
 		if (current_player->watertype & CONTENTS_SLIME)
-		{
-			if (!envirosuit)
-			{	// no damage from slime with envirosuit
-				T_Damage (current_player, world, world, vec3_origin, current_player->s.origin, vec3_origin, 1*waterlevel, 0, DAMAGE_NONE, MOD_SLIME);
-			}
-		}
+			T_Damage (current_player, world, world, vec3_origin, current_player->s.origin, vec3_origin, 1*waterlevel, 0, DAMAGE_NONE, MOD_SLIME);
 	}
 }
 
@@ -744,42 +666,11 @@ G_SetClientEffects
 */
 void G_SetClientEffects (edict_t *ent)
 {
-	int32_t		pa_type;
-	int32_t		remaining;
-
 	ent->s.effects = EF_NONE;
 	ent->s.renderfx = RF_NONE;
 
 	if (ent->health <= 0 || level.intermissiontime)
 		return;
-
-	if (ent->powerarmor_time > level.time)
-	{
-		pa_type = PowerArmorType (ent);
-		if (pa_type == POWER_ARMOR_SCREEN)
-		{
-			ent->s.effects |= EF_POWERSCREEN;
-		}
-		else if (pa_type == POWER_ARMOR_SHIELD)
-		{
-			ent->s.effects |= EF_COLOR_SHELL;
-			ent->s.renderfx |= RF_SHELL_GREEN;
-		}
-	}
-
-	if (ent->client->quad_framenum > level.framenum)
-	{
-		remaining = ent->client->quad_framenum - level.framenum;
-		if (remaining > 30 || (remaining & 4) )
-			ent->s.effects |= EF_QUAD;
-	}
-
-	if (ent->client->invincible_framenum > level.framenum)
-	{
-		remaining = ent->client->invincible_framenum - level.framenum;
-		if (remaining > 30 || (remaining & 4) )
-			ent->s.effects |= EF_PENT;
-	}
 
 	// show cheaters!!!
 	if (ent->flags & FL_GODMODE)
@@ -815,20 +706,6 @@ G_SetClientSound
 void G_SetClientSound (edict_t *ent)
 {
 	char	*weap;
-
-	if (ent->client->pers.game_helpchanged != game.helpchanged)
-	{
-		ent->client->pers.game_helpchanged = game.helpchanged;
-		ent->client->pers.helpchanged = 1;
-	}
-
-	// help beep (no more than three times)
-	if (ent->client->pers.helpchanged && ent->client->pers.helpchanged <= 3 && !(level.framenum&63) )
-	{
-		ent->client->pers.helpchanged++;
-		gi.sound (ent, CHAN_VOICE, gi.soundindex ("misc/pc_up.wav"), 1, ATTN_STATIC, 0);
-	}
-
 
 	if (ent->client->pers.weapon)
 		weap = ent->client->pers.weapon->classname;

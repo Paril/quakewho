@@ -102,12 +102,10 @@
     <ClCompile Include="src\g_misc.cpp" />
     <ClCompile Include="src\g_monster.cpp" />
     <ClCompile Include="src\g_phys.cpp" />
-    <ClCompile Include="src\g_save.cpp" />
     <ClCompile Include="src\g_spawn.cpp" />
     <ClCompile Include="src\g_svcmds.cpp" />
     <ClCompile Include="src\g_target.cpp" />
     <ClCompile Include="src\g_trigger.cpp" />
-    <ClCompile Include="src\g_turret.cpp" />
     <ClCompile Include="src\g_utils.cpp" />
     <ClCompile Include="src\g_weapon.cpp" />
     <ClCompile Include="src\m_berserk.cpp" />
@@ -117,6 +115,7 @@
     <ClCompile Include="src\m_boss32.cpp" />
     <ClCompile Include="src\m_brain.cpp" />
     <ClCompile Include="src\m_chick.cpp" />
+    <ClInclude Include="src\g_fields.h" />
     <ClInclude Include="src\m_flash.h" />
     <ClCompile Include="src\m_flipper.cpp" />
     <ClCompile Include="src\m_float.cpp" />

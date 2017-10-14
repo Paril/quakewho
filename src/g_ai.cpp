@@ -32,54 +32,6 @@ vec_t		enemy_yaw;
 
 //============================================================================
 
-
-/*
-=================
-AI_SetSightClient
-
-Called once each frame to set level.sight_client to the
-player to be checked for in findtarget.
-
-If all clients are either dead or in notarget, sight_client
-will be null.
-
-In coop games, sight_client will cycle between the clients.
-=================
-*/
-void AI_SetSightClient (void)
-{
-	edict_t	*ent;
-	int32_t		start, check;
-
-	if (level.sight_client == nullptr)
-		start = 1;
-	else
-		start = level.sight_client - g_edicts;
-
-	check = start;
-	while (1)
-	{
-		check++;
-		if (check > game.maxclients)
-			check = 1;
-		ent = &g_edicts[check];
-		if (ent->inuse
-			&& ent->health > 0
-			&& !(ent->flags & FL_NOTARGET) )
-		{
-			level.sight_client = ent;
-			return;		// got one
-		}
-		if (check == start)
-		{
-			level.sight_client = nullptr;
-			return;		// nobody to see
-		}
-	}
-}
-
-//============================================================================
-
 /*
 =============
 ai_move
@@ -345,14 +297,6 @@ void HuntTarget (edict_t *self)
 
 void FoundTarget (edict_t *self)
 {
-	// let other monsters see this monster for a while
-	if (self->enemy->client)
-	{
-		level.sight_entity = self;
-		level.sight_entity_framenum = level.framenum;
-		level.sight_entity->light_level = 128;
-	}
-
 	self->show_hostile = level.time + 1;		// wake up other monsters
 
 	VectorCopy(self->enemy->s.origin, self->monsterinfo.last_sighting);
@@ -405,9 +349,8 @@ slower noticing monsters.
 */
 bool FindTarget (edict_t *self)
 {
-	edict_t		*client;
-	bool		heardit;
-	int32_t			r;
+	edict_t		*client = nullptr;
+	int32_t		r;
 
 	if (self->monsterinfo.aiflags & AI_GOOD_GUY)
 	{
@@ -431,32 +374,8 @@ bool FindTarget (edict_t *self)
 
 // revised behavior so they will wake up if they "see" a player make a noise
 // but not weapon impact/explosion noises
-
-	heardit = false;
-	if ((level.sight_entity_framenum >= (level.framenum - 1)) && !(self->spawnflags & 1) )
-	{
-		client = level.sight_entity;
-		if (client->enemy == self->enemy)
-		{
-			return false;
-		}
-	}
-	else if (level.sound_entity_framenum >= (level.framenum - 1))
-	{
-		client = level.sound_entity;
-		heardit = true;
-	}
-	else if (!(self->enemy) && (level.sound2_entity_framenum >= (level.framenum - 1)) && !(self->spawnflags & 1) )
-	{
-		client = level.sound2_entity;
-		heardit = true;
-	}
-	else
-	{
-		client = level.sight_client;
-		if (!client)
-			return false;	// no clients to get mad at
-	}
+	if (!client)
+		return false;	// no clients to get mad at
 
 	// if the entity went away, forget it
 	if (!client->inuse)
@@ -477,98 +396,41 @@ bool FindTarget (edict_t *self)
 		if (client->enemy->flags & FL_NOTARGET)
 			return false;
 	}
-	else if (heardit)
-	{
-		if (client->owner->flags & FL_NOTARGET)
-			return false;
-	}
 	else
 		return false;
 
-	if (!heardit)
-	{
-		r = range (self, client);
+	r = range (self, client);
 
-		if (r == RANGE_FAR)
-			return false;
+	if (r == RANGE_FAR)
+		return false;
 
 // this is where we would check invisibility
 
-		// is client in an spot too dark to be seen?
-		if (client->light_level <= 5)
-			return false;
+	// is client in an spot too dark to be seen?
+	if (client->light_level <= 5)
+		return false;
 
-		if (!visible (self, client))
-		{
-			return false;
-		}
-
-		if (r == RANGE_NEAR)
-		{
-			if (client->show_hostile < level.time && !infront (self, client))
-			{
-				return false;
-			}
-		}
-		else if (r == RANGE_MID)
-		{
-			if (!infront (self, client))
-			{
-				return false;
-			}
-		}
-
-		self->enemy = client;
-
-		if (strcmp(self->enemy->classname, "player_noise") != 0)
-		{
-			self->monsterinfo.aiflags &= ~AI_SOUND_TARGET;
-
-			if (!self->enemy->client)
-			{
-				self->enemy = self->enemy->enemy;
-				if (!self->enemy->client)
-				{
-					self->enemy = nullptr;
-					return false;
-				}
-			}
-		}
-	}
-	else	// heardit
+	if (!visible (self, client))
 	{
-		vec3_t	temp;
+		return false;
+	}
 
-		if (self->spawnflags & 1)
-		{
-			if (!visible (self, client))
-				return false;
-		}
-		else
-		{
-			if (!gi.inPHS(self->s.origin, client->s.origin))
-				return false;
-		}
-
-		VectorSubtract (client->s.origin, self->s.origin, temp);
-
-		if (VectorLength(temp) > 1000)	// too far to hear
+	if (r == RANGE_NEAR)
+	{
+		if (client->show_hostile < level.time && !infront (self, client))
 		{
 			return false;
 		}
-
-		// check area portals - if they are different and not connected then we can't hear it
-		if (client->areanum != self->areanum)
-			if (!gi.AreasConnected(self->areanum, client->areanum))
-				return false;
-
-		self->ideal_yaw = vectoyaw(temp);
-		M_ChangeYaw (self);
-
-		// hunt the sound for a bit; hopefully find the real player
-		self->monsterinfo.aiflags |= AI_SOUND_TARGET;
-		self->enemy = client;
 	}
+	else if (r == RANGE_MID)
+	{
+		if (!infront (self, client))
+		{
+			return false;
+		}
+	}
+
+	self->enemy = client;
 
 //
 // got one

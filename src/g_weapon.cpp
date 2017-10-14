@@ -225,19 +225,13 @@ static void fire_lead (edict_t *self, vec3_t start, vec3_t aimdir, int32_t damag
 			{
 				T_Damage (tr.ent, self, self, aimdir, tr.endpos, tr.plane.normal, damage, kick, DAMAGE_BULLET, mod);
 			}
-			else
+			else if (strncmp (tr.surface->name, "sky", 3) != 0)
 			{
-				if (strncmp (tr.surface->name, "sky", 3) != 0)
-				{
-					gi.WriteByte (SVC_TEMP_ENTITY);
-					gi.WriteByte (te_impact);
-					gi.WritePosition (tr.endpos);
-					gi.WriteDir (tr.plane.normal);
-					gi.multicast (tr.endpos, MULTICAST_PVS);
-
-					if (self->client)
-						PlayerNoise(self, tr.endpos, PNOISE_IMPACT);
-				}
+				gi.WriteByte (SVC_TEMP_ENTITY);
+				gi.WriteByte (te_impact);
+				gi.WritePosition (tr.endpos);
+				gi.WriteDir (tr.plane.normal);
+				gi.multicast (tr.endpos, MULTICAST_PVS);
 			}
 		}
 	}
@@ -316,9 +310,6 @@ void blaster_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *
 		G_FreeEdict (self);
 		return;
 	}
-
-	if (self->owner->client)
-		PlayerNoise(self->owner, self->s.origin, PNOISE_IMPACT);
 
 	if (other->takedamage)
 	{
@@ -400,9 +391,6 @@ static void Grenade_Explode (edict_t *ent)
 {
 	vec3_t		origin;
 	meansofdeath_t			mod;
-
-	if (ent->owner->client)
-		PlayerNoise(ent->owner, ent->s.origin, PNOISE_IMPACT);
 
 	//FIXME: if we are onground then raise our Z just a bit since we are a point?
 	if (ent->enemy)
@@ -580,9 +568,6 @@ void rocket_touch (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *su
 		return;
 	}
 
-	if (ent->owner->client)
-		PlayerNoise(ent->owner, ent->s.origin, PNOISE_IMPACT);
-
 	// calculate position for the explosion entity
 	VectorMA (ent->s.origin, -0.02, ent->velocity, origin);
 
@@ -687,7 +672,7 @@ void fire_rail (edict_t *self, vec3_t start, vec3_t aimdir, int32_t damage, int3
 	gi.WritePosition (start);
 	gi.WritePosition (tr.endpos);
 	gi.multicast (self->s.origin, MULTICAST_PHS);
-//	gi.multicast (start, MULTICAST_PHS);
+
 	if (water)
 	{
 		gi.WriteByte (SVC_TEMP_ENTITY);
@@ -696,9 +681,6 @@ void fire_rail (edict_t *self, vec3_t start, vec3_t aimdir, int32_t damage, int3
 		gi.WritePosition (tr.endpos);
 		gi.multicast (tr.endpos, MULTICAST_PHS);
 	}
-
-	if (self->client)
-		PlayerNoise(self, tr.endpos, PNOISE_IMPACT);
 }
 
 
@@ -761,9 +743,6 @@ void bfg_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf
 		G_FreeEdict (self);
 		return;
 	}
-
-	if (self->owner->client)
-		PlayerNoise(self->owner, self->s.origin, PNOISE_IMPACT);
 
 	// core explosion - prevents firing it into the wall/floor
 	if (other->takedamage)

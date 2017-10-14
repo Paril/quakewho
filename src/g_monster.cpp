@@ -513,12 +513,6 @@ void monster_death_use (edict_t *self)
 	self->flags &= ~(FL_FLY|FL_SWIM);
 	self->monsterinfo.aiflags &= AI_GOOD_GUY;
 
-	if (self->item)
-	{
-		Drop_Item (self, self->item);
-		self->item = nullptr;
-	}
-
 	if (self->deathtarget)
 		self->target = self->deathtarget;
 
@@ -540,9 +534,6 @@ bool monster_start (edict_t *self)
 //		gi.dprintf("fixed spawnflags on %s at %s\n", self->classname, vtos(self->s.origin));
 	}
 
-	if (!(self->monsterinfo.aiflags & AI_GOOD_GUY))
-		level.total_monsters++;
-
 	self->nextthink = level.time + FRAMETIME;
 	self->svflags |= SVF_MONSTER;
 	self->s.renderfx |= RF_FRAMELERP;
@@ -559,13 +550,6 @@ bool monster_start (edict_t *self)
 	if (!self->monsterinfo.checkattack)
 		self->monsterinfo.checkattack = M_CheckAttack;
 	VectorCopy (self->s.origin, self->s.old_origin);
-
-	if (st.item)
-	{
-		self->item = FindItemByClassname (st.item);
-		if (!self->item)
-			gi.dprintf("%s at %s has bad item: %s\n", self->classname, vtos(self->s.origin), st.item);
-	}
 
 	// randomize what frame they start on
 	if (self->monsterinfo.currentmove)

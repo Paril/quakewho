@@ -80,13 +80,83 @@ void ClientUserinfoChanged (edict_t *ent, char *userinfo);
 void ClientDisconnect (edict_t *ent);
 void ClientBegin (edict_t *ent);
 void ClientCommand (edict_t *ent);
-void WriteGame (char *filename, qboolean autosave);
-void ReadGame (char *filename);
-void WriteLevel (char *filename);
-void ReadLevel (char *filename);
-void InitGame (void);
 void G_RunFrame (void);
 
+/*
+============
+InitGame
+
+This will be called when the dll is first loaded, which
+only happens when a new game is started or a save game
+is loaded.
+============
+*/
+void InitGame (void)
+{
+	gi.dprintf ("==== InitGame ====\n");
+
+	gun_x = gi.cvar ("gun_x", "0", CVAR_NONE);
+	gun_y = gi.cvar ("gun_y", "0", CVAR_NONE);
+	gun_z = gi.cvar ("gun_z", "0", CVAR_NONE);
+
+	//FIXME: sv_ prefix is wrong for these
+	sv_rollspeed = gi.cvar ("sv_rollspeed", "200", CVAR_NONE);
+	sv_rollangle = gi.cvar ("sv_rollangle", "2", CVAR_NONE);
+	sv_maxvelocity = gi.cvar ("sv_maxvelocity", "2000", CVAR_NONE);
+	sv_gravity = gi.cvar ("sv_gravity", "800", CVAR_NONE);
+
+	// noset vars
+	dedicated = gi.cvar ("dedicated", "0", CVAR_NOSET);
+
+	// latched vars
+	sv_cheats = gi.cvar ("cheats", "0", CVAR_SERVERINFO|CVAR_LATCH);
+	gi.cvar ("gamename", GAMEVERSION, CVAR_SERVERINFO | CVAR_LATCH);
+	gi.cvar ("gamedate", __DATE__, CVAR_SERVERINFO | CVAR_LATCH);
+
+	maxclients = gi.cvar ("maxclients", "4", CVAR_SERVERINFO | CVAR_LATCH);
+	maxspectators = gi.cvar ("maxspectators", "4", CVAR_SERVERINFO);
+	skill = gi.cvar ("skill", "1", CVAR_LATCH);
+	maxentities = gi.cvar ("maxentities", "1024", CVAR_LATCH);
+
+	// change anytime vars
+	dmflags = gi.cvar ("dmflags", "0", CVAR_SERVERINFO);
+	fraglimit = gi.cvar ("fraglimit", "0", CVAR_SERVERINFO);
+	timelimit = gi.cvar ("timelimit", "0", CVAR_SERVERINFO);
+	password = gi.cvar ("password", "", CVAR_USERINFO);
+	spectator_password = gi.cvar ("spectator_password", "", CVAR_USERINFO);
+	needpass = gi.cvar ("needpass", "0", CVAR_SERVERINFO);
+	filterban = gi.cvar ("filterban", "1", CVAR_NONE);
+
+	g_select_empty = gi.cvar ("g_select_empty", "0", CVAR_ARCHIVE);
+
+	run_pitch = gi.cvar ("run_pitch", "0.002", CVAR_NONE);
+	run_roll = gi.cvar ("run_roll", "0.005", CVAR_NONE);
+	bob_up  = gi.cvar ("bob_up", "0.005", CVAR_NONE);
+	bob_pitch = gi.cvar ("bob_pitch", "0.002", CVAR_NONE);
+	bob_roll = gi.cvar ("bob_roll", "0.002", CVAR_NONE);
+
+	// flood control
+	flood_msgs = gi.cvar ("flood_msgs", "4", CVAR_NONE);
+	flood_persecond = gi.cvar ("flood_persecond", "4", CVAR_NONE);
+	flood_waitdelay = gi.cvar ("flood_waitdelay", "10", CVAR_NONE);
+
+	// dm map list
+	sv_maplist = gi.cvar ("sv_maplist", "", CVAR_NONE);
+
+	// items
+	InitItems ();
+
+	// initialize all entities for this game
+	game.maxentities = maxentities->value;
+	g_edicts = (edict_t *) gi.TagMalloc ((int32_t) (game.maxentities * sizeof(g_edicts[0])), TAG_GAME);
+	globals.edicts = g_edicts;
+	globals.max_edicts = game.maxentities;
+
+	// initialize all clients for this game
+	game.maxclients = maxclients->value;
+	game.clients = (gclient_t *) gi.TagMalloc ((int32_t) (game.maxclients * sizeof(game.clients[0])), TAG_GAME);
+	globals.num_edicts = game.maxclients+1;
+}
 
 //===================================================================
 
@@ -117,10 +187,11 @@ game_export_t *GetGameAPI (game_import_t *import)
 	globals.Shutdown = ShutdownGame;
 	globals.SpawnEntities = SpawnEntities;
 
-	globals.WriteGame = WriteGame;
-	globals.ReadGame = ReadGame;
-	globals.WriteLevel = WriteLevel;
-	globals.ReadLevel = ReadLevel;
+	// null these out
+	globals.WriteGame = [](char *, qboolean){};
+	globals.ReadGame = [](char *){};
+	globals.WriteLevel = [](char *){};
+	globals.ReadLevel = [](char *){};
 
 	globals.ClientThink = ClientThink;
 	globals.ClientConnect = ClientConnect;
@@ -354,9 +425,6 @@ void G_RunFrame (void)
 
 	level.framenum++;
 	level.time = level.framenum*FRAMETIME;
-
-	// choose a client for monsters to target this frame
-	AI_SetSightClient ();
 
 	// exit intermissions
 

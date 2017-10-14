@@ -154,10 +154,9 @@ void Cmd_Give_f (edict_t *ent)
 {
 	char		*name;
 	gitem_t		*it;
-	int32_t			index;
-	int32_t			i;
+	int32_t		index;
+	int32_t		i;
 	bool		give_all;
-	edict_t		*it_ent;
 
 	if (!sv_cheats->value)
 	{
@@ -187,11 +186,9 @@ void Cmd_Give_f (edict_t *ent)
 		for (i=0 ; i<game.num_items ; i++)
 		{
 			it = itemlist + i;
-			if (!it->pickup)
-				continue;
 			if (!(it->flags & IT_WEAPON))
 				continue;
-			ent->client->pers.inventory[i] += 1;
+			ent->client->pers.inventory[i] = 1;
 		}
 		if (!give_all)
 			return;
@@ -202,61 +199,16 @@ void Cmd_Give_f (edict_t *ent)
 		for (i=0 ; i<game.num_items ; i++)
 		{
 			it = itemlist + i;
-			if (!it->pickup)
-				continue;
 			if (!(it->flags & IT_AMMO))
 				continue;
-			Add_Ammo (ent, it, 1000);
+			ent->client->pers.inventory[i] = 999;
 		}
-		if (!give_all)
-			return;
-	}
-
-	if (give_all || stricmp(name, "armor") == 0)
-	{
-		gitem_armor_t	*info;
-
-		it = FindItem("Jacket Armor");
-		ent->client->pers.inventory[ITEM_INDEX(it)] = 0;
-
-		it = FindItem("Combat Armor");
-		ent->client->pers.inventory[ITEM_INDEX(it)] = 0;
-
-		it = FindItem("Body Armor");
-		info = (gitem_armor_t *)it->info;
-		ent->client->pers.inventory[ITEM_INDEX(it)] = info->max_count;
-
-		if (!give_all)
-			return;
-	}
-
-	if (give_all || stricmp(name, "Power Shield") == 0)
-	{
-		it = FindItem("Power Shield");
-		it_ent = G_Spawn();
-		it_ent->classname = it->classname;
-		SpawnItem (it_ent, it);
-		Touch_Item (it_ent, ent, nullptr, nullptr);
-		if (it_ent->inuse)
-			G_FreeEdict(it_ent);
-
 		if (!give_all)
 			return;
 	}
 
 	if (give_all)
-	{
-		for (i=0 ; i<game.num_items ; i++)
-		{
-			it = itemlist + i;
-			if (!it->pickup)
-				continue;
-			if (it->flags & (IT_ARMOR|IT_WEAPON|IT_AMMO))
-				continue;
-			ent->client->pers.inventory[i] = 1;
-		}
 		return;
-	}
 
 	it = FindItem (name);
 	if (!it)
@@ -270,12 +222,6 @@ void Cmd_Give_f (edict_t *ent)
 		}
 	}
 
-	if (!it->pickup)
-	{
-		gi.cprintf (ent, PRINT_HIGH, "non-pickup item\n");
-		return;
-	}
-
 	index = ITEM_INDEX(it);
 
 	if (it->flags & IT_AMMO)
@@ -283,17 +229,10 @@ void Cmd_Give_f (edict_t *ent)
 		if (gi.argc() == 3)
 			ent->client->pers.inventory[index] = atoi(gi.argv(2));
 		else
-			ent->client->pers.inventory[index] += it->quantity;
+			ent->client->pers.inventory[index] = 999;
 	}
 	else
-	{
-		it_ent = G_Spawn();
-		it_ent->classname = it->classname;
-		SpawnItem (it_ent, it);
-		Touch_Item (it_ent, ent, nullptr, nullptr);
-		if (it_ent->inuse)
-			G_FreeEdict(it_ent);
-	}
+		ent->client->pers.inventory[index] = 1;
 }
 
 
@@ -422,43 +361,6 @@ void Cmd_Use_f (edict_t *ent)
 	it->use (ent, it);
 }
 
-
-/*
-==================
-Cmd_Drop_f
-
-Drop an inventory item
-==================
-*/
-void Cmd_Drop_f (edict_t *ent)
-{
-	int32_t			index;
-	gitem_t		*it;
-	char		*s;
-
-	s = gi.args();
-	it = FindItem (s);
-	if (!it)
-	{
-		gi.cprintf (ent, PRINT_HIGH, "unknown item: %s\n", s);
-		return;
-	}
-	if (!it->drop)
-	{
-		gi.cprintf (ent, PRINT_HIGH, "Item is not dropable.\n");
-		return;
-	}
-	index = ITEM_INDEX(it);
-	if (!ent->client->pers.inventory[index])
-	{
-		gi.cprintf (ent, PRINT_HIGH, "Out of item: %s\n", s);
-		return;
-	}
-
-	it->drop (ent, it);
-}
-
-
 /*
 =================
 Cmd_Inven_f
@@ -466,28 +368,7 @@ Cmd_Inven_f
 */
 void Cmd_Inven_f (edict_t *ent)
 {
-	int32_t			i;
-	gclient_t	*cl;
-
-	cl = ent->client;
-
-	cl->showscores = false;
-	cl->showhelp = false;
-
-	if (cl->showinventory)
-	{
-		cl->showinventory = false;
-		return;
-	}
-
-	cl->showinventory = true;
-
-	gi.WriteByte (SVC_INVENTORY);
-	for (i=0 ; i<MAX_ITEMS ; i++)
-	{
-		gi.WriteShort (cl->pers.inventory[i]);
-	}
-	gi.unicast (ent, true);
+	Cmd_Score_f(ent);
 }
 
 /*
@@ -617,32 +498,6 @@ void Cmd_WeapLast_f (edict_t *ent)
 
 /*
 =================
-Cmd_InvDrop_f
-=================
-*/
-void Cmd_InvDrop_f (edict_t *ent)
-{
-	gitem_t		*it;
-
-	ValidateSelectedItem (ent);
-
-	if (ent->client->pers.selected_item == -1)
-	{
-		gi.cprintf (ent, PRINT_HIGH, "No item to drop.\n");
-		return;
-	}
-
-	it = &itemlist[ent->client->pers.selected_item];
-	if (!it->drop)
-	{
-		gi.cprintf (ent, PRINT_HIGH, "Item is not dropable.\n");
-		return;
-	}
-	it->drop (ent, it);
-}
-
-/*
-=================
 Cmd_Kill_f
 =================
 */
@@ -664,8 +519,6 @@ Cmd_PutAway_f
 void Cmd_PutAway_f (edict_t *ent)
 {
 	ent->client->showscores = false;
-	ent->client->showhelp = false;
-	ent->client->showinventory = false;
 }
 
 
@@ -946,8 +799,6 @@ void ClientCommand (edict_t *ent)
 
 	if (stricmp (cmd, "use") == 0)
 		Cmd_Use_f (ent);
-	else if (stricmp (cmd, "drop") == 0)
-		Cmd_Drop_f (ent);
 	else if (stricmp (cmd, "give") == 0)
 		Cmd_Give_f (ent);
 	else if (stricmp (cmd, "god") == 0)
@@ -972,8 +823,6 @@ void ClientCommand (edict_t *ent)
 		SelectPrevItem (ent, IT_POWERUP);
 	else if (stricmp (cmd, "invuse") == 0)
 		Cmd_InvUse_f (ent);
-	else if (stricmp (cmd, "invdrop") == 0)
-		Cmd_InvDrop_f (ent);
 	else if (stricmp (cmd, "weapprev") == 0)
 		Cmd_WeapPrev_f (ent);
 	else if (stricmp (cmd, "weapnext") == 0)

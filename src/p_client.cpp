@@ -371,10 +371,6 @@ void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int32_t d
 	}
 
 	// remove powerups
-	self->client->quad_framenum = 0;
-	self->client->invincible_framenum = 0;
-	self->client->breather_framenum = 0;
-	self->client->enviro_framenum = 0;
 	self->flags &= ~FL_POWER_ARMOR;
 
 	if (self->health < -40)
@@ -464,7 +460,6 @@ void InitClientResp (gclient_t *client)
 {
 	memset (&client->resp, 0, sizeof(client->resp));
 	client->resp.enterframe = level.framenum;
-	client->resp.coop_respawn = client->pers;
 }
 
 /*
@@ -654,43 +649,6 @@ edict_t *SelectDeathmatchSpawnPoint (void)
 }
 
 
-edict_t *SelectCoopSpawnPoint (edict_t *ent)
-{
-	int32_t		index;
-	edict_t	*spot = nullptr;
-	char	*target;
-
-	index = ent->client - game.clients;
-
-	// player 0 starts in normal player spawn point
-	if (!index)
-		return nullptr;
-
-	spot = nullptr;
-
-	// assume there are four coop spots at each spawnpoint
-	while (1)
-	{
-		spot = G_Find (spot, FOFS(classname), "info_player_coop");
-		if (!spot)
-			return nullptr;	// we didn't have enough...
-
-		target = spot->targetname;
-		if (!target)
-			target = "";
-		if ( stricmp(game.spawnpoint, target) == 0 )
-		{	// this is a coop spawn point for one of the clients here
-			index--;
-			if (!index)
-				return spot;		// this is it
-		}
-	}
-
-
-	return spot;
-}
-
-
 /*
 ===========
 SelectSpawnPoint
@@ -704,29 +662,7 @@ void	SelectSpawnPoint (edict_t *ent, vec3_t origin, vec3_t angles)
 
 	// find a single player start spot
 	if (!spot)
-	{
-		while ((spot = G_Find (spot, FOFS(classname), "info_player_start")) != nullptr)
-		{
-			if (!game.spawnpoint[0] && !spot->targetname)
-				break;
-
-			if (!game.spawnpoint[0] || !spot->targetname)
-				continue;
-
-			if (stricmp(game.spawnpoint, spot->targetname) == 0)
-				break;
-		}
-
-		if (!spot)
-		{
-			if (!game.spawnpoint[0])
-			{	// there wasn't a spawnpoint without a target, so use any
-				spot = G_Find (spot, FOFS(classname), "info_player_start");
-			}
-			if (!spot)
-				gi.error ("Couldn't find spawn point %s\n", game.spawnpoint);
-		}
-	}
+		gi.error ("Couldn't find spawn point\n");
 
 	VectorCopy (spot->s.origin, origin);
 	origin[2] += 9;
@@ -1044,15 +980,17 @@ void PutClientInServer (edict_t *ent)
 }
 
 /*
-=====================
-ClientBeginDeathmatch
+===========
+ClientBegin
 
-A client has just connected to the server in 
-deathmatch mode, so clear everything out before starting them.
-=====================
+called when a client has finished connecting, and is ready
+to be placed into the game.  This will happen every level load.
+============
 */
-void ClientBeginDeathmatch (edict_t *ent)
+void ClientBegin (edict_t *ent)
 {
+	ent->client = game.clients + (ent - g_edicts - 1);
+
 	G_InitEdict (ent);
 
 	InitClientResp (ent->client);
@@ -1077,21 +1015,6 @@ void ClientBeginDeathmatch (edict_t *ent)
 
 	// make sure all view stuff is valid
 	ClientEndServerFrame (ent);
-}
-
-
-/*
-===========
-ClientBegin
-
-called when a client has finished connecting, and is ready
-to be placed into the game.  This will happen every level load.
-============
-*/
-void ClientBegin (edict_t *ent)
-{
-	ent->client = game.clients + (ent - g_edicts - 1);
-	ClientBeginDeathmatch (ent);
 }
 
 /*
@@ -1225,7 +1148,7 @@ qboolean ClientConnect (edict_t *ent, char *userinfo)
 	{
 		// clear the respawning variables
 		InitClientResp (ent->client);
-		if (!game.autosaved || !ent->client->pers.weapon)
+		if (!ent->client->pers.weapon)
 			InitClientPersistant (ent->client);
 	}
 
@@ -1379,10 +1302,7 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 		client->resp.cmd_angles[2] = SHORT2ANGLE(ucmd->angles[2]);
 
 		if (ent->groundentity && !pm.groundentity && (pm.cmd.upmove >= 10) && (pm.waterlevel == WATER_NONE))
-		{
 			gi.sound(ent, CHAN_VOICE, gi.soundindex("*jump1.wav"), 1, ATTN_NORM, 0);
-			PlayerNoise(ent, ent->s.origin, PNOISE_SELF);
-		}
 
 		ent->viewheight = pm.viewheight;
 		ent->waterlevel = pm.waterlevel;

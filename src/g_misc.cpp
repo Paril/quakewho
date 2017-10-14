@@ -414,20 +414,6 @@ void SP_path_corner (edict_t *self)
 	gi.linkentity (self);
 }
 
-void SP_point_combat (edict_t *self)
-{
-	G_FreeEdict (self);
-}
-
-/*QUAKED info_null (0 0.5 0) (-4 -4 -4) (4 4 4)
-Used as a positional target for spotlights, etc.
-*/
-void SP_info_null (edict_t *self)
-{
-	G_FreeEdict (self);
-};
-
-
 /*QUAKED info_notnull (0 0.5 0) (-4 -4 -4) (4 4 4)
 Used as a positional target for lightning.
 */
@@ -436,13 +422,6 @@ void SP_info_notnull (edict_t *self)
 	VectorCopy (self->s.origin, self->absmin);
 	VectorCopy (self->s.origin, self->absmax);
 };
-
-void SP_light (edict_t *self)
-{
-	// no targeted lights in deathmatch, because they cause global messages
-	G_FreeEdict (self);
-}
-
 
 /*QUAKED func_wall (0 .5 .8) ? TRIGGER_SPAWN TOGGLE START_ON ANIMATED ANIMATED_FAST
 This is just a solid wall if not inhibited
@@ -596,12 +575,6 @@ void SP_func_object (edict_t *self)
 	gi.linkentity (self);
 }
 
-void SP_func_explosive (edict_t *self)
-{
-	G_FreeEdict (self);
-}
-
-
 /*QUAKED misc_explobox (0 .5 .8) (-16 -16 0) (16 16 40)
 Large exploding box.  You can override its mass (100),
 health (80), and dmg (150).
@@ -741,416 +714,6 @@ void SP_misc_explobox (edict_t *self)
 	gi.linkentity (self);
 }
 
-
-//
-// miscellaneous specialty items
-//
-
-/*QUAKED misc_blackhole (1 .5 0) (-8 -8 -8) (8 8 8)
-*/
-
-void misc_blackhole_use (edict_t *ent, edict_t *other, edict_t *activator)
-{
-	/*
-	gi.WriteByte (svc_temp_entity);
-	gi.WriteByte (TE_BOSSTPORT);
-	gi.WritePosition (ent->s.origin);
-	gi.multicast (ent->s.origin, MULTICAST_PVS);
-	*/
-	G_FreeEdict (ent);
-}
-
-void misc_blackhole_think (edict_t *self)
-{
-	if (++self->s.frame < 19)
-		self->nextthink = level.time + FRAMETIME;
-	else
-	{		
-		self->s.frame = 0;
-		self->nextthink = level.time + FRAMETIME;
-	}
-}
-
-void SP_misc_blackhole (edict_t *ent)
-{
-	ent->movetype = MOVETYPE_NONE;
-	ent->solid = SOLID_NOT;
-	VectorSet (ent->mins, -64, -64, 0);
-	VectorSet (ent->maxs, 64, 64, 8);
-	ent->s.modelindex = gi.modelindex ("models/objects/black/tris.md2");
-	ent->s.renderfx = RF_TRANSLUCENT;
-	ent->use = misc_blackhole_use;
-	ent->think = misc_blackhole_think;
-	ent->nextthink = level.time + 2 * FRAMETIME;
-	gi.linkentity (ent);
-}
-
-/*QUAKED misc_eastertank (1 .5 0) (-32 -32 -16) (32 32 32)
-*/
-
-void misc_eastertank_think (edict_t *self)
-{
-	if (++self->s.frame < 293)
-		self->nextthink = level.time + FRAMETIME;
-	else
-	{		
-		self->s.frame = 254;
-		self->nextthink = level.time + FRAMETIME;
-	}
-}
-
-void SP_misc_eastertank (edict_t *ent)
-{
-	ent->movetype = MOVETYPE_NONE;
-	ent->solid = SOLID_BBOX;
-	VectorSet (ent->mins, -32, -32, -16);
-	VectorSet (ent->maxs, 32, 32, 32);
-	ent->s.modelindex = gi.modelindex ("models/monsters/tank/tris.md2");
-	ent->s.frame = 254;
-	ent->think = misc_eastertank_think;
-	ent->nextthink = level.time + 2 * FRAMETIME;
-	gi.linkentity (ent);
-}
-
-/*QUAKED misc_easterchick (1 .5 0) (-32 -32 0) (32 32 32)
-*/
-
-
-void misc_easterchick_think (edict_t *self)
-{
-	if (++self->s.frame < 247)
-		self->nextthink = level.time + FRAMETIME;
-	else
-	{		
-		self->s.frame = 208;
-		self->nextthink = level.time + FRAMETIME;
-	}
-}
-
-void SP_misc_easterchick (edict_t *ent)
-{
-	ent->movetype = MOVETYPE_NONE;
-	ent->solid = SOLID_BBOX;
-	VectorSet (ent->mins, -32, -32, 0);
-	VectorSet (ent->maxs, 32, 32, 32);
-	ent->s.modelindex = gi.modelindex ("models/monsters/bitch/tris.md2");
-	ent->s.frame = 208;
-	ent->think = misc_easterchick_think;
-	ent->nextthink = level.time + 2 * FRAMETIME;
-	gi.linkentity (ent);
-}
-
-/*QUAKED misc_easterchick2 (1 .5 0) (-32 -32 0) (32 32 32)
-*/
-
-
-void misc_easterchick2_think (edict_t *self)
-{
-	if (++self->s.frame < 287)
-		self->nextthink = level.time + FRAMETIME;
-	else
-	{		
-		self->s.frame = 248;
-		self->nextthink = level.time + FRAMETIME;
-	}
-}
-
-void SP_misc_easterchick2 (edict_t *ent)
-{
-	ent->movetype = MOVETYPE_NONE;
-	ent->solid = SOLID_BBOX;
-	VectorSet (ent->mins, -32, -32, 0);
-	VectorSet (ent->maxs, 32, 32, 32);
-	ent->s.modelindex = gi.modelindex ("models/monsters/bitch/tris.md2");
-	ent->s.frame = 248;
-	ent->think = misc_easterchick2_think;
-	ent->nextthink = level.time + 2 * FRAMETIME;
-	gi.linkentity (ent);
-}
-
-
-/*QUAKED monster_commander_body (1 .5 0) (-32 -32 0) (32 32 48)
-Not really a monster, this is the Tank Commander's decapitated body.
-There should be a item_commander_head that has this as it's target.
-*/
-
-void commander_body_think (edict_t *self)
-{
-	if (++self->s.frame < 24)
-		self->nextthink = level.time + FRAMETIME;
-	else
-		self->nextthink = 0;
-
-	if (self->s.frame == 22)
-		gi.sound (self, CHAN_BODY, gi.soundindex ("tank/thud.wav"), 1, ATTN_NORM, 0);
-}
-
-void commander_body_use (edict_t *self, edict_t *other, edict_t *activator)
-{
-	self->think = commander_body_think;
-	self->nextthink = level.time + FRAMETIME;
-	gi.sound (self, CHAN_BODY, gi.soundindex ("tank/pain.wav"), 1, ATTN_NORM, 0);
-}
-
-void commander_body_drop (edict_t *self)
-{
-	self->movetype = MOVETYPE_TOSS;
-	self->s.origin[2] += 2;
-}
-
-void SP_monster_commander_body (edict_t *self)
-{
-	self->movetype = MOVETYPE_NONE;
-	self->solid = SOLID_BBOX;
-	self->model = "models/monsters/commandr/tris.md2";
-	self->s.modelindex = gi.modelindex (self->model);
-	VectorSet (self->mins, -32, -32, 0);
-	VectorSet (self->maxs, 32, 32, 48);
-	self->use = commander_body_use;
-	self->takedamage = DAMAGE_YES;
-	self->flags = FL_GODMODE;
-	self->s.renderfx |= RF_FRAMELERP;
-	gi.linkentity (self);
-
-	gi.soundindex ("tank/thud.wav");
-	gi.soundindex ("tank/pain.wav");
-
-	self->think = commander_body_drop;
-	self->nextthink = level.time + 5 * FRAMETIME;
-}
-
-
-/*QUAKED misc_banner (1 .5 0) (-4 -4 -4) (4 4 4)
-The origin is the bottom of the banner.
-The banner is 128 tall.
-*/
-void misc_banner_think (edict_t *ent)
-{
-	ent->s.frame = (ent->s.frame + 1) % 16;
-	ent->nextthink = level.time + FRAMETIME;
-}
-
-void SP_misc_banner (edict_t *ent)
-{
-	ent->movetype = MOVETYPE_NONE;
-	ent->solid = SOLID_NOT;
-	ent->s.modelindex = gi.modelindex ("models/objects/banner/tris.md2");
-	ent->s.frame = irandom(15);
-	gi.linkentity (ent);
-
-	ent->think = misc_banner_think;
-	ent->nextthink = level.time + FRAMETIME;
-}
-
-void SP_misc_deadsoldier (edict_t *ent)
-{
-	G_FreeEdict (ent);
-}
-
-/*QUAKED misc_viper (1 .5 0) (-16 -16 0) (16 16 32)
-This is the Viper for the flyby bombing.
-It is trigger_spawned, so you must have something use it for it to show up.
-There must be a path for it to follow once it is activated.
-
-"speed"		How fast the Viper should fly
-*/
-
-extern void train_use (edict_t *self, edict_t *other, edict_t *activator);
-extern void func_train_find (edict_t *self);
-
-void misc_viper_use  (edict_t *self, edict_t *other, edict_t *activator)
-{
-	self->svflags &= ~SVF_NOCLIENT;
-	self->use = train_use;
-	train_use (self, other, activator);
-}
-
-void SP_misc_viper (edict_t *ent)
-{
-	if (!ent->target)
-	{
-		gi.dprintf ("misc_viper without a target at %s\n", vtos(ent->absmin));
-		G_FreeEdict (ent);
-		return;
-	}
-
-	if (!ent->speed)
-		ent->speed = 300;
-
-	ent->movetype = MOVETYPE_PUSH;
-	ent->solid = SOLID_NOT;
-	ent->s.modelindex = gi.modelindex ("models/ships/viper/tris.md2");
-	VectorSet (ent->mins, -16, -16, 0);
-	VectorSet (ent->maxs, 16, 16, 32);
-
-	ent->think = func_train_find;
-	ent->nextthink = level.time + FRAMETIME;
-	ent->use = misc_viper_use;
-	ent->svflags |= SVF_NOCLIENT;
-	ent->moveinfo.accel = ent->moveinfo.decel = ent->moveinfo.speed = ent->speed;
-
-	gi.linkentity (ent);
-}
-
-
-/*QUAKED misc_bigviper (1 .5 0) (-176 -120 -24) (176 120 72) 
-This is a large stationary viper as seen in Paul's intro
-*/
-void SP_misc_bigviper (edict_t *ent)
-{
-	ent->movetype = MOVETYPE_NONE;
-	ent->solid = SOLID_BBOX;
-	VectorSet (ent->mins, -176, -120, -24);
-	VectorSet (ent->maxs, 176, 120, 72);
-	ent->s.modelindex = gi.modelindex ("models/ships/bigviper/tris.md2");
-	gi.linkentity (ent);
-}
-
-
-/*QUAKED misc_viper_bomb (1 0 0) (-8 -8 -8) (8 8 8)
-"dmg"	how much boom should the bomb make?
-*/
-void misc_viper_bomb_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf)
-{
-	G_UseTargets (self, self->activator);
-
-	self->s.origin[2] = self->absmin[2] + 1;
-	T_RadiusDamage (self, self, self->dmg, nullptr, self->dmg+40, MOD_BOMB);
-	BecomeExplosion2 (self);
-}
-
-void misc_viper_bomb_prethink (edict_t *self)
-{
-	vec3_t	v;
-	vec_t	diff;
-
-	self->groundentity = nullptr;
-
-	diff = self->timestamp - level.time;
-	if (diff < -1.0)
-		diff = -1.0;
-
-	VectorScale (self->moveinfo.dir, 1.0 + diff, v);
-	v[2] = diff;
-
-	diff = self->s.angles[2];
-	vectoangles (v, self->s.angles);
-	self->s.angles[2] = diff + 10;
-}
-
-void misc_viper_bomb_use (edict_t *self, edict_t *other, edict_t *activator)
-{
-	edict_t	*viper;
-
-	self->solid = SOLID_BBOX;
-	self->svflags &= ~SVF_NOCLIENT;
-	self->s.effects |= EF_ROCKET;
-	self->use = nullptr;
-	self->movetype = MOVETYPE_TOSS;
-	self->prethink = misc_viper_bomb_prethink;
-	self->touch = misc_viper_bomb_touch;
-	self->activator = activator;
-
-	viper = G_Find (nullptr, FOFS(classname), "misc_viper");
-	VectorScale (viper->moveinfo.dir, viper->moveinfo.speed, self->velocity);
-
-	self->timestamp = level.time;
-	VectorCopy (viper->moveinfo.dir, self->moveinfo.dir);
-}
-
-void SP_misc_viper_bomb (edict_t *self)
-{
-	self->movetype = MOVETYPE_NONE;
-	self->solid = SOLID_NOT;
-	VectorSet (self->mins, -8, -8, -8);
-	VectorSet (self->maxs, 8, 8, 8);
-
-	self->s.modelindex = gi.modelindex ("models/objects/bomb/tris.md2");
-
-	if (!self->dmg)
-		self->dmg = 1000;
-
-	self->use = misc_viper_bomb_use;
-	self->svflags |= SVF_NOCLIENT;
-
-	gi.linkentity (self);
-}
-
-
-/*QUAKED misc_strogg_ship (1 .5 0) (-16 -16 0) (16 16 32)
-This is a Storgg ship for the flybys.
-It is trigger_spawned, so you must have something use it for it to show up.
-There must be a path for it to follow once it is activated.
-
-"speed"		How fast it should fly
-*/
-
-extern void train_use (edict_t *self, edict_t *other, edict_t *activator);
-extern void func_train_find (edict_t *self);
-
-void misc_strogg_ship_use  (edict_t *self, edict_t *other, edict_t *activator)
-{
-	self->svflags &= ~SVF_NOCLIENT;
-	self->use = train_use;
-	train_use (self, other, activator);
-}
-
-void SP_misc_strogg_ship (edict_t *ent)
-{
-	if (!ent->target)
-	{
-		gi.dprintf ("%s without a target at %s\n", ent->classname, vtos(ent->absmin));
-		G_FreeEdict (ent);
-		return;
-	}
-
-	if (!ent->speed)
-		ent->speed = 300;
-
-	ent->movetype = MOVETYPE_PUSH;
-	ent->solid = SOLID_NOT;
-	ent->s.modelindex = gi.modelindex ("models/ships/strogg1/tris.md2");
-	VectorSet (ent->mins, -16, -16, 0);
-	VectorSet (ent->maxs, 16, 16, 32);
-
-	ent->think = func_train_find;
-	ent->nextthink = level.time + FRAMETIME;
-	ent->use = misc_strogg_ship_use;
-	ent->svflags |= SVF_NOCLIENT;
-	ent->moveinfo.accel = ent->moveinfo.decel = ent->moveinfo.speed = ent->speed;
-
-	gi.linkentity (ent);
-}
-
-
-/*QUAKED misc_satellite_dish (1 .5 0) (-64 -64 0) (64 64 128)
-*/
-void misc_satellite_dish_think (edict_t *self)
-{
-	self->s.frame++;
-	if (self->s.frame < 38)
-		self->nextthink = level.time + FRAMETIME;
-}
-
-void misc_satellite_dish_use (edict_t *self, edict_t *other, edict_t *activator)
-{
-	self->s.frame = 0;
-	self->think = misc_satellite_dish_think;
-	self->nextthink = level.time + FRAMETIME;
-}
-
-void SP_misc_satellite_dish (edict_t *ent)
-{
-	ent->movetype = MOVETYPE_NONE;
-	ent->solid = SOLID_BBOX;
-	VectorSet (ent->mins, -64, -64, 0);
-	VectorSet (ent->maxs, 64, 64, 128);
-	ent->s.modelindex = gi.modelindex ("models/objects/satellite/tris.md2");
-	ent->use = misc_satellite_dish_use;
-	gi.linkentity (ent);
-}
-
-
 /*QUAKED light_mine1 (0 1 0) (-2 -2 -12) (2 2 12)
 */
 void SP_light_mine1 (edict_t *ent)
@@ -1169,70 +732,6 @@ void SP_light_mine2 (edict_t *ent)
 	ent->movetype = MOVETYPE_NONE;
 	ent->solid = SOLID_BBOX;
 	ent->s.modelindex = gi.modelindex ("models/objects/minelite/light2/tris.md2");
-	gi.linkentity (ent);
-}
-
-
-/*QUAKED misc_gib_arm (1 0 0) (-8 -8 -8) (8 8 8)
-Intended for use with the target_spawner
-*/
-void SP_misc_gib_arm (edict_t *ent)
-{
-	ent->s.modelindex = gi.modelindex("models/objects/gibs/arm/tris.md2");
-	ent->solid = SOLID_NOT;
-	ent->s.effects |= EF_GIB;
-	ent->takedamage = DAMAGE_YES;
-	ent->die = gib_die;
-	ent->movetype = MOVETYPE_TOSS;
-	ent->svflags |= SVF_MONSTER;
-	ent->deadflag = DEAD_DEAD;
-	ent->avelocity[0] = random(200);
-	ent->avelocity[1] = random(200);
-	ent->avelocity[2] = random(200);
-	ent->think = G_FreeEdict;
-	ent->nextthink = level.time + 30;
-	gi.linkentity (ent);
-}
-
-/*QUAKED misc_gib_leg (1 0 0) (-8 -8 -8) (8 8 8)
-Intended for use with the target_spawner
-*/
-void SP_misc_gib_leg (edict_t *ent)
-{
-	ent->s.modelindex = gi.modelindex("models/objects/gibs/leg/tris.md2");
-	ent->solid = SOLID_NOT;
-	ent->s.effects |= EF_GIB;
-	ent->takedamage = DAMAGE_YES;
-	ent->die = gib_die;
-	ent->movetype = MOVETYPE_TOSS;
-	ent->svflags |= SVF_MONSTER;
-	ent->deadflag = DEAD_DEAD;
-	ent->avelocity[0] = random(200);
-	ent->avelocity[1] = random(200);
-	ent->avelocity[2] = random(200);
-	ent->think = G_FreeEdict;
-	ent->nextthink = level.time + 30;
-	gi.linkentity (ent);
-}
-
-/*QUAKED misc_gib_head (1 0 0) (-8 -8 -8) (8 8 8)
-Intended for use with the target_spawner
-*/
-void SP_misc_gib_head (edict_t *ent)
-{
-	ent->s.modelindex = gi.modelindex("models/objects/gibs/head/tris.md2");
-	ent->solid = SOLID_NOT;
-	ent->s.effects |= EF_GIB;
-	ent->takedamage = DAMAGE_YES;
-	ent->die = gib_die;
-	ent->movetype = MOVETYPE_TOSS;
-	ent->svflags |= SVF_MONSTER;
-	ent->deadflag = DEAD_DEAD;
-	ent->avelocity[0] = random(200);
-	ent->avelocity[1] = random(200);
-	ent->avelocity[2] = random(200);
-	ent->think = G_FreeEdict;
-	ent->nextthink = level.time + 30;
 	gi.linkentity (ent);
 }
 
@@ -1468,8 +967,6 @@ void teleporter_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_
 	edict_t		*dest;
 	int32_t			i;
 
-	if (!other->client)
-		return;
 	dest = G_Find (nullptr, FOFS(targetname), self->target);
 	if (!dest)
 	{
@@ -1486,22 +983,25 @@ void teleporter_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_
 
 	// clear the velocity and hold them in place briefly
 	VectorClear (other->velocity);
-	other->client->ps.pmove.pm_time = 160>>3;		// hold time
-	other->client->ps.pmove.pm_flags |= PMF_TIME_TELEPORT;
+
+	if (other->client)
+	{
+		other->client->ps.pmove.pm_time = 160>>3;		// hold time
+		other->client->ps.pmove.pm_flags |= PMF_TIME_TELEPORT;
+
+		// set angles
+		for (i=0 ; i<3 ; i++)
+			other->client->ps.pmove.delta_angles[i] = ANGLE2SHORT(dest->s.angles[i] - other->client->resp.cmd_angles[i]);
+
+		VectorClear (other->client->ps.viewangles);
+		VectorClear (other->client->v_angle);
+	}
 
 	// draw the teleport splash at source and on the player
 	self->owner->s.event = EV_PLAYER_TELEPORT;
 	other->s.event = EV_PLAYER_TELEPORT;
 
-	// set angles
-	for (i=0 ; i<3 ; i++)
-	{
-		other->client->ps.pmove.delta_angles[i] = ANGLE2SHORT(dest->s.angles[i] - other->client->resp.cmd_angles[i]);
-	}
-
 	VectorClear (other->s.angles);
-	VectorClear (other->client->ps.viewangles);
-	VectorClear (other->client->v_angle);
 
 	// kill anything at the destination
 	KillBox (other);

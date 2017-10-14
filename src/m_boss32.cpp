@@ -857,33 +857,6 @@ void SP_monster_makron (edict_t *self)
 	walkmonster_start(self);
 }
 
-
-/*
-=================
-MakronSpawn
-
-=================
-*/
-void MakronSpawn (edict_t *self)
-{
-	vec3_t		vec;
-	edict_t		*player;
-
-	SP_monster_makron (self);
-
-	// jump at player
-	player = level.sight_client;
-	if (!player)
-		return;
-
-	VectorSubtract (player->s.origin, self->s.origin, vec);
-	self->s.angles[YAW] = vectoyaw(vec);
-	VectorNormalize (vec);
-	VectorMA (vec3_origin, 400, vec, self->velocity);
-	self->velocity[2] = 200;
-	self->groundentity = nullptr;
-}
-
 /*
 =================
 MakronToss
@@ -897,7 +870,7 @@ void MakronToss (edict_t *self)
 
 	ent = G_Spawn ();
 	ent->nextthink = level.time + 0.8;
-	ent->think = MakronSpawn;
+	ent->think = SP_monster_makron;
 	ent->target = self->target;
 	VectorCopy (self->s.origin, ent->s.origin);
 }

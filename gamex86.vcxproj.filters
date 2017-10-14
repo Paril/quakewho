@@ -42,9 +42,6 @@
     <ClCompile Include="src\g_phys.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="src\g_save.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
     <ClCompile Include="src\g_spawn.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -55,9 +52,6 @@
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\g_trigger.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="src\g_turret.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\g_utils.cpp">
@@ -240,6 +234,9 @@
       <Filter>inc</Filter>
     </ClInclude>
     <ClInclude Include="src\q_math.h">
+      <Filter>inc</Filter>
+    </ClInclude>
+    <ClInclude Include="src\g_fields.h">
       <Filter>inc</Filter>
     </ClInclude>
   </ItemGroup>
