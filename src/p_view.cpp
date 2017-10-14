@@ -92,7 +92,7 @@ void P_DamageFeedback (edict_t *player)
 		return;		// didn't take any damage
 
 	// start a pain animation if still in the player model
-	if (client->anim_priority < ANIM_PAIN && player->s.modelindex == 255)
+	if (client->anim_priority < ANIM_PAIN && player->s.modelindex == MODEL_PLAYER)
 	{
 		static int32_t		i;
 
@@ -461,7 +461,7 @@ void P_FallingDamage (edict_t *ent)
 	int32_t		damage;
 	vec3_t	dir;
 
-	if (ent->s.modelindex != 255)
+	if (ent->s.modelindex != MODEL_PLAYER)
 		return;		// not in the player model
 
 	if (ent->movetype == MOVETYPE_NOCLIP)
@@ -533,7 +533,7 @@ void P_FallingDamage (edict_t *ent)
 P_WorldEffects
 =============
 */
-void P_WorldEffects (void)
+void P_WorldEffects ()
 {
 	waterlevel_t waterlevel, old_waterlevel;
 
@@ -720,7 +720,7 @@ void G_SetClientFrame (edict_t *ent)
 	gclient_t	*client;
 	bool		duck, run;
 
-	if (ent->s.modelindex != 255)
+	if (ent->s.modelindex != MODEL_PLAYER)
 		return;		// not in the player model
 
 	client = ent->client;

@@ -631,6 +631,9 @@ enum statindex_t : uint8_t
 	STAT_SPECTATOR,
 
 	// 18-31 reserved for mods
+	STAT_BULLETS,
+	STAT_SHELLS,
+	STAT_GRENADES,
 
 	MAX_STATS				= 32
 };

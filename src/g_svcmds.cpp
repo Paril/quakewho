@@ -21,7 +21,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "q_shared.h"
 
 
-void	Svcmd_Test_f (void)
+void	Svcmd_Test_f ()
 {
 	gi.cprintf (nullptr, PRINT_HIGH, "Svcmd_Test_f()\n");
 }
@@ -155,7 +155,7 @@ bool SV_FilterPacket (char *from)
 SV_AddIP_f
 =================
 */
-void SVCmd_AddIP_f (void)
+void SVCmd_AddIP_f ()
 {
 	int32_t		i;
 	
@@ -186,7 +186,7 @@ void SVCmd_AddIP_f (void)
 SV_RemoveIP_f
 =================
 */
-void SVCmd_RemoveIP_f (void)
+void SVCmd_RemoveIP_f ()
 {
 	ipfilter_t	f;
 	int32_t			i, j;
@@ -217,7 +217,7 @@ void SVCmd_RemoveIP_f (void)
 SV_ListIP_f
 =================
 */
-void SVCmd_ListIP_f (void)
+void SVCmd_ListIP_f ()
 {
 	int32_t		i;
 	uint8_t	b[4];
@@ -235,7 +235,7 @@ void SVCmd_ListIP_f (void)
 SV_WriteIP_f
 =================
 */
-void SVCmd_WriteIP_f (void)
+void SVCmd_WriteIP_f ()
 {
 	FILE	*f;
 	char	name[MAX_OSPATH];
@@ -279,7 +279,7 @@ The game can issue gi.argc() / gi.argv() commands to get the rest
 of the parameters
 =================
 */
-void	ServerCommand (void)
+void	ServerCommand ()
 {
 	char	*cmd;
 

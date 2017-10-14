@@ -51,7 +51,7 @@ void ChangeWeapon (edict_t *ent)
 	ent->client->newweapon = nullptr;
 
 	// set visible model
-	if (ent->s.modelindex == 255)
+	if (ent->s.modelindex == MODEL_PLAYER)
 	{
 		if (ent->client->pers.weapon)
 			i = ((ent->client->pers.weapon->weapmodel + 1) & 0xff) << 8;
@@ -172,7 +172,7 @@ void Weapon_Generic (edict_t *ent, int32_t FRAME_ACTIVATE_LAST, int32_t FRAME_FI
 	const int32_t FRAME_IDLE_FIRST		= (FRAME_FIRE_LAST + 1);
 	const int32_t FRAME_DEACTIVATE_FIRST= (FRAME_IDLE_LAST + 1);
 
-	if(ent->deadflag || ent->s.modelindex != 255) // VWep animations screw up corpses
+	if(ent->deadflag || ent->s.modelindex != MODEL_PLAYER) // VWep animations screw up corpses
 	{
 		return;
 	}

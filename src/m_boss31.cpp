@@ -685,7 +685,7 @@ bool Jorg_CheckAttack (edict_t *self)
 }
 
 
-void MakronPrecache (void);
+void MakronPrecache ();
 
 /*QUAKED monster_jorg (1 .5 0) (-80 -80 0) (90 90 140) Ambush Trigger_Spawn Sight
 */

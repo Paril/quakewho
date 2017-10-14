@@ -458,7 +458,7 @@ be mirrored out to the client structure before all the
 edicts are wiped.
 ==================
 */
-void SaveClientData (void)
+void SaveClientData ()
 {
 	int32_t		i;
 	edict_t	*ent;
@@ -537,7 +537,7 @@ go to a random point, but NOT the two points closest
 to other players
 ================
 */
-edict_t *SelectRandomDeathmatchSpawnPoint (void)
+edict_t *SelectRandomDeathmatchSpawnPoint ()
 {
 	edict_t	*spot, *spot1, *spot2;
 	int32_t		count = 0;
@@ -593,7 +593,7 @@ SelectFarthestDeathmatchSpawnPoint
 
 ================
 */
-edict_t *SelectFarthestDeathmatchSpawnPoint (void)
+edict_t *SelectFarthestDeathmatchSpawnPoint ()
 {
 	edict_t	*bestspot;
 	vec_t	bestdistance, bestplayerdistance;
@@ -626,7 +626,7 @@ edict_t *SelectFarthestDeathmatchSpawnPoint (void)
 	return spot;
 }
 
-edict_t *SelectDeathmatchSpawnPoint (void)
+edict_t *SelectDeathmatchSpawnPoint ()
 {
 	if ( (dmflags_t)dmflags->value & DF_SPAWN_FARTHEST)
 		return SelectFarthestDeathmatchSpawnPoint ();
@@ -658,7 +658,7 @@ void	SelectSpawnPoint (edict_t *ent, vec3_t origin, vec3_t angles)
 //======================================================================
 
 
-void InitBodyQue (void)
+void InitBodyQue ()
 {
 	int32_t		i;
 	edict_t	*ent;
@@ -1240,7 +1240,7 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 
 		if (ent->movetype == MOVETYPE_NOCLIP)
 			client->ps.pmove.pm_type = PM_SPECTATOR;
-		else if (ent->s.modelindex != 255)
+		else if (ent->s.modelindex != MODEL_PLAYER)
 			client->ps.pmove.pm_type = PM_GIB;
 		else if (ent->deadflag)
 			client->ps.pmove.pm_type = PM_DEAD;

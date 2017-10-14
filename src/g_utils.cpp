@@ -388,16 +388,6 @@ void vectoangles (vec3_t value1, vec3_t angles)
 	angles[ROLL] = 0;
 }
 
-char *G_CopyString (char *in)
-{
-	char	*out;
-	
-	out = (char *) gi.TagMalloc ((int32_t) (strlen(in)+1), TAG_LEVEL);
-	strcpy (out, in);
-	return out;
-}
-
-
 void G_InitEdict (edict_t *e)
 {
 	e->inuse = true;
@@ -417,7 +407,7 @@ instead of being removed and recreated, which can cause interpolated
 angles and bad trails.
 =================
 */
-edict_t *G_Spawn (void)
+edict_t *G_Spawn ()
 {
 	int32_t			i;
 	edict_t		*e;

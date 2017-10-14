@@ -138,7 +138,7 @@ static void PrecacheItem (gitem_t *it)
 	}
 }
 
-void InitItems (void)
+void InitItems ()
 {
 	for (size_t i = 0; i < lengthof(g_weapons); i++)
 		PrecacheItem(&g_weapons[i]);

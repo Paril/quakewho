@@ -508,8 +508,7 @@ const uint32_t	SPAWNFLAG_NOT_COOP			= bit(12);
 enum fieldflags_t : uint8_t
 {
 	FFL_NONE = 0,
-	FFL_SPAWNTEMP = bit(0),
-	FFL_NOSPAWN = bit(1)
+	FFL_SPAWNTEMP = bit(0)
 };
 
 MAKE_BITFLAGS(fieldflags_t);
@@ -519,14 +518,8 @@ enum fieldtype_t : uint8_t
 	F_INT, 
 	F_FLOAT,
 	F_LSTRING,			// string on disk, pointer in memory, TAG_LEVEL
-	F_GSTRING,			// string on disk, pointer in memory, TAG_GAME
 	F_VECTOR,
 	F_ANGLEHACK,
-	F_EDICT,			// index on disk, pointer in memory
-	F_ITEM,				// index on disk, pointer in memory
-	F_CLIENT,			// index on disk, pointer in memory
-	F_FUNCTION,
-	F_MMOVE,
 	F_IGNORE
 };
 
@@ -540,7 +533,6 @@ struct field_t
 
 extern gitem_t g_weapons[WEAP_TOTAL];
 
-
 //
 // g_cmds.c
 //
@@ -550,7 +542,7 @@ void Cmd_Score_f (edict_t *ent);
 //
 // g_items.c
 //
-void InitItems (void);
+void InitItems ();
 void ChangeWeapon (edict_t *ent);
 void Think_Weapon (edict_t *ent);
 
@@ -566,13 +558,11 @@ void	G_UseTargets (edict_t *ent, edict_t *activator);
 void	G_SetMovedir (vec3_t angles, vec3_t movedir);
 
 void	G_InitEdict (edict_t *e);
-edict_t	*G_Spawn (void);
+edict_t	*G_Spawn ();
 void	G_FreeEdict (edict_t *e);
 
 void	G_TouchTriggers (edict_t *ent);
 void	G_TouchSolids (edict_t *ent);
-
-char	*G_CopyString (char *in);
 
 vec_t	*tv (vec_t x, vec_t y, vec_t z);
 char	*vtos (vec3_t v);
@@ -680,7 +670,7 @@ void BeginIntermission (edict_t *targ);
 void PutClientInServer (edict_t *ent);
 void InitClientPersistant (gclient_t *client);
 void InitClientResp (gclient_t *client);
-void InitBodyQue (void);
+void InitBodyQue ();
 void ClientBeginServerFrame (edict_t *ent);
 
 //
@@ -692,7 +682,7 @@ void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int32_t d
 //
 // g_svcmds.c
 //
-void	ServerCommand (void);
+void	ServerCommand ();
 bool SV_FilterPacket (char *from);
 
 //
@@ -726,7 +716,7 @@ void G_RunEntity (edict_t *ent);
 //
 // g_main.c
 //
-void SaveClientData (void);
+void SaveClientData ();
 void FetchClientEntData (edict_t *ent);
 
 //

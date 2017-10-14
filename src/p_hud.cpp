@@ -274,6 +274,10 @@ void G_SetStats (edict_t *ent)
 	//
 	ent->client->ps.stats[STAT_AMMO_ICON] = 0;
 	ent->client->ps.stats[STAT_AMMO] = 0;
+	
+	ent->client->ps.stats[STAT_BULLETS] = ent->client->pers.ammo[AMMO_BULLETS];
+	ent->client->ps.stats[STAT_SHELLS] = ent->client->pers.ammo[AMMO_SHELLS];
+	ent->client->ps.stats[STAT_GRENADES] = ent->client->pers.ammo[AMMO_GRENADES];
 
 	if (ent->client->pers.weapon)
 	{

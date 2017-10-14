@@ -80,7 +80,7 @@ void ClientUserinfoChanged (edict_t *ent, char *userinfo);
 void ClientDisconnect (edict_t *ent);
 void ClientBegin (edict_t *ent);
 void ClientCommand (edict_t *ent);
-void G_RunFrame (void);
+void G_RunFrame ();
 
 /*
 ============
@@ -91,7 +91,7 @@ only happens when a new game is started or a save game
 is loaded.
 ============
 */
-void InitGame (void)
+void InitGame ()
 {
 	gi.dprintf ("==== InitGame ====\n");
 
@@ -158,7 +158,7 @@ void InitGame (void)
 //===================================================================
 
 
-void ShutdownGame (void)
+void ShutdownGame ()
 {
 	gi.dprintf ("==== ShutdownGame ====\n");
 
@@ -214,7 +214,7 @@ game_export_t *GetGameAPI (game_import_t *import)
 ClientEndServerFrames
 =================
 */
-void ClientEndServerFrames (void)
+void ClientEndServerFrames ()
 {
 	int32_t		i;
 	edict_t	*ent;
@@ -256,7 +256,7 @@ EndDMLevel
 The timelimit or fraglimit has been exceeded
 =================
 */
-void EndDMLevel (void)
+void EndDMLevel ()
 {
 	edict_t		*ent;
 	char *s, *t, *f;
@@ -315,7 +315,7 @@ void EndDMLevel (void)
 CheckNeedPass
 =================
 */
-void CheckNeedPass (void)
+void CheckNeedPass ()
 {
 	int32_t need;
 
@@ -341,7 +341,7 @@ void CheckNeedPass (void)
 CheckDMRules
 =================
 */
-void CheckDMRules (void)
+void CheckDMRules ()
 {
 	int32_t			i;
 	gclient_t	*cl;
@@ -383,7 +383,7 @@ void CheckDMRules (void)
 ExitLevel
 =============
 */
-void ExitLevel (void)
+void ExitLevel ()
 {
 	int32_t		i;
 	edict_t	*ent;
@@ -415,7 +415,7 @@ G_RunFrame
 Advances the world by 0.1 seconds
 ================
 */
-void G_RunFrame (void)
+void G_RunFrame ()
 {
 	int32_t		i;
 	edict_t	*ent;

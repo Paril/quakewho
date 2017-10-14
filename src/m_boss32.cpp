@@ -801,7 +801,7 @@ bool Makron_CheckAttack (edict_t *self)
 // monster_makron
 //
 
-void MakronPrecache (void)
+void MakronPrecache ()
 {
 	sound_pain4 = gi.soundindex ("makron/pain3.wav");
 	sound_pain5 = gi.soundindex ("makron/pain2.wav");

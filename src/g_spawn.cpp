@@ -264,7 +264,7 @@ void ED_ParseField (char *key, char *value, edict_t *ent)
 
 	for (f=fields ; f->name ; f++)
 	{
-		if (!(f->flags & FFL_NOSPAWN) && !stricmp(f->name, key))
+		if (!stricmp(f->name, key))
 		{	// found it
 			if (f->flags & FFL_SPAWNTEMP)
 				b = (uint8_t *)&st;
@@ -367,7 +367,7 @@ All but the first will have the FL_TEAMSLAVE flag set.
 All but the last will have the teamchain field set to the next one
 ================
 */
-void G_FindTeams (void)
+void G_FindTeams ()
 {
 	edict_t	*e, *e2, *chain;
 	int32_t		i, j;
@@ -587,6 +587,17 @@ char *dm_statusbar =
 
 "yt 120 "
 "picn a_grenades "
+
+"xr -80 "
+
+"yt 64 "
+"num 3 18 "
+
+"yt 92 "
+"num 3 19 "
+
+"yt 120 "
+"num 3 20 "
 ;
 
 /*QUAKED worldspawn (0 0 0) ?
