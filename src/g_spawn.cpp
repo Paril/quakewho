@@ -548,51 +548,11 @@ char *dm_statusbar =
 "pic 0 "
 
 // ammo
-"if 2 "
+"if 3 "
 "	xv	100 "
 "	anum "
 "	xv	150 "
 "	pic 2 "
-"endif "
-
-// armor
-"if 4 "
-"	xv	200 "
-"	rnum "
-"	xv	250 "
-"	pic 4 "
-"endif "
-
-// selected item
-"if 6 "
-"	xv	296 "
-"	pic 6 "
-"endif "
-
-"yb	-50 "
-
-// picked up item
-"if 7 "
-"	xv	0 "
-"	pic 7 "
-"	xv	26 "
-"	yb	-42 "
-"	stat_string 8 "
-"	yb	-50 "
-"endif "
-
-// timer
-"if 9 "
-"	xv	246 "
-"	num	2	10 "
-"	xv	296 "
-"	pic	9 "
-"endif "
-
-//  help / weapon icon 
-"if 11 "
-"	xv	148 "
-"	pic	11 "
 "endif "
 
 //  frags
@@ -615,6 +575,18 @@ char *dm_statusbar =
   "xv 64 "
   "stat_string 16 "
 "endif "
+
+// ammo types
+"xr -28 "
+
+"yt 64 "
+"picn a_bullets "
+
+"yt 92 "
+"picn a_shells "
+
+"yt 120 "
+"picn a_grenades "
 ;
 
 /*QUAKED worldspawn (0 0 0) ?
@@ -638,9 +610,6 @@ void SP_worldspawn (edict_t *ent)
 
 	// reserve some spots for dead player bodies for coop / deathmatch
 	InitBodyQue ();
-
-	// set configstrings for items
-	SetItemNames ();
 
 	if (st.nextmap)
 		strcpy (level.nextmap, st.nextmap);
@@ -672,6 +641,9 @@ void SP_worldspawn (edict_t *ent)
 	// status bar program
 	gi.configstring (CS_STATUSBAR, dm_statusbar);
 
+	// items
+	InitItems ();
+
 	//---------------
 
 	level.pic_health = gi.imageindex ("i_health");
@@ -683,11 +655,6 @@ void SP_worldspawn (edict_t *ent)
 		gi.cvar_set("sv_gravity", st.gravity);
 
 	snd_fry = gi.soundindex ("player/fry.wav");	// standing in lava / slime
-	
-	PrecacheItem (FindItem ("Blaster"));
-	PrecacheItem (FindItem ("Machinegun"));
-	PrecacheItem (FindItem ("Shotgun"));
-	PrecacheItem (FindItem ("Grenade Launcher"));
 
 	gi.soundindex ("player/lava1.wav");
 	gi.soundindex ("player/lava2.wav");
@@ -714,21 +681,6 @@ void SP_worldspawn (edict_t *ent)
 	gi.soundindex ("*pain75_2.wav");
 	gi.soundindex ("*pain100_1.wav");
 	gi.soundindex ("*pain100_2.wav");
-
-	// sexed models
-	// THIS ORDER MUST MATCH THE DEFINES IN g_local.h
-	// you can add more, max 15
-	gi.modelindex ("#w_blaster.md2");
-	gi.modelindex ("#w_shotgun.md2");
-	gi.modelindex ("#w_sshotgun.md2");
-	gi.modelindex ("#w_machinegun.md2");
-	gi.modelindex ("#w_chaingun.md2");
-	gi.modelindex ("#a_grenades.md2");
-	gi.modelindex ("#w_glauncher.md2");
-	gi.modelindex ("#w_rlauncher.md2");
-	gi.modelindex ("#w_hyperblaster.md2");
-	gi.modelindex ("#w_railgun.md2");
-	gi.modelindex ("#w_bfg.md2");
 
 	//-------------------
 

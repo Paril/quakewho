@@ -216,3 +216,21 @@ constexpr auto LerpAngle (const T &a2, const T &a1, const vec_t &frac)
 
 	return a2 + frac * (a1 - a2);
 }
+
+template<typename T>
+constexpr T min(const T &a, const T &b)
+{
+	return (a < b) ? a : b;
+}
+
+template<typename T>
+constexpr T max(const T &a, const T &b)
+{
+	return (a > b) ? a : b;
+}
+
+template<typename T>
+constexpr T clamp(const T &value, const T &min, const T &max)
+{
+	return (value < min) ? min : (value > max) ? max : value;
+}

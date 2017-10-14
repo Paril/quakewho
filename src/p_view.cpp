@@ -87,7 +87,7 @@ void P_DamageFeedback (edict_t *player)
 		client->ps.stats[STAT_FLASHES] |= 1;
 
 	// total points of damage shot at the player this frame
-	count = (client->damage_blood + client->damage_parmor);
+	count = (client->damage_blood);
 	if (count == 0)
 		return;		// didn't take any damage
 
@@ -155,8 +155,6 @@ void P_DamageFeedback (edict_t *player)
 	// the color of the blend will vary based on how much was absorbed
 	// by different armors
 	VectorClear (v);
-	if (client->damage_parmor)
-		VectorMA (v, (vec_t)client->damage_parmor/realcount, power_color, v);
 	if (client->damage_blood)
 		VectorMA (v, (vec_t)client->damage_blood/realcount,  bcolor, v);
 	VectorCopy (v, client->damage_blend);
@@ -191,7 +189,6 @@ void P_DamageFeedback (edict_t *player)
 	// clear totals
 	//
 	client->damage_blood = 0;
-	client->damage_parmor = 0;
 	client->damage_knockback = 0;
 }
 
@@ -705,19 +702,8 @@ G_SetClientSound
 */
 void G_SetClientSound (edict_t *ent)
 {
-	char	*weap;
-
-	if (ent->client->pers.weapon)
-		weap = ent->client->pers.weapon->classname;
-	else
-		weap = "";
-
 	if (ent->waterlevel && (ent->watertype & (CONTENTS_LAVA | CONTENTS_SLIME)) )
 		ent->s.sound = snd_fry;
-	else if (strcmp(weap, "weapon_railgun") == 0)
-		ent->s.sound = gi.soundindex("weapons/rg_hum.wav");
-	else if (strcmp(weap, "weapon_bfg") == 0)
-		ent->s.sound = gi.soundindex("weapons/bfg_hum.wav");
 	else if (ent->client->weapon_sound)
 		ent->s.sound = ent->client->weapon_sound;
 	else

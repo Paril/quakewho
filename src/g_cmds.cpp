@@ -63,84 +63,6 @@ bool OnSameTeam (edict_t *ent1, edict_t *ent2)
 	return false;
 }
 
-
-void SelectNextItem (edict_t *ent, int32_t itflags)
-{
-	gclient_t	*cl;
-	int32_t			i, index;
-	gitem_t		*it;
-
-	cl = ent->client;
-
-	if (cl->chase_target) {
-		ChaseNext(ent);
-		return;
-	}
-
-	// scan  for the next valid one
-	for (i=1 ; i<=MAX_ITEMS ; i++)
-	{
-		index = (cl->pers.selected_item + i)%MAX_ITEMS;
-		if (!cl->pers.inventory[index])
-			continue;
-		it = &itemlist[index];
-		if (!it->use)
-			continue;
-		if (!(it->flags & itflags))
-			continue;
-
-		cl->pers.selected_item = index;
-		return;
-	}
-
-	cl->pers.selected_item = -1;
-}
-
-void SelectPrevItem (edict_t *ent, int32_t itflags)
-{
-	gclient_t	*cl;
-	int32_t			i, index;
-	gitem_t		*it;
-
-	cl = ent->client;
-
-	if (cl->chase_target) {
-		ChasePrev(ent);
-		return;
-	}
-
-	// scan  for the next valid one
-	for (i=1 ; i<=MAX_ITEMS ; i++)
-	{
-		index = (cl->pers.selected_item + MAX_ITEMS - i)%MAX_ITEMS;
-		if (!cl->pers.inventory[index])
-			continue;
-		it = &itemlist[index];
-		if (!it->use)
-			continue;
-		if (!(it->flags & itflags))
-			continue;
-
-		cl->pers.selected_item = index;
-		return;
-	}
-
-	cl->pers.selected_item = -1;
-}
-
-void ValidateSelectedItem (edict_t *ent)
-{
-	gclient_t	*cl;
-
-	cl = ent->client;
-
-	if (cl->pers.inventory[cl->pers.selected_item])
-		return;		// valid
-
-	SelectNextItem (ent, -1);
-}
-
-
 //=================================================================================
 
 /*
@@ -152,24 +74,14 @@ Give items to a client
 */
 void Cmd_Give_f (edict_t *ent)
 {
-	char		*name;
-	gitem_t		*it;
-	int32_t		index;
-	int32_t		i;
-	bool		give_all;
-
 	if (!sv_cheats->value)
 	{
 		gi.cprintf (ent, PRINT_HIGH, "You must run the server with '+set cheats 1' to enable this command.\n");
 		return;
 	}
 
-	name = gi.args();
-
-	if (stricmp(name, "all") == 0)
-		give_all = true;
-	else
-		give_all = false;
+	const char *name = gi.args();
+	const bool give_all = (stricmp(name, "all") == 0);
 
 	if (give_all || stricmp(gi.argv(1), "health") == 0)
 	{
@@ -177,32 +89,16 @@ void Cmd_Give_f (edict_t *ent)
 			ent->health = atoi(gi.argv(2));
 		else
 			ent->health = ent->max_health;
-		if (!give_all)
-			return;
-	}
 
-	if (give_all || stricmp(name, "weapons") == 0)
-	{
-		for (i=0 ; i<game.num_items ; i++)
-		{
-			it = itemlist + i;
-			if (!(it->flags & IT_WEAPON))
-				continue;
-			ent->client->pers.inventory[i] = 1;
-		}
 		if (!give_all)
 			return;
 	}
 
 	if (give_all || stricmp(name, "ammo") == 0)
 	{
-		for (i=0 ; i<game.num_items ; i++)
-		{
-			it = itemlist + i;
-			if (!(it->flags & IT_AMMO))
-				continue;
-			ent->client->pers.inventory[i] = 999;
-		}
+		for (ammo_t i = AMMO_BULLETS; i < AMMO_TOTAL; i++)
+			ent->client->pers.ammo[i] = 999;
+
 		if (!give_all)
 			return;
 	}
@@ -210,29 +106,7 @@ void Cmd_Give_f (edict_t *ent)
 	if (give_all)
 		return;
 
-	it = FindItem (name);
-	if (!it)
-	{
-		name = gi.argv(1);
-		it = FindItem (name);
-		if (!it)
-		{
-			gi.cprintf (ent, PRINT_HIGH, "unknown item\n");
-			return;
-		}
-	}
-
-	index = ITEM_INDEX(it);
-
-	if (it->flags & IT_AMMO)
-	{
-		if (gi.argc() == 3)
-			ent->client->pers.inventory[index] = atoi(gi.argv(2));
-		else
-			ent->client->pers.inventory[index] = 999;
-	}
-	else
-		ent->client->pers.inventory[index] = 1;
+	gi.cprintf (ent, PRINT_HIGH, "only thing you can do here is \"health\" or \"ammo\".\n");
 }
 
 
@@ -335,30 +209,20 @@ Use an inventory item
 */
 void Cmd_Use_f (edict_t *ent)
 {
-	int32_t			index;
-	gitem_t		*it;
-	char		*s;
+	const char *s = gi.args();
 
-	s = gi.args();
-	it = FindItem (s);
-	if (!it)
+	for (gitem_weapmodel_t i = WEAP_BLASTER; i < WEAP_TOTAL; i++)
 	{
-		gi.cprintf (ent, PRINT_HIGH, "unknown item: %s\n", s);
-		return;
-	}
-	if (!it->use)
-	{
-		gi.cprintf (ent, PRINT_HIGH, "Item is not usable.\n");
-		return;
-	}
-	index = ITEM_INDEX(it);
-	if (!ent->client->pers.inventory[index])
-	{
-		gi.cprintf (ent, PRINT_HIGH, "Out of item: %s\n", s);
-		return;
+		gitem_t *it = &g_weapons[i];
+
+		if (stricmp(it->pickup_name, s) == 0)
+		{
+			it->use (ent, it);
+			return;
+		}
 	}
 
-	it->use (ent, it);
+	gi.cprintf (ent, PRINT_HIGH, "unknown item: %s\n", s);
 }
 
 /*
@@ -373,64 +237,16 @@ void Cmd_Inven_f (edict_t *ent)
 
 /*
 =================
-Cmd_InvUse_f
-=================
-*/
-void Cmd_InvUse_f (edict_t *ent)
-{
-	gitem_t		*it;
-
-	ValidateSelectedItem (ent);
-
-	if (ent->client->pers.selected_item == -1)
-	{
-		gi.cprintf (ent, PRINT_HIGH, "No item to use.\n");
-		return;
-	}
-
-	it = &itemlist[ent->client->pers.selected_item];
-	if (!it->use)
-	{
-		gi.cprintf (ent, PRINT_HIGH, "Item is not usable.\n");
-		return;
-	}
-	it->use (ent, it);
-}
-
-/*
-=================
 Cmd_WeapPrev_f
 =================
 */
 void Cmd_WeapPrev_f (edict_t *ent)
 {
-	gclient_t	*cl;
-	int32_t			i, index;
-	gitem_t		*it;
-	int32_t			selected_weapon;
-
-	cl = ent->client;
-
-	if (!cl->pers.weapon)
+	if (!ent->client->pers.weapon)
 		return;
 
-	selected_weapon = ITEM_INDEX(cl->pers.weapon);
-
-	// scan  for the next valid one
-	for (i=1 ; i<=MAX_ITEMS ; i++)
-	{
-		index = (selected_weapon + i)%MAX_ITEMS;
-		if (!cl->pers.inventory[index])
-			continue;
-		it = &itemlist[index];
-		if (!it->use)
-			continue;
-		if (! (it->flags & IT_WEAPON) )
-			continue;
-		it->use (ent, it);
-		if (cl->pers.weapon == it)
-			return;	// successful
-	}
+	gitem_t *it = &g_weapons[(ent->client->pers.weapon->weapmodel - 1) % lengthof(g_weapons)];
+	it->use (ent, it);
 }
 
 /*
@@ -440,33 +256,11 @@ Cmd_WeapNext_f
 */
 void Cmd_WeapNext_f (edict_t *ent)
 {
-	gclient_t	*cl;
-	int32_t			i, index;
-	gitem_t		*it;
-	int32_t			selected_weapon;
-
-	cl = ent->client;
-
-	if (!cl->pers.weapon)
+	if (!ent->client->pers.weapon)
 		return;
 
-	selected_weapon = ITEM_INDEX(cl->pers.weapon);
-
-	// scan  for the next valid one
-	for (i=1 ; i<=MAX_ITEMS ; i++)
-	{
-		index = (selected_weapon + MAX_ITEMS - i)%MAX_ITEMS;
-		if (!cl->pers.inventory[index])
-			continue;
-		it = &itemlist[index];
-		if (!it->use)
-			continue;
-		if (! (it->flags & IT_WEAPON) )
-			continue;
-		it->use (ent, it);
-		if (cl->pers.weapon == it)
-			return;	// successful
-	}
+	gitem_t *it = &g_weapons[(ent->client->pers.weapon->weapmodel + 1) % lengthof(g_weapons)];
+	it->use (ent, it);
 }
 
 /*
@@ -476,24 +270,10 @@ Cmd_WeapLast_f
 */
 void Cmd_WeapLast_f (edict_t *ent)
 {
-	gclient_t	*cl;
-	int32_t			index;
-	gitem_t		*it;
-
-	cl = ent->client;
-
-	if (!cl->pers.weapon || !cl->pers.lastweapon)
+	if (!ent->client->pers.weapon || !ent->client->pers.lastweapon)
 		return;
 
-	index = ITEM_INDEX(cl->pers.lastweapon);
-	if (!cl->pers.inventory[index])
-		return;
-	it = &itemlist[index];
-	if (!it->use)
-		return;
-	if (! (it->flags & IT_WEAPON) )
-		return;
-	it->use (ent, it);
+	ent->client->pers.lastweapon->use (ent, ent->client->pers.lastweapon);
 }
 
 /*
@@ -809,24 +589,16 @@ void ClientCommand (edict_t *ent)
 		Cmd_Noclip_f (ent);
 	else if (stricmp (cmd, "inven") == 0)
 		Cmd_Inven_f (ent);
-	else if (stricmp (cmd, "invnext") == 0)
-		SelectNextItem (ent, -1);
-	else if (stricmp (cmd, "invprev") == 0)
-		SelectPrevItem (ent, -1);
-	else if (stricmp (cmd, "invnextw") == 0)
-		SelectNextItem (ent, IT_WEAPON);
-	else if (stricmp (cmd, "invprevw") == 0)
-		SelectPrevItem (ent, IT_WEAPON);
-	else if (stricmp (cmd, "invnextp") == 0)
-		SelectNextItem (ent, IT_POWERUP);
-	else if (stricmp (cmd, "invprevp") == 0)
-		SelectPrevItem (ent, IT_POWERUP);
-	else if (stricmp (cmd, "invuse") == 0)
-		Cmd_InvUse_f (ent);
-	else if (stricmp (cmd, "weapprev") == 0)
-		Cmd_WeapPrev_f (ent);
-	else if (stricmp (cmd, "weapnext") == 0)
+	else if (stricmp (cmd, "invnext") == 0 ||
+			 stricmp (cmd, "invnextw") == 0 ||
+			 stricmp (cmd, "invnextp") == 0 ||
+			 stricmp (cmd, "weapnext") == 0)
 		Cmd_WeapNext_f (ent);
+	else if (stricmp (cmd, "invprev") == 0 ||
+			 stricmp (cmd, "invprevw") == 0 ||
+			 stricmp (cmd, "invprevp") == 0 ||
+			 stricmp (cmd, "weapprev") == 0)
+		Cmd_WeapPrev_f (ent);
 	else if (stricmp (cmd, "weaplast") == 0)
 		Cmd_WeapLast_f (ent);
 	else if (stricmp (cmd, "kill") == 0)

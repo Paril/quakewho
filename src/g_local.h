@@ -111,15 +111,17 @@ enum weaponstate_t : uint8_t
 	WEAPON_FIRING
 };
 
-enum ammo_t : uint8_t
+enum
 {
 	AMMO_BULLETS,
 	AMMO_SHELLS,
-	AMMO_ROCKETS,
 	AMMO_GRENADES,
-	AMMO_CELLS,
-	AMMO_SLUGS
+	
+	AMMO_TOTAL,
+	AMMO_NONE = AMMO_TOTAL
 };
+
+typedef uint8_t ammo_t;
 
 //deadflag
 enum deadflag_t : uint8_t
@@ -202,67 +204,30 @@ enum movetype_t : uint8_t
 	MOVETYPE_BOUNCE
 };
 
-// power armor types
-enum powerarmor_t : uint8_t
-{
-	POWER_ARMOR_NONE,
-	POWER_ARMOR_SCREEN,
-	POWER_ARMOR_SHIELD
-};
-
-// gitem_t->flags
-enum gitem_flags_t : uint8_t
-{
-	IT_NONE			= 0,
-	IT_WEAPON		= bit(0),		// use makes active weapon
-	IT_AMMO			= bit(1),
-	IT_ARMOR		= bit(2),
-	IT_STAY_COOP	= bit(3),
-	IT_KEY			= bit(4),
-	IT_POWERUP		= bit(5)
-};
-
-MAKE_BITFLAGS(gitem_flags_t);
-
 // gitem_t->weapmodel for weapons indicates model index
-enum gitem_weapmodel_t : uint8_t
+enum
 {
-	WEAP_NONE,
 	WEAP_BLASTER,
 	WEAP_SHOTGUN,
-	WEAP_SUPERSHOTGUN,
 	WEAP_MACHINEGUN,
-	WEAP_CHAINGUN,
-	WEAP_GRENADES,
 	WEAP_GRENADELAUNCHER,
-	WEAP_ROCKETLAUNCHER,
-	WEAP_HYPERBLASTER,
-	WEAP_RAILGUN,
-	WEAP_BFG,
+	WEAP_TOTAL
 };
+
+typedef uint8_t gitem_weapmodel_t;
 
 struct gitem_t
 {
-	char				*classname;	// spawning name
 	void				(*use)(edict_t *ent, gitem_t *item);
 	void				(*weaponthink)(edict_t *ent);
 	char				*view_model;
-
-	// client side info
+	char				*vwep_model;
 	char				*icon;
-	char				*pickup_name;	// for printing on pickup
-	int32_t				count_width;		// number of digits to display by icon
-
-	int32_t				quantity;		// for ammo how much, for weapons how much is used per shot
-	char				*ammo;			// for weapons
-	gitem_flags_t		flags;			// IT_* flags
-
-	gitem_weapmodel_t	weapmodel;		// weapon model index (for weapons)
-
-	void				*info;
-	int32_t				tag;
-
-	char				*precaches;		// string of all models, sounds, and images this item will use
+	char				*pickup_name;
+	uint16_t			quantity;
+	ammo_t				ammo;
+	gitem_weapmodel_t	weapmodel;
+	char				*precaches;
 };
 
 //
@@ -277,9 +242,6 @@ struct game_locals_t
 	// store latched cvars here that we want to get at often
 	int32_t		maxclients;
 	int32_t		maxentities;
-
-	// items
-	int32_t		num_items;
 };
 
 
@@ -418,9 +380,6 @@ struct monsterinfo_t
 	bool		lefty;
 	vec_t		idle_time;
 	int32_t		linkcount;
-
-	powerarmor_t power_armor_type;
-	int32_t		power_armor_power;
 };
 
 extern	game_locals_t	game;
@@ -579,7 +538,7 @@ struct field_t
 	fieldflags_t flags;
 };
 
-extern	gitem_t	itemlist[];
+extern gitem_t g_weapons[WEAP_TOTAL];
 
 
 //
@@ -592,14 +551,8 @@ void Cmd_Score_f (edict_t *ent);
 // g_items.c
 //
 void InitItems (void);
-void SetItemNames (void);
-void PrecacheItem (gitem_t *item);
-gitem_t	*FindItem (char *pickup_name);
-gitem_t	*FindItemByClassname (char *classname);
-#define	ITEM_INDEX(x) ((x)-itemlist)
 void ChangeWeapon (edict_t *ent);
 void Think_Weapon (edict_t *ent);
-gitem_t	*GetItemByIndex (int32_t index);
 
 //
 // g_utils.c
@@ -813,16 +766,7 @@ struct client_persistant_t
 	int32_t		max_health;
 	edictflags_t savedFlags;
 
-	int32_t		selected_item;
-	int32_t		inventory[MAX_ITEMS];
-
-	// ammo capacities
-	int32_t		max_bullets;
-	int32_t		max_shells;
-	int32_t		max_rockets;
-	int32_t		max_grenades;
-	int32_t		max_cells;
-	int32_t		max_slugs;
+	uint32_t	ammo[AMMO_TOTAL];
 
 	gitem_t		*weapon;
 	gitem_t		*lastweapon;
@@ -859,8 +803,6 @@ struct gclient_t
 
 	bool		showscores;			// set layout stat
 
-	int32_t		ammo_index;
-
 	button_t	buttons;
 	button_t	oldbuttons;
 	button_t	latched_buttons;
@@ -871,7 +813,6 @@ struct gclient_t
 
 	// sum up damage over an entire frame, so
 	// shotgun blasts give a single big kick
-	int32_t		damage_parmor;		// damage absorbed by power armor
 	int32_t		damage_blood;		// damage taken out of health
 	int32_t		damage_knockback;	// impact damage
 	vec3_t		damage_from;		// origin for vector calculation
@@ -900,10 +841,7 @@ struct gclient_t
 	bool		anim_duck;
 	bool		anim_run;
 
-	int32_t		silencer_shots;
 	soundindex_t weapon_sound;
-
-	vec_t		pickup_msg_time;
 
 	vec_t		flood_locktill;		// locked from talking
 	vec_t		flood_when[10];		// when messages were said

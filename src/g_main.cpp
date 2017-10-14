@@ -143,9 +143,6 @@ void InitGame (void)
 	// dm map list
 	sv_maplist = gi.cvar ("sv_maplist", "", CVAR_NONE);
 
-	// items
-	InitItems ();
-
 	// initialize all entities for this game
 	game.maxentities = maxentities->value;
 	g_edicts = (edict_t *) gi.TagMalloc ((int32_t) (game.maxentities * sizeof(g_edicts[0])), TAG_GAME);

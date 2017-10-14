@@ -263,8 +263,6 @@ G_SetStats
 */
 void G_SetStats (edict_t *ent)
 {
-	gitem_t		*item;
-
 	//
 	// health
 	//
@@ -274,36 +272,16 @@ void G_SetStats (edict_t *ent)
 	//
 	// ammo
 	//
-	if (!ent->client->ammo_index /* || !ent->client->pers.inventory[ent->client->ammo_index] */)
-	{
-		ent->client->ps.stats[STAT_AMMO_ICON] = 0;
-		ent->client->ps.stats[STAT_AMMO] = 0;
-	}
-	else
-	{
-		item = &itemlist[ent->client->ammo_index];
-		ent->client->ps.stats[STAT_AMMO_ICON] = gi.imageindex (item->icon);
-		ent->client->ps.stats[STAT_AMMO] = ent->client->pers.inventory[ent->client->ammo_index];
-	}
-	
-	//
-	// pickup message
-	//
-	if (level.time > ent->client->pickup_msg_time)
-	{
-		ent->client->ps.stats[STAT_PICKUP_ICON] = 0;
-		ent->client->ps.stats[STAT_PICKUP_STRING] = 0;
-	}
+	ent->client->ps.stats[STAT_AMMO_ICON] = 0;
+	ent->client->ps.stats[STAT_AMMO] = 0;
 
-	//
-	// selected item
-	//
-	if (ent->client->pers.selected_item == -1)
-		ent->client->ps.stats[STAT_SELECTED_ICON] = 0;
-	else
-		ent->client->ps.stats[STAT_SELECTED_ICON] = gi.imageindex (itemlist[ent->client->pers.selected_item].icon);
+	if (ent->client->pers.weapon)
+	{
+		ent->client->ps.stats[STAT_AMMO_ICON] = gi.imageindex (ent->client->pers.weapon->icon);
 
-	ent->client->ps.stats[STAT_SELECTED_ITEM] = ent->client->pers.selected_item;
+		if (ent->client->pers.weapon->ammo != AMMO_NONE)
+			ent->client->ps.stats[STAT_AMMO] = ent->client->pers.ammo[ent->client->pers.weapon->ammo];
+	}
 
 	//
 	// layouts

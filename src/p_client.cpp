@@ -287,10 +287,6 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 	self->client->resp.score--;
 }
 
-void TossClientWeapon (edict_t *self)
-{
-}
-
 
 /*
 ==================
@@ -363,11 +359,10 @@ void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int32_t d
 		LookAtKiller (self, inflictor, attacker);
 		self->client->ps.pmove.pm_type = PM_DEAD;
 		ClientObituary (self, inflictor, attacker);
-		TossClientWeapon (self);
 		Cmd_Help_f (self);		// show scores
 
 		// clear inventory
-		memset(self->client->pers.inventory, 0, sizeof(self->client->pers.inventory));
+		memset(self->client->pers.ammo, 0, sizeof(self->client->pers.ammo));
 	}
 
 	// remove powerups
@@ -432,25 +427,16 @@ but is called after each death and level change in deathmatch
 */
 void InitClientPersistant (gclient_t *client)
 {
-	gitem_t		*item;
-
 	memset (&client->pers, 0, sizeof(client->pers));
 
-	item = FindItem("Blaster");
-	client->pers.selected_item = ITEM_INDEX(item);
-	client->pers.inventory[client->pers.selected_item] = 1;
-
-	client->pers.weapon = item;
+	client->pers.weapon = &g_weapons[WEAP_BLASTER];
 
 	client->pers.health			= 100;
 	client->pers.max_health		= 100;
 
-	client->pers.max_bullets	= 200;
-	client->pers.max_shells		= 100;
-	client->pers.max_rockets	= 50;
-	client->pers.max_grenades	= 50;
-	client->pers.max_cells		= 200;
-	client->pers.max_slugs		= 50;
+	client->pers.ammo[AMMO_BULLETS]		= 100;
+	client->pers.ammo[AMMO_SHELLS]		= 20;
+	client->pers.ammo[AMMO_GRENADES]	= 5;
 
 	client->pers.connected = true;
 }

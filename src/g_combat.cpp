@@ -142,106 +142,6 @@ void SpawnDamage (int32_t type, const vec3_t origin, const vec3_t normal, int32_
 	gi.multicast (origin, MULTICAST_PVS);
 }
 
-
-/*
-============
-T_Damage
-
-targ		entity that is being damaged
-inflictor	entity that is causing the damage
-attacker	entity that caused the inflictor to damage targ
-	example: targ=monster, inflictor=rocket, attacker=player
-
-dir			direction of the attack
-point		point at which the damage is being inflicted
-normal		normal vector from that point
-damage		amount of damage being inflicted
-knockback	force to be applied against targ as a result of the damage
-
-dflags		these flags are used to control how T_Damage works
-	DAMAGE_RADIUS			damage was indirect (from a nearby explosion)
-	DAMAGE_NO_ARMOR			armor does not protect from this damage
-	DAMAGE_ENERGY			damage is from an energy based weapon
-	DAMAGE_NO_KNOCKBACK		do not affect velocity, just view angles
-	DAMAGE_BULLET			damage is from a bullet (used for ricochets)
-	DAMAGE_NO_PROTECTION	kills godmode, armor, everything
-============
-*/
-static int32_t CheckPowerArmor (edict_t *ent, const vec3_t point, const vec3_t normal, int32_t damage, damageflag_t dflags)
-{
-	gclient_t	*client;
-	int32_t			save;
-	powerarmor_t	power_armor_type;
-	int32_t			index = 0;
-	int32_t			damagePerCell;
-	int32_t			pa_te_type;
-	int32_t			power = 0;
-	int32_t			power_used;
-
-	if (!damage)
-		return 0;
-
-	client = ent->client;
-
-	if (dflags & DAMAGE_NO_ARMOR)
-		return 0;
-
-	if (!client && (ent->svflags & SVF_MONSTER))
-	{
-		power_armor_type = ent->monsterinfo.power_armor_type;
-		power = ent->monsterinfo.power_armor_power;
-	}
-	else
-		return 0;
-
-	if (power_armor_type == POWER_ARMOR_NONE)
-		return 0;
-	if (!power)
-		return 0;
-
-	if (power_armor_type == POWER_ARMOR_SCREEN)
-	{
-		vec3_t		vec;
-		vec_t		dot;
-		vec3_t		forward;
-
-		// only works if damage point is in front
-		AngleVectors (ent->s.angles, forward, nullptr, nullptr);
-		VectorSubtract (point, ent->s.origin, vec);
-		VectorNormalize (vec);
-		dot = DotProduct (vec, forward);
-		if (dot <= 0.3)
-			return 0;
-
-		damagePerCell = 1;
-		pa_te_type = TE_SCREEN_SPARKS;
-		damage = damage / 3;
-	}
-	else
-	{
-		damagePerCell = 2;
-		pa_te_type = TE_SHIELD_SPARKS;
-		damage = (2 * damage) / 3;
-	}
-
-	save = power * damagePerCell;
-	if (!save)
-		return 0;
-	if (save > damage)
-		save = damage;
-
-	SpawnDamage (pa_te_type, point, normal, save);
-	ent->powerarmor_time = level.time + 0.2;
-
-	power_used = save / damagePerCell;
-
-	if (client)
-		client->pers.inventory[index] -= power_used;
-	else
-		ent->monsterinfo.power_armor_power -= power_used;
-	return save;
-}
-
 void M_ReactToDamage (edict_t *targ, edict_t *attacker)
 {
 	if (!(attacker->client) && !(attacker->svflags & SVF_MONSTER))
@@ -329,7 +229,6 @@ void T_Damage (edict_t *targ, edict_t *inflictor, edict_t *attacker, const vec3_
 	gclient_t	*client;
 	int32_t		take;
 	int32_t		save;
-	int32_t		psave;
 	int32_t		te_sparks;
 
 	if (!targ->takedamage)
@@ -396,9 +295,6 @@ void T_Damage (edict_t *targ, edict_t *inflictor, edict_t *attacker, const vec3_
 		SpawnDamage (te_sparks, point, normal, save);
 	}
 
-	psave = CheckPowerArmor (targ, point, normal, take, dflags);
-	take -= psave;
-
 	// team damage avoidance
 	if (!(dflags & DAMAGE_NO_PROTECTION) && CheckTeamDamage (targ, attacker))
 		return;
@@ -450,7 +346,6 @@ void T_Damage (edict_t *targ, edict_t *inflictor, edict_t *attacker, const vec3_
 	// at the end of the frame
 	if (client)
 	{
-		client->damage_parmor += psave;
 		client->damage_blood += take;
 		client->damage_knockback += knockback;
 		VectorCopy (point, client->damage_from);
