@@ -151,16 +151,6 @@ void InitGame (void)
 {
 	gi.dprintf ("==== InitGame ====\n");
 
-	cvar_t *deathmatch = gi.cvar ("deathmatch", "1", CVAR_LATCH);
-	cvar_t *coop = gi.cvar ("coop", "0", CVAR_LATCH);
-
-	if (!deathmatch->value || coop->value)
-	{
-		gi.dprintf("Needs dm 1/coop 0, setting...\n");
-		gi.cvar_forceset("deathmatch", "1");
-		gi.cvar_forceset("coop", "0");
-	}
-
 	gun_x = gi.cvar ("gun_x", "0", CVAR_NONE);
 	gun_y = gi.cvar ("gun_y", "0", CVAR_NONE);
 	gun_z = gi.cvar ("gun_z", "0", CVAR_NONE);

@@ -519,6 +519,18 @@ parsing textual entity definitions out of an ent file.
 */
 void SpawnEntities (char *mapname, char *entities, char *spawnpoint)
 {
+	cvar_t *deathmatch = gi.cvar ("deathmatch", "1", CVAR_LATCH);
+	cvar_t *coop = gi.cvar ("coop", "0", CVAR_LATCH);
+
+	if (!deathmatch->value || coop->value)
+	{
+		gi.dprintf("Needs dm 1/coop 0, setting...\n");
+		gi.cvar_forceset("sv_allow_map", "1");
+		gi.cvar_forceset("deathmatch", "1");
+		gi.cvar_forceset("coop", "0");
+		gi.AddCommandString(va("map %s\n", mapname));
+	}
+
 	edict_t		*ent;
 	int32_t			inhibit;
 	char		*com_token;
