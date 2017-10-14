@@ -35,8 +35,6 @@ meansofdeath_t meansOfDeath;
 
 edict_t		*g_edicts;
 
-cvar_t	*deathmatch;
-cvar_t	*coop;
 cvar_t	*dmflags;
 cvar_t	*skill;
 cvar_t	*fraglimit;
@@ -281,9 +279,6 @@ void CheckDMRules (void)
 	gclient_t	*cl;
 
 	if (level.intermissiontime)
-		return;
-
-	if (!deathmatch->value)
 		return;
 
 	if (timelimit->value)

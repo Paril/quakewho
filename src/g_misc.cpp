@@ -414,105 +414,10 @@ void SP_path_corner (edict_t *self)
 	gi.linkentity (self);
 }
 
-
-/*QUAKED point_combat (0.5 0.3 0) (-8 -8 -8) (8 8 8) Hold
-Makes this the target of a monster and it will head here
-when first activated before going after the activator.  If
-hold is selected, it will stay here.
-*/
-void point_combat_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf)
-{
-	edict_t	*activator;
-
-	if (other->movetarget != self)
-		return;
-
-	if (self->target)
-	{
-		other->target = self->target;
-		other->goalentity = other->movetarget = G_PickTarget(other->target);
-		if (!other->goalentity)
-		{
-			gi.dprintf("%s at %s target %s does not exist\n", self->classname, vtos(self->s.origin), self->target);
-			other->movetarget = self;
-		}
-		self->target = nullptr;
-	}
-	else if ((self->spawnflags & 1) && !(other->flags & (FL_SWIM|FL_FLY)))
-	{
-		other->monsterinfo.pausetime = level.time + 100000000;
-		other->monsterinfo.aiflags |= AI_STAND_GROUND;
-		other->monsterinfo.stand (other);
-	}
-
-	if (other->movetarget == self)
-	{
-		other->target = nullptr;
-		other->movetarget = nullptr;
-		other->goalentity = other->enemy;
-		other->monsterinfo.aiflags &= ~AI_COMBAT_POINT;
-	}
-
-	if (self->pathtarget)
-	{
-		char *savetarget;
-
-		savetarget = self->target;
-		self->target = self->pathtarget;
-		if (other->enemy && other->enemy->client)
-			activator = other->enemy;
-		else if (other->oldenemy && other->oldenemy->client)
-			activator = other->oldenemy;
-		else if (other->activator && other->activator->client)
-			activator = other->activator;
-		else
-			activator = other;
-		G_UseTargets (self, activator);
-		self->target = savetarget;
-	}
-}
-
 void SP_point_combat (edict_t *self)
 {
-	if (deathmatch->value)
-	{
-		G_FreeEdict (self);
-		return;
-	}
-	self->solid = SOLID_TRIGGER;
-	self->touch = point_combat_touch;
-	VectorSet (self->mins, -8, -8, -16);
-	VectorSet (self->maxs, 8, 8, 16);
-	self->svflags = SVF_NOCLIENT;
-	gi.linkentity (self);
-};
-
-
-/*QUAKED viewthing (0 .5 .8) (-8 -8 -8) (8 8 8)
-Just for the debugging level.  Don't use
-*/
-void TH_viewthing(edict_t *ent)
-{
-	ent->s.frame = (ent->s.frame + 1) % 7;
-	ent->nextthink = level.time + FRAMETIME;
+	G_FreeEdict (self);
 }
-
-void SP_viewthing(edict_t *ent)
-{
-	gi.dprintf ("viewthing spawned\n");
-
-	ent->movetype = MOVETYPE_NONE;
-	ent->solid = SOLID_BBOX;
-	ent->s.renderfx = RF_FRAMELERP;
-	VectorSet (ent->mins, -16, -16, -24);
-	VectorSet (ent->maxs, 16, 16, 32);
-	ent->s.modelindex = gi.modelindex ("models/objects/banner/tris.md2");
-	gi.linkentity (ent);
-	ent->nextthink = level.time + 0.5;
-	ent->think = TH_viewthing;
-	return;
-}
-
 
 /*QUAKED info_null (0 0.5 0) (-4 -4 -4) (4 4 4)
 Used as a positional target for spotlights, etc.
@@ -532,48 +437,10 @@ void SP_info_notnull (edict_t *self)
 	VectorCopy (self->s.origin, self->absmax);
 };
 
-
-/*QUAKED light (0 1 0) (-8 -8 -8) (8 8 8) START_OFF
-Non-displayed light.
-Default light value is 300.
-Default style is 0.
-If targeted, will toggle between on and off.
-Default _cone value is 10 (used to set size of light for spotlights)
-*/
-
-const int32_t START_OFF	= bit(0);
-
-static void light_use (edict_t *self, edict_t *other, edict_t *activator)
-{
-	if (self->spawnflags & START_OFF)
-	{
-		gi.configstring (CS_LIGHTS+self->style, "m");
-		self->spawnflags &= ~START_OFF;
-	}
-	else
-	{
-		gi.configstring (CS_LIGHTS+self->style, "a");
-		self->spawnflags |= START_OFF;
-	}
-}
-
 void SP_light (edict_t *self)
 {
 	// no targeted lights in deathmatch, because they cause global messages
-	if (!self->targetname || deathmatch->value)
-	{
-		G_FreeEdict (self);
-		return;
-	}
-
-	if (self->style >= 32)
-	{
-		self->use = light_use;
-		if (self->spawnflags & START_OFF)
-			gi.configstring (CS_LIGHTS+self->style, "a");
-		else
-			gi.configstring (CS_LIGHTS+self->style, "m");
-	}
+	G_FreeEdict (self);
 }
 
 
@@ -729,140 +596,9 @@ void SP_func_object (edict_t *self)
 	gi.linkentity (self);
 }
 
-
-/*QUAKED func_explosive (0 .5 .8) ? Trigger_Spawn ANIMATED ANIMATED_FAST
-Any brush that you want to explode or break apart.  If you want an
-ex0plosion, set dmg and it will do a radius explosion of that amount
-at the center of the bursh.
-
-If targeted it will not be shootable.
-
-health defaults to 100.
-
-mass defaults to 75.  This determines how much debris is emitted when
-it explodes.  You get one large chunk per 100 of mass (up to 8) and
-one small chunk per 25 of mass (up to 16).  So 800 gives the most.
-*/
-void func_explosive_explode (edict_t *self, edict_t *inflictor, edict_t *attacker, int32_t damage, const vec3_t point)
-{
-	vec3_t	origin;
-	vec3_t	chunkorigin;
-	vec3_t	size;
-	int32_t		count;
-	int32_t		mass;
-
-	// bmodel origins are (0 0 0), we need to adjust that here
-	VectorScale (self->size, 0.5, size);
-	VectorAdd (self->absmin, size, origin);
-	VectorCopy (origin, self->s.origin);
-
-	self->takedamage = DAMAGE_NO;
-
-	if (self->dmg)
-		T_RadiusDamage (self, attacker, self->dmg, nullptr, self->dmg+40, MOD_EXPLOSIVE);
-
-	VectorSubtract (self->s.origin, inflictor->s.origin, self->velocity);
-	VectorNormalize (self->velocity);
-	VectorScale (self->velocity, 150, self->velocity);
-
-	// start chunks towards the center
-	VectorScale (size, 0.5, size);
-
-	mass = self->mass;
-	if (!mass)
-		mass = 75;
-
-	// big chunks
-	if (mass >= 100)
-	{
-		count = mass / 100;
-		if (count > 8)
-			count = 8;
-		while(count--)
-		{
-			chunkorigin[0] = origin[0] + crandom() * size[0];
-			chunkorigin[1] = origin[1] + crandom() * size[1];
-			chunkorigin[2] = origin[2] + crandom() * size[2];
-			ThrowDebris (self, "models/objects/debris1/tris.md2", 1, chunkorigin);
-		}
-	}
-
-	// small chunks
-	count = mass / 25;
-	if (count > 16)
-		count = 16;
-	while(count--)
-	{
-		chunkorigin[0] = origin[0] + crandom() * size[0];
-		chunkorigin[1] = origin[1] + crandom() * size[1];
-		chunkorigin[2] = origin[2] + crandom() * size[2];
-		ThrowDebris (self, "models/objects/debris2/tris.md2", 2, chunkorigin);
-	}
-
-	G_UseTargets (self, attacker);
-
-	if (self->dmg)
-		BecomeExplosion1 (self);
-	else
-		G_FreeEdict (self);
-}
-
-void func_explosive_use(edict_t *self, edict_t *other, edict_t *activator)
-{
-	func_explosive_explode (self, self, other, self->health, vec3_origin);
-}
-
-void func_explosive_spawn (edict_t *self, edict_t *other, edict_t *activator)
-{
-	self->solid = SOLID_BSP;
-	self->svflags &= ~SVF_NOCLIENT;
-	self->use = nullptr;
-	KillBox (self);
-	gi.linkentity (self);
-}
-
 void SP_func_explosive (edict_t *self)
 {
-	if (deathmatch->value)
-	{	// auto-remove for deathmatch
-		G_FreeEdict (self);
-		return;
-	}
-
-	self->movetype = MOVETYPE_PUSH;
-
-	gi.modelindex ("models/objects/debris1/tris.md2");
-	gi.modelindex ("models/objects/debris2/tris.md2");
-
-	gi.setmodel (self, self->model);
-
-	if (self->spawnflags & 1)
-	{
-		self->svflags |= SVF_NOCLIENT;
-		self->solid = SOLID_NOT;
-		self->use = func_explosive_spawn;
-	}
-	else
-	{
-		self->solid = SOLID_BSP;
-		if (self->targetname)
-			self->use = func_explosive_use;
-	}
-
-	if (self->spawnflags & 2)
-		self->s.effects |= EF_ANIM_ALL;
-	if (self->spawnflags & 4)
-		self->s.effects |= EF_ANIM_ALLFAST;
-
-	if (self->use != func_explosive_use)
-	{
-		if (!self->health)
-			self->health = 100;
-		self->die = func_explosive_explode;
-		self->takedamage = DAMAGE_YES;
-	}
-
-	gi.linkentity (self);
+	G_FreeEdict (self);
 }
 
 
@@ -974,12 +710,6 @@ void barrel_delay (edict_t *self, edict_t *inflictor, edict_t *attacker, int32_t
 
 void SP_misc_explobox (edict_t *self)
 {
-	if (deathmatch->value)
-	{	// auto-remove for deathmatch
-		G_FreeEdict (self);
-		return;
-	}
-
 	gi.modelindex ("models/objects/debris1/tris.md2");
 	gi.modelindex ("models/objects/debris2/tris.md2");
 	gi.modelindex ("models/objects/debris3/tris.md2");
@@ -1212,57 +942,9 @@ void SP_misc_banner (edict_t *ent)
 	ent->nextthink = level.time + FRAMETIME;
 }
 
-/*QUAKED misc_deadsoldier (1 .5 0) (-16 -16 0) (16 16 16) ON_BACK ON_STOMACH BACK_DECAP FETAL_POS SIT_DECAP IMPALED
-This is the dead player model. Comes in 6 exciting different poses!
-*/
-void misc_deadsoldier_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int32_t damage, const vec3_t point)
-{
-	int32_t		n;
-
-	if (self->health > -80)
-		return;
-
-	gi.sound (self, CHAN_BODY, gi.soundindex ("misc/udeath.wav"), 1, ATTN_NORM, 0);
-	for (n= 0; n < 4; n++)
-		ThrowGib (self, "models/objects/gibs/sm_meat/tris.md2", damage, GIB_ORGANIC);
-	ThrowHead (self, "models/objects/gibs/head2/tris.md2", damage, GIB_ORGANIC);
-}
-
 void SP_misc_deadsoldier (edict_t *ent)
 {
-	if (deathmatch->value)
-	{	// auto-remove for deathmatch
-		G_FreeEdict (ent);
-		return;
-	}
-
-	ent->movetype = MOVETYPE_NONE;
-	ent->solid = SOLID_BBOX;
-	ent->s.modelindex=gi.modelindex ("models/deadbods/dude/tris.md2");
-
-	// Defaults to frame 0
-	if (ent->spawnflags & 2)
-		ent->s.frame = 1;
-	else if (ent->spawnflags & 4)
-		ent->s.frame = 2;
-	else if (ent->spawnflags & 8)
-		ent->s.frame = 3;
-	else if (ent->spawnflags & 16)
-		ent->s.frame = 4;
-	else if (ent->spawnflags & 32)
-		ent->s.frame = 5;
-	else
-		ent->s.frame = 0;
-
-	VectorSet (ent->mins, -16, -16, 0);
-	VectorSet (ent->maxs, 16, 16, 16);
-	ent->deadflag = DEAD_DEAD;
-	ent->takedamage = DAMAGE_YES;
-	ent->svflags |= SVF_MONSTER|SVF_DEADMONSTER;
-	ent->die = misc_deadsoldier_die;
-	ent->monsterinfo.aiflags |= AI_GOOD_GUY;
-
-	gi.linkentity (ent);
+	G_FreeEdict (ent);
 }
 
 /*QUAKED misc_viper (1 .5 0) (-16 -16 0) (16 16 32)

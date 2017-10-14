@@ -412,12 +412,6 @@ void berserk_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int32_t 
 */
 void SP_monster_berserk (edict_t *self)
 {
-	if (deathmatch->value)
-	{
-		G_FreeEdict (self);
-		return;
-	}
-
 	// pre-caches
 	sound_pain  = gi.soundindex ("berserk/berpain2.wav");
 	sound_die   = gi.soundindex ("berserk/berdeth2.wav");

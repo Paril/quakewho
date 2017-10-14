@@ -102,8 +102,8 @@ void Killed (edict_t *targ, edict_t *inflictor, edict_t *attacker, int32_t damag
 		if (!(targ->monsterinfo.aiflags & AI_GOOD_GUY))
 		{
 			level.killed_monsters++;
-			if (coop->value && attacker->client)
-				attacker->client->resp.score++;
+			//if (coop->value && attacker->client)
+			//	attacker->client->resp.score++;
 			// medics won't heal monsters that they kill themselves
 			if (strcmp(attacker->classname, "monster_medic") == 0)
 				targ->owner = attacker;
@@ -389,7 +389,7 @@ void T_Damage (edict_t *targ, edict_t *inflictor, edict_t *attacker, const vec3_
 	// friendly fire avoidance
 	// if enabled you can't hurt teammates (but you can hurt yourself)
 	// knockback still occurs
-	if ((targ != attacker) && ((deathmatch->value && ((dmflags_t)dmflags->value & (DF_MODELTEAMS | DF_SKINTEAMS))) || coop->value))
+	if ((targ != attacker) && (((dmflags_t)dmflags->value & (DF_MODELTEAMS | DF_SKINTEAMS))))
 	{
 		if (OnSameTeam (targ, attacker))
 		{
@@ -401,24 +401,12 @@ void T_Damage (edict_t *targ, edict_t *inflictor, edict_t *attacker, const vec3_
 	}
 	meansOfDeath = mod;
 
-	// easy mode takes half damage
-	if (skill->value == 0 && deathmatch->value == 0 && targ->client)
-	{
-		damage *= 0.5;
-		if (!damage)
-			damage = 1;
-	}
-
 	client = targ->client;
 
 	if (dflags & DAMAGE_BULLET)
 		te_sparks = TE_BULLET_SPARKS;
 	else
 		te_sparks = TE_SPARKS;
-
-// bonus damage for suprising a monster
-	if (!(dflags & DAMAGE_RADIUS) && (targ->svflags & SVF_MONSTER) && (attacker->client) && (!targ->enemy) && (targ->health > 0))
-		damage *= 2;
 
 	if (targ->flags & FL_NO_KNOCKBACK)
 		knockback = 0;

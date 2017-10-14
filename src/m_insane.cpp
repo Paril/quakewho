@@ -620,14 +620,6 @@ void insane_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int32_t d
 */
 void SP_misc_insane (edict_t *self)
 {
-//	static int32_t skin = 0;	//@@
-
-	if (deathmatch->value)
-	{
-		G_FreeEdict (self);
-		return;
-	}
-
 	sound_fist = gi.soundindex ("insane/insane11.wav");
 	sound_shake = gi.soundindex ("insane/insane5.wav");
 	sound_moan = gi.soundindex ("insane/insane7.wav");
@@ -662,12 +654,6 @@ void SP_misc_insane (edict_t *self)
 	self->monsterinfo.melee = nullptr;
 	self->monsterinfo.sight = nullptr;
 	self->monsterinfo.aiflags |= AI_GOOD_GUY;
-
-//@@
-//	self->s.skinnum = skin;
-//	skin++;
-//	if (skin > 12)
-//		skin = 0;
 
 	gi.linkentity (self);
 

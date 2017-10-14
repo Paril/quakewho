@@ -714,12 +714,6 @@ bool medic_checkattack (edict_t *self)
 */
 void SP_monster_medic (edict_t *self)
 {
-	if (deathmatch->value)
-	{
-		G_FreeEdict (self);
-		return;
-	}
-
 	sound_idle1 = gi.soundindex ("medic/idle.wav");
 	sound_pain1 = gi.soundindex ("medic/medpain1.wav");
 	sound_pain2 = gi.soundindex ("medic/medpain2.wav");

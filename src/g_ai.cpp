@@ -966,13 +966,6 @@ void ai_run (edict_t *self, vec_t dist)
 		return;
 	}
 
-	// coop will change to another enemy if visible
-	if (coop->value)
-	{	// FIXME: insane guys get mad with this, which causes crashes!
-		if (FindTarget (self))
-			return;
-	}
-
 	if ((self->monsterinfo.search_time) && (level.time > (self->monsterinfo.search_time + 20)))
 	{
 		M_MoveToGoal (self, dist);
@@ -1015,11 +1008,6 @@ void ai_run (edict_t *self, vec_t dist)
 		else if (self->monsterinfo.aiflags & AI_PURSUIT_LAST_SEEN)
 		{
 			self->monsterinfo.aiflags &= ~AI_PURSUIT_LAST_SEEN;
-			marker = PlayerTrail_PickFirst (self);
-		}
-		else
-		{
-			marker = PlayerTrail_PickNext (self);
 		}
 
 		if (marker)

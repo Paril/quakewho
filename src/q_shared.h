@@ -610,6 +610,7 @@ enum soundattn_t
 // player_state->stats[] indexes
 enum statindex_t : uint8_t
 {
+	// For compatibility sake, these 17 stat IDs should not be modified.
 	STAT_HEALTH_ICON,
 	STAT_HEALTH,
 	STAT_AMMO_ICON,
@@ -628,6 +629,8 @@ enum statindex_t : uint8_t
 	STAT_FLASHES,		// cleared each frame, 1 = health, 2 = armor
 	STAT_CHASE,
 	STAT_SPECTATOR,
+
+	// 18-31 reserved for mods
 
 	MAX_STATS				= 32
 };

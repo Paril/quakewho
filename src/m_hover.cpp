@@ -569,12 +569,6 @@ void hover_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int32_t da
 */
 void SP_monster_hover (edict_t *self)
 {
-	if (deathmatch->value)
-	{
-		G_FreeEdict (self);
-		return;
-	}
-
 	sound_pain1 = gi.soundindex ("hover/hovpain1.wav");	
 	sound_pain2 = gi.soundindex ("hover/hovpain2.wav");	
 	sound_death1 = gi.soundindex ("hover/hovdeth1.wav");	

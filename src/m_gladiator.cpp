@@ -338,13 +338,6 @@ void gladiator_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int32_
 */
 void SP_monster_gladiator (edict_t *self)
 {
-	if (deathmatch->value)
-	{
-		G_FreeEdict (self);
-		return;
-	}
-
-
 	sound_pain1 = gi.soundindex ("gladiator/pain.wav");	
 	sound_pain2 = gi.soundindex ("gladiator/gldpain2.wav");	
 	sound_die = gi.soundindex ("gladiator/glddeth2.wav");	

@@ -533,12 +533,6 @@ void monster_death_use (edict_t *self)
 
 bool monster_start (edict_t *self)
 {
-	if (deathmatch->value)
-	{
-		G_FreeEdict (self);
-		return false;
-	}
-
 	if ((self->spawnflags & 4) && !(self->monsterinfo.aiflags & AI_GOOD_GUY))
 	{
 		self->spawnflags &= ~4;

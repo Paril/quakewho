@@ -570,7 +570,6 @@ fire_rocket
 void rocket_touch (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf)
 {
 	vec3_t		origin;
-	int32_t			n;
 
 	if (other == ent->owner)
 		return;
@@ -590,19 +589,6 @@ void rocket_touch (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *su
 	if (other->takedamage)
 	{
 		T_Damage (other, ent, ent->owner, ent->velocity, ent->s.origin, plane->normal, ent->dmg, 0, DAMAGE_NONE, MOD_ROCKET);
-	}
-	else
-	{
-		// don't throw any debris in net games
-		if (!deathmatch->value && !coop->value)
-		{
-			if ((surf) && !(surf->flags & (SURF_WARP|SURF_TRANS33|SURF_TRANS66|SURF_FLOWING)))
-			{
-				n = irandom(4);
-				while(n--)
-					ThrowDebris (ent, "models/objects/debris2/tris.md2", 2, ent->s.origin);
-			}
-		}
 	}
 
 	T_RadiusDamage(ent, ent->owner, ent->radius_dmg, other, ent->dmg_radius, MOD_R_SPLASH);
@@ -815,10 +801,7 @@ void bfg_think (edict_t *self)
 	int32_t		dmg;
 	trace_t	tr;
 
-	if (deathmatch->value)
-		dmg = 5;
-	else
-		dmg = 10;
+	dmg = 5;
 
 	ent = nullptr;
 	while ((ent = findradius(ent, self->s.origin, 256)) != nullptr)

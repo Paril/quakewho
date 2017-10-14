@@ -57,8 +57,6 @@ to a noise in hopes of seeing the player from there.
 */
 void PlayerNoise(edict_t *who, vec3_t where, playernoise_t type)
 {
-	edict_t		*noise;
-
 	if (type == PNOISE_WEAPON)
 	{
 		if (who->client->silencer_shots)
@@ -67,51 +65,6 @@ void PlayerNoise(edict_t *who, vec3_t where, playernoise_t type)
 			return;
 		}
 	}
-
-	if (deathmatch->value)
-		return;
-
-	if (who->flags & FL_NOTARGET)
-		return;
-
-
-	if (!who->mynoise)
-	{
-		noise = G_Spawn();
-		noise->classname = "player_noise";
-		VectorSet (noise->mins, -8, -8, -8);
-		VectorSet (noise->maxs, 8, 8, 8);
-		noise->owner = who;
-		noise->svflags = SVF_NOCLIENT;
-		who->mynoise = noise;
-
-		noise = G_Spawn();
-		noise->classname = "player_noise";
-		VectorSet (noise->mins, -8, -8, -8);
-		VectorSet (noise->maxs, 8, 8, 8);
-		noise->owner = who;
-		noise->svflags = SVF_NOCLIENT;
-		who->mynoise2 = noise;
-	}
-
-	if (type == PNOISE_SELF || type == PNOISE_WEAPON)
-	{
-		noise = who->mynoise;
-		level.sound_entity = noise;
-		level.sound_entity_framenum = level.framenum;
-	}
-	else // type == PNOISE_IMPACT
-	{
-		noise = who->mynoise2;
-		level.sound2_entity = noise;
-		level.sound2_entity_framenum = level.framenum;
-	}
-
-	VectorCopy (where, noise->s.origin);
-	VectorSubtract (where, noise->maxs, noise->absmin);
-	VectorAdd (where, noise->maxs, noise->absmax);
-	noise->teleport_time = level.time;
-	gi.linkentity (noise);
 }
 
 
@@ -122,7 +75,7 @@ bool Pickup_Weapon (edict_t *ent, edict_t *other)
 
 	index = ITEM_INDEX(ent->item);
 
-	if ( ( ((dmflags_t)dmflags->value & DF_WEAPONS_STAY) || coop->value) 
+	if ((((dmflags_t)dmflags->value & DF_WEAPONS_STAY)) 
 		&& other->client->pers.inventory[index])
 	{
 		if (!(ent->spawnflags & (DROPPED_ITEM | DROPPED_PLAYER_ITEM) ) )
@@ -142,21 +95,16 @@ bool Pickup_Weapon (edict_t *ent, edict_t *other)
 
 		if (! (ent->spawnflags & DROPPED_PLAYER_ITEM) )
 		{
-			if (deathmatch->value)
-			{
-				if ((dmflags_t)dmflags->value & DF_WEAPONS_STAY)
-					ent->flags |= FL_RESPAWN;
-				else
-					SetRespawn (ent, 30);
-			}
-			if (coop->value)
+			if ((dmflags_t)dmflags->value & DF_WEAPONS_STAY)
 				ent->flags |= FL_RESPAWN;
+			else
+				SetRespawn (ent, 30);
 		}
 	}
 
 	if (other->client->pers.weapon != ent->item && 
 		(other->client->pers.inventory[index] == 1) &&
-		( !deathmatch->value || other->client->pers.weapon == FindItem("blaster") ) )
+		other->client->pers.weapon == FindItem("blaster"))
 		other->client->newweapon = ent->item;
 
 	return true;
@@ -846,12 +794,8 @@ void Blaster_Fire (edict_t *ent, const vec3_t g_offset, int32_t damage, bool hyp
 
 void Weapon_Blaster_Fire (edict_t *ent)
 {
-	int32_t		damage;
+	int32_t		damage = 15;
 
-	if (deathmatch->value)
-		damage = 15;
-	else
-		damage = 10;
 	Blaster_Fire (ent, vec3_origin, damage, false, EF_BLASTER);
 	ent->client->ps.gunframe++;
 }
@@ -900,10 +844,9 @@ void Weapon_HyperBlaster_Fire (edict_t *ent)
 				effect = EF_HYPERBLASTER;
 			else
 				effect = EF_NONE;
-			if (deathmatch->value)
-				damage = 15;
-			else
-				damage = 20;
+
+			damage = 15;
+
 			Blaster_Fire (ent, offset, damage, true, effect);
 			if (! ( (dmflags_t)dmflags->value & DF_INFINITE_AMMO ) )
 				ent->client->pers.inventory[ent->client->ammo_index]--;
@@ -998,14 +941,6 @@ void Machinegun_Fire (edict_t *ent)
 	ent->client->kick_origin[0] = crandom() * 0.35;
 	ent->client->kick_angles[0] = ent->client->machinegun_shots * -1.5;
 
-	// raise the gun as it is firing
-	if (!deathmatch->value)
-	{
-		ent->client->machinegun_shots++;
-		if (ent->client->machinegun_shots > 9)
-			ent->client->machinegun_shots = 9;
-	}
-
 	// get start / end positions
 	VectorAdd (ent->client->v_angle, ent->client->kick_angles, angles);
 	AngleVectors (angles, forward, right, nullptr);
@@ -1055,10 +990,7 @@ void Chaingun_Fire (edict_t *ent)
 	int32_t			damage;
 	int32_t			kick = 2;
 
-	if (deathmatch->value)
-		damage = 6;
-	else
-		damage = 8;
+	damage = 6;
 
 	if (ent->client->ps.gunframe == 5)
 		gi.sound(ent, CHAN_AUTO, gi.soundindex("weapons/chngnu1a.wav"), 1, ATTN_IDLE, 0);
@@ -1209,10 +1141,7 @@ void weapon_shotgun_fire (edict_t *ent)
 		kick *= 4;
 	}
 
-	if (deathmatch->value)
-		fire_shotgun (ent, start, forward, damage, kick, 500, 500, DEFAULT_DEATHMATCH_SHOTGUN_COUNT, MOD_SHOTGUN);
-	else
-		fire_shotgun (ent, start, forward, damage, kick, 500, 500, DEFAULT_SHOTGUN_COUNT, MOD_SHOTGUN);
+	fire_shotgun (ent, start, forward, damage, kick, 500, 500, DEFAULT_DEATHMATCH_SHOTGUN_COUNT, MOD_SHOTGUN);
 
 	// send muzzle flash
 	gi.WriteByte (SVC_MUZZLEFLASH);
@@ -1307,16 +1236,8 @@ void weapon_railgun_fire (edict_t *ent)
 	int32_t			damage;
 	int32_t			kick;
 
-	if (deathmatch->value)
-	{	// normal damage is too extreme in dm
-		damage = 100;
-		kick = 200;
-	}
-	else
-	{
-		damage = 150;
-		kick = 250;
-	}
+	damage = 100;
+	kick = 200;
 
 	if (is_quad)
 	{
@@ -1371,10 +1292,7 @@ void weapon_bfg_fire (edict_t *ent)
 	int32_t		damage;
 	vec_t	damage_radius = 1000;
 
-	if (deathmatch->value)
-		damage = 200;
-	else
-		damage = 500;
+	damage = 200;
 
 	if (ent->client->ps.gunframe == 9)
 	{

@@ -79,14 +79,14 @@ void SP_target_crosslevel_trigger (edict_t *ent);
 void SP_target_crosslevel_target (edict_t *ent);
 void SP_target_laser (edict_t *self);
 void SP_target_help (edict_t *ent);
-void SP_target_actor (edict_t *ent);
+void SP_target_actor (edict_t *ent) { G_FreeEdict(ent); }
 void SP_target_lightramp (edict_t *self);
 void SP_target_earthquake (edict_t *ent);
 void SP_target_character (edict_t *ent);
 void SP_target_string (edict_t *ent);
 
 void SP_worldspawn (edict_t *ent);
-void SP_viewthing (edict_t *ent);
+void SP_viewthing (edict_t *ent) { G_FreeEdict(ent); }
 
 void SP_light (edict_t *self);
 void SP_light_mine1 (edict_t *ent);
@@ -99,7 +99,7 @@ void SP_point_combat (edict_t *self);
 void SP_misc_explobox (edict_t *self);
 void SP_misc_banner (edict_t *self);
 void SP_misc_satellite_dish (edict_t *self);
-void SP_misc_actor (edict_t *self);
+void SP_misc_actor (edict_t *self) { G_FreeEdict(self); }
 void SP_misc_gib_arm (edict_t *self);
 void SP_misc_gib_leg (edict_t *self);
 void SP_misc_gib_head (edict_t *self);
@@ -140,8 +140,8 @@ void SP_monster_boss3_stand (edict_t *self);
 
 void SP_monster_commander_body (edict_t *self);
 
-void SP_turret_breach (edict_t *self);
-void SP_turret_base (edict_t *self);
+void SP_turret_breach (edict_t *self) { G_FreeEdict(self); }
+void SP_turret_base (edict_t *self) { G_FreeEdict(self); }
 void SP_turret_driver (edict_t *self);
 
 
@@ -573,27 +573,11 @@ void SpawnEntities (char *mapname, char *entities, char *spawnpoint)
 		// remove things (except the world) from different skill levels or deathmatch
 		if (ent != g_edicts)
 		{
-			if (deathmatch->value)
+			if ( ent->spawnflags & SPAWNFLAG_NOT_DEATHMATCH )
 			{
-				if ( ent->spawnflags & SPAWNFLAG_NOT_DEATHMATCH )
-				{
-					G_FreeEdict (ent);	
-					inhibit++;
-					continue;
-				}
-			}
-			else
-			{
-				if ( /* ((coop->value) && (ent->spawnflags & SPAWNFLAG_NOT_COOP)) || */
-					((skill->value == 0) && (ent->spawnflags & SPAWNFLAG_NOT_EASY)) ||
-					((skill->value == 1) && (ent->spawnflags & SPAWNFLAG_NOT_MEDIUM)) ||
-					(((skill->value == 2) || (skill->value == 3)) && (ent->spawnflags & SPAWNFLAG_NOT_HARD))
-					)
-					{
-						G_FreeEdict (ent);	
-						inhibit++;
-						continue;
-					}
+				G_FreeEdict (ent);	
+				inhibit++;
+				continue;
 			}
 
 			ent->spawnflags &= ~(SPAWNFLAG_NOT_EASY|SPAWNFLAG_NOT_MEDIUM|SPAWNFLAG_NOT_HARD|SPAWNFLAG_NOT_COOP|SPAWNFLAG_NOT_DEATHMATCH);
@@ -615,8 +599,6 @@ void SpawnEntities (char *mapname, char *entities, char *spawnpoint)
 #endif
 
 	G_FindTeams ();
-
-	PlayerTrail_Init ();
 }
 
 
@@ -644,64 +626,6 @@ void SpawnEntities (char *mapname, char *entities, char *spawnpoint)
 	endif
 
 #endif
-
-char *single_statusbar = 
-"yb	-24 "
-
-// health
-"xv	0 "
-"hnum "
-"xv	50 "
-"pic 0 "
-
-// ammo
-"if 2 "
-"	xv	100 "
-"	anum "
-"	xv	150 "
-"	pic 2 "
-"endif "
-
-// armor
-"if 4 "
-"	xv	200 "
-"	rnum "
-"	xv	250 "
-"	pic 4 "
-"endif "
-
-// selected item
-"if 6 "
-"	xv	296 "
-"	pic 6 "
-"endif "
-
-"yb	-50 "
-
-// picked up item
-"if 7 "
-"	xv	0 "
-"	pic 7 "
-"	xv	26 "
-"	yb	-42 "
-"	stat_string 8 "
-"	yb	-50 "
-"endif "
-
-// timer
-"if 9 "
-"	xv	262 "
-"	num	2	10 "
-"	xv	296 "
-"	pic	9 "
-"endif "
-
-//  help / weapon icon 
-"if 11 "
-"	xv	148 "
-"	pic	11 "
-"endif "
-;
 
 char *dm_statusbar =
 "yb	-24 "
@@ -836,10 +760,7 @@ void SP_worldspawn (edict_t *ent)
 	gi.configstring (CS_MAXCLIENTS, va("%i", (int32_t)(maxclients->value) ) );
 
 	// status bar program
-	if (deathmatch->value)
-		gi.configstring (CS_STATUSBAR, dm_statusbar);
-	else
-		gi.configstring (CS_STATUSBAR, single_statusbar);
+	gi.configstring (CS_STATUSBAR, dm_statusbar);
 
 	//---------------
 

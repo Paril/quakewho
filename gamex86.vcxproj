@@ -110,7 +110,6 @@
     <ClCompile Include="src\g_turret.cpp" />
     <ClCompile Include="src\g_utils.cpp" />
     <ClCompile Include="src\g_weapon.cpp" />
-    <ClCompile Include="src\m_actor.cpp" />
     <ClCompile Include="src\m_berserk.cpp" />
     <ClCompile Include="src\m_boss2.cpp" />
     <ClCompile Include="src\m_boss3.cpp" />
@@ -136,7 +135,6 @@
     <ClCompile Include="src\m_tank.cpp" />
     <ClCompile Include="src\p_client.cpp" />
     <ClCompile Include="src\p_hud.cpp" />
-    <ClCompile Include="src\p_trail.cpp" />
     <ClCompile Include="src\p_view.cpp" />
     <ClCompile Include="src\p_weapon.cpp" />
     <ClCompile Include="src\q_random.cpp" />
@@ -149,7 +147,6 @@
   <ItemGroup>
     <ClInclude Include="src\game.h" />
     <ClInclude Include="src\g_local.h" />
-    <ClInclude Include="src\m_actor.h" />
     <ClInclude Include="src\m_berserk.h" />
     <ClInclude Include="src\m_boss2.h" />
     <ClInclude Include="src\m_boss31.h" />

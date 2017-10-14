@@ -618,12 +618,6 @@ void brain_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int32_t da
 */
 void SP_monster_brain (edict_t *self)
 {
-	if (deathmatch->value)
-	{
-		G_FreeEdict (self);
-		return;
-	}
-
 	sound_chest_open = gi.soundindex ("brain/brnatck1.wav");
 	sound_tentacles_extend = gi.soundindex ("brain/brnatck2.wav");
 	sound_tentacles_retract = gi.soundindex ("brain/brnatck3.wav");

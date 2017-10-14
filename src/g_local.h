@@ -577,8 +577,6 @@ extern	edict_t			*g_edicts;
 #include "q_random.h"
 
 extern	cvar_t	*maxentities;
-extern	cvar_t	*deathmatch;
-extern	cvar_t	*coop;
 extern	cvar_t	*dmflags;
 extern	cvar_t	*skill;
 extern	cvar_t	*fraglimit;
@@ -820,16 +818,6 @@ void fire_grenade2 (edict_t *self, vec3_t start, vec3_t aimdir, int32_t damage, 
 void fire_rocket (edict_t *self, vec3_t start, vec3_t dir, int32_t damage, int32_t speed, vec_t damage_radius, int32_t radius_damage);
 void fire_rail (edict_t *self, vec3_t start, vec3_t aimdir, int32_t damage, int32_t kick);
 void fire_bfg (edict_t *self, vec3_t start, vec3_t dir, int32_t damage, int32_t speed, vec_t damage_radius);
-
-//
-// g_ptrail.c
-//
-void PlayerTrail_Init (void);
-void PlayerTrail_Add (vec3_t spot);
-void PlayerTrail_New (vec3_t spot);
-edict_t *PlayerTrail_PickFirst (edict_t *self);
-edict_t *PlayerTrail_PickNext (edict_t *self);
-edict_t	*PlayerTrail_LastSpot (void);
 
 //
 // g_client.c

@@ -66,9 +66,6 @@
     <ClCompile Include="src\g_weapon.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="src\m_actor.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
     <ClCompile Include="src\m_berserk.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -141,9 +138,6 @@
     <ClCompile Include="src\p_hud.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="src\p_trail.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
     <ClCompile Include="src\p_view.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -165,9 +159,6 @@
       <Filter>inc</Filter>
     </ClInclude>
     <ClInclude Include="src\game.h">
-      <Filter>inc</Filter>
-    </ClInclude>
-    <ClInclude Include="src\m_actor.h">
       <Filter>inc</Filter>
     </ClInclude>
     <ClInclude Include="src\m_berserk.h">

@@ -629,12 +629,6 @@ bool Boss2_CheckAttack (edict_t *self)
 */
 void SP_monster_boss2 (edict_t *self)
 {
-	if (deathmatch->value)
-	{
-		G_FreeEdict (self);
-		return;
-	}
-
 	sound_pain1 = gi.soundindex ("bosshovr/bhvpain1.wav");
 	sound_pain2 = gi.soundindex ("bosshovr/bhvpain2.wav");
 	sound_pain3 = gi.soundindex ("bosshovr/bhvpain3.wav");

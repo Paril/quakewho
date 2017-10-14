@@ -570,12 +570,6 @@ void flyer_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int32_t dam
 */
 void SP_monster_flyer (edict_t *self)
 {
-	if (deathmatch->value)
-	{
-		G_FreeEdict (self);
-		return;
-	}
-
 	// fix a map bug in jail5.bsp
 	if (!stricmp(level.mapname, "jail5") && (self->s.origin[2] == -104))
 	{
