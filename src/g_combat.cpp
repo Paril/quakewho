@@ -89,7 +89,7 @@ bool CanDamage (edict_t *targ, edict_t *inflictor)
 Killed
 ============
 */
-void Killed (edict_t *targ, edict_t *inflictor, edict_t *attacker, int32_t damage, vec3_t point)
+void Killed (edict_t *targ, edict_t *inflictor, edict_t *attacker, int32_t damage, const vec3_t point)
 {
 	if (targ->health < -999)
 		targ->health = -999;
@@ -131,7 +131,7 @@ void Killed (edict_t *targ, edict_t *inflictor, edict_t *attacker, int32_t damag
 SpawnDamage
 ================
 */
-void SpawnDamage (int32_t type, vec3_t origin, vec3_t normal, int32_t damage)
+void SpawnDamage (int32_t type, const vec3_t origin, const vec3_t normal, int32_t damage)
 {
 	if (damage > 255)
 		damage = 255;
@@ -168,7 +168,7 @@ dflags		these flags are used to control how T_Damage works
 	DAMAGE_NO_PROTECTION	kills godmode, armor, everything
 ============
 */
-static int32_t CheckPowerArmor (edict_t *ent, vec3_t point, vec3_t normal, int32_t damage, damageflag_t dflags)
+static int32_t CheckPowerArmor (edict_t *ent, const vec3_t point, const vec3_t normal, int32_t damage, damageflag_t dflags)
 {
 	gclient_t	*client;
 	int32_t			save;
@@ -252,7 +252,7 @@ static int32_t CheckPowerArmor (edict_t *ent, vec3_t point, vec3_t normal, int32
 	return save;
 }
 
-static int32_t CheckArmor (edict_t *ent, vec3_t point, vec3_t normal, int32_t damage, int32_t te_sparks, damageflag_t dflags)
+static int32_t CheckArmor (edict_t *ent, const vec3_t point, const vec3_t normal, int32_t damage, int32_t te_sparks, damageflag_t dflags)
 {
 	gclient_t	*client;
 	int32_t			save;
@@ -374,7 +374,7 @@ bool CheckTeamDamage (edict_t *targ, edict_t *attacker)
 	return false;
 }
 
-void T_Damage (edict_t *targ, edict_t *inflictor, edict_t *attacker, vec3_t dir, vec3_t point, vec3_t normal, int32_t damage, int32_t knockback, damageflag_t dflags, meansofdeath_t mod)
+void T_Damage (edict_t *targ, edict_t *inflictor, edict_t *attacker, const vec3_t dir, const vec3_t point, const vec3_t normal, int32_t damage, int32_t knockback, damageflag_t dflags, meansofdeath_t mod)
 {
 	gclient_t	*client;
 	int32_t			take;
@@ -416,8 +416,6 @@ void T_Damage (edict_t *targ, edict_t *inflictor, edict_t *attacker, vec3_t dir,
 	else
 		te_sparks = TE_SPARKS;
 
-	VectorNormalize(dir);
-
 // bonus damage for suprising a monster
 	if (!(dflags & DAMAGE_RADIUS) && (targ->svflags & SVF_MONSTER) && (attacker->client) && (!targ->enemy) && (targ->health > 0))
 		damage *= 2;
@@ -437,11 +435,13 @@ void T_Damage (edict_t *targ, edict_t *inflictor, edict_t *attacker, vec3_t dir,
 				mass = 50;
 			else
 				mass = targ->mass;
+	
+			VectorNormalize(dir, kvel);
 
 			if (targ->client  && attacker == targ)
-				VectorScale (dir, 1600.0 * (vec_t)knockback / mass, kvel);	// the rocket jump hack...
+				VectorScale (kvel, 1600.0 * (vec_t)knockback / mass, kvel);	// the rocket jump hack...
 			else
-				VectorScale (dir, 500.0 * (vec_t)knockback / mass, kvel);
+				VectorScale (kvel, 500.0 * (vec_t)knockback / mass, kvel);
 
 			VectorAdd (targ->velocity, kvel, targ->velocity);
 		}

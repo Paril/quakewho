@@ -378,7 +378,7 @@ mframe_t berserk_frames_death2 [] =
 mmove_t berserk_move_death2 = {FRAME_deathc1, FRAME_deathc8, berserk_frames_death2, berserk_dead};
 
 
-void berserk_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int32_t damage, vec3_t point)
+void berserk_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int32_t damage, const vec3_t point)
 {
 	int32_t		n;
 

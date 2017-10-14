@@ -20,30 +20,20 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #pragma once
 
-// q_shared.h -- included first by ALL program modules
-
-// vec_t stuff, just to silence for now
-#pragma warning(disable : 4305)
-#pragma warning(disable : 4244)
-#pragma warning(disable : 4242)
+// q_shared.h -- stuff that Quake client will need. Do not touch this stuff.
 
 #include <cstdio>
 #include <cstring>
 #include <cmath>
 #include <cstdint>
 
+#include "q_math.h"
 #include "q_bitflags.h"
-
-template <size_t size, typename T>
-inline constexpr size_t lengthof(T (&arr)[size]) { return size; }
-
-template<typename T>
-inline constexpr T bit(const T &place) { return 1u << place; }
 
 // type used for interop, but shouldn't be used by game. Use bool.
 typedef int32_t	qboolean;
 
-// this exists elsewhere
+// these exist elsewhere
 struct edict_t;
 
 // angle indexes
@@ -73,7 +63,6 @@ const size_t	MAX_IMAGES			= 256;
 const size_t	MAX_ITEMS			= 256;
 const size_t	MAX_GENERAL			= (MAX_CLIENTS * 2);	// general config strings
 
-
 // game print flags
 enum printflags_t
 {
@@ -93,231 +82,6 @@ enum multicast_t
 	MULTICAST_PHS_R,
 	MULTICAST_PVS_R
 };
-
-
-/*
-==============================================================
-
-MATHLIB
-
-==============================================================
-*/
-
-typedef float vec_t;
-typedef vec_t vec3_t[3];
-
-typedef double dvec_t;
-typedef dvec_t dvec3_t[3];
-
-template<typename T>
-constexpr T pi = 3.141592653589793238462643383279502884e+00;
-
-#ifndef M_PI
- constexpr vec_t M_PI = pi<float>;
-#endif
-
-struct cplane_t;
-
-extern vec3_t vec3_origin;
-
-template<typename Ta, typename Tb>
-constexpr auto DotProduct(const Ta *x, const Tb *y)
-{
-	return x[0] * y[0] + x[1] * y[1] + x[2] * y[2];
-}
-
-template<typename Ta, typename Tb, typename Tc>
-inline void VectorSubtract(const Ta *a, const Tb *b, Tc *c)
-{
-	for (int32_t i = 0; i < 3; i++)
-		c[i] = a[i] - b[i];
-}
-
-template<typename Ta, typename Tb, typename Tc>
-inline void VectorAdd(const Ta *a, const Tb *b, Tc *c)
-{
-	for (int32_t i = 0; i < 3; i++)
-		c[i] = a[i] + b[i];
-}
-
-template<typename Ta, typename Tb>
-inline void VectorCopy(const Ta *a, Tb *b)
-{
-	for (int32_t i = 0; i < 3; i++)
-		b[i] = a[i];
-}
-
-template<typename Ta, typename Tx, typename Ty, typename Tz>
-inline void VectorSet(Ta *a, const Tx &x, const Ty &y, const Tz &z)
-{
-	a[0] = x;
-	a[1] = y;
-	a[2] = z;
-}
-
-template<typename T>
-inline void VectorClear(T *a)
-{
-	VectorCopy(vec3_origin, a);
-}
-
-template<typename Ta, typename Tb>
-inline void VectorNegate(const Ta *a, Tb *b)
-{
-	for (int32_t i = 0; i < 3; i++)
-		b[i] = -a[i];
-}
-
-template<typename Ta, typename Ts, typename Tb>
-inline void VectorScale(const Ta *a, const Ts &s, Tb *b)
-{
-	for (int32_t i = 0; i < 3; i++)
-		b[i] = a[i] * s;
-}
-
-template<typename Ta, typename Ts, typename Tb, typename Tc>
-inline void VectorMA (const Ta *a, const Ts &s, const Tb *b, Tc *c)
-{
-	for (int32_t i = 0; i < 3; i++)
-		c[i] = a[i] + s * b[i];
-}
-
-template<typename Ta, typename Tb>
-constexpr bool VectorCompare (const Ta *v1, const Tb *v2)
-{
-	return (v1[0] == v2[0] && v1[1] == v2[1] && v1[2] == v2[2]);
-}
-
-template<typename T>
-constexpr auto VectorLengthSquared(const T *v)
-{
-	return DotProduct(v, v);
-}
-
-template<typename T>
-constexpr auto VectorLength(const T *v)
-{
-	return sqrt(VectorLengthSquared(v));
-}
-
-template<typename Ta, typename Tb>
-inline auto VectorNormalize (const Ta *v, Tb *o)
-{
-	auto length = VectorLength(v);
-
-	if (length)
-		VectorScale(v, 1.0 / length, o);
-	else
-		VectorClear(o);
-		
-	return length;
-}
-
-template<typename T>
-inline auto VectorNormalize (T *v)
-{
-	return VectorNormalize(v, v);
-}
-
-template<typename Ta, typename Tb, typename Tc>
-inline void CrossProduct (const Ta *v1, const Tb *v2, Tc *cross)
-{
-	cross[0] = v1[1] * v2[2] - v1[2] * v2[1];
-	cross[1] = v1[2] * v2[0] - v1[0] * v2[2];
-	cross[2] = v1[0] * v2[1] - v1[1] * v2[0];
-}
-
-template<typename T>
-inline void VectorInverse (T *v)
-{
-	for (int32_t i = 0; i < 3; i++)
-		v[0] = -v[0];
-}
-
-template<typename T>
-inline void AngleVectors (const T *angles, vec_t *forward, vec_t *right, vec_t *up)
-{
-	T angle = angles[YAW] * (M_PI*2 / 360);
-	T sy = sin(angle);
-	T cy = cos(angle);
-
-	angle = angles[PITCH] * (M_PI*2 / 360);
-	T sp = sin(angle);
-	T cp = cos(angle);
-	
-	angle = angles[ROLL] * (M_PI*2 / 360);
-	T sr = sin(angle);
-	T cr = cos(angle);
-
-	if (forward)
-	{
-		forward[0] = cp * cy;
-		forward[1] = cp * sy;
-		forward[2] = -sp;
-	}
-	
-	if (right)
-	{
-		right[0] = (-1 * sr * sp * cy + -1 * cr * -sy);
-		right[1] = (-1 * sr * sp * sy + -1 * cr * cy);
-		right[2] = -1 * sr * cp;
-	}
-
-	if (up)
-	{
-		up[0] = (cr * sp * cy + -sr * -sy);
-		up[1] = (cr * sp * sy + -sr * cy);
-		up[2] = cr * cp;
-	}
-}
-
-template<typename T>
-inline void ClearBounds (T *mins, T *maxs)
-{
-	mins[0] = mins[1] = mins[2] = 99999;
-	maxs[0] = maxs[1] = maxs[2] = -99999;
-}
-
-template<typename Tv, typename Tm>
-inline void AddPointToBounds (const Tv *v, Tm *mins, Tm *maxs)
-{
-	for (int32_t i = 0; i < 3; i++)
-	{
-		const Tv &val = v[i];
-
-		if (val < mins[i])
-			mins[i] = val;
-		
-		if (val > maxs[i])
-			maxs[i] = val;
-	}
-}
-
-template<typename T>
-constexpr T DEG2RAD(const T &a) { return (a * pi<T>) / 180.0; }
-
-template<typename T>
-constexpr T anglemod(const T &x)
-{
-    T angle = fmod(x, 360);
-
-	if (angle < 0)
-        angle += 360;
-    
-	return angle;
-}
-
-template<typename T>
-constexpr auto LerpAngle (const T &a2, const T &a1, const vec_t &frac)
-{
-	if (a1 - a2 > 180)
-		a1 -= 360;
-
-	if (a1 - a2 < -180)
-		a1 += 360;
-
-	return a2 + frac * (a1 - a2);
-}
 
 //=============================================
 
@@ -341,18 +105,6 @@ char *Info_ValueForKey (char *s, char *key);
 void Info_RemoveKey (char *s, char *key);
 void Info_SetValueForKey (char *s, char *key, char *value);
 bool Info_Validate (char *s);
-
-/*
-==============================================================
-
-SYSTEM SPECIFIC
-
-==============================================================
-*/
-
-// this is only here so the functions in q_shared.c and q_shwin.c can link
-void Sys_Error (char *error, ...);
-void Com_Printf (char *msg, ...);
 
 
 /*
@@ -482,13 +234,6 @@ struct cplane_t
 	uint8_t	type;			// for fast side tests
 	uint8_t	signbits;		// signx + (signy<<1) + (signz<<1)
 	uint8_t	pad[2];
-};
-
-struct cmodel_t
-{
-	vec3_t		mins, maxs;
-	vec3_t		origin;		// for sounds or lights
-	int32_t		headnode;
 };
 
 struct csurface_t
@@ -754,241 +499,6 @@ enum muzzleflash_t : uint8_t
 
 MAKE_BITFLAGS(muzzleflash_t);
 
-//
-// monster muzzle flashes
-//
-enum monstermuzzleflash_t : uint8_t
-{
-	MZ2_TANK_BLASTER_1				= 1,
-	MZ2_TANK_BLASTER_2,
-	MZ2_TANK_BLASTER_3,
-	MZ2_TANK_MACHINEGUN_1,
-	MZ2_TANK_MACHINEGUN_2,
-	MZ2_TANK_MACHINEGUN_3,
-	MZ2_TANK_MACHINEGUN_4,
-	MZ2_TANK_MACHINEGUN_5,
-	MZ2_TANK_MACHINEGUN_6,
-	MZ2_TANK_MACHINEGUN_7,
-	MZ2_TANK_MACHINEGUN_8,
-	MZ2_TANK_MACHINEGUN_9,
-	MZ2_TANK_MACHINEGUN_10,
-	MZ2_TANK_MACHINEGUN_11,
-	MZ2_TANK_MACHINEGUN_12,
-	MZ2_TANK_MACHINEGUN_13,
-	MZ2_TANK_MACHINEGUN_14,
-	MZ2_TANK_MACHINEGUN_15,
-	MZ2_TANK_MACHINEGUN_16,
-	MZ2_TANK_MACHINEGUN_17,
-	MZ2_TANK_MACHINEGUN_18,
-	MZ2_TANK_MACHINEGUN_19,
-	MZ2_TANK_ROCKET_1,
-	MZ2_TANK_ROCKET_2,
-	MZ2_TANK_ROCKET_3,
-
-	MZ2_INFANTRY_MACHINEGUN_1,
-	MZ2_INFANTRY_MACHINEGUN_2,
-	MZ2_INFANTRY_MACHINEGUN_3,
-	MZ2_INFANTRY_MACHINEGUN_4,
-	MZ2_INFANTRY_MACHINEGUN_5,
-	MZ2_INFANTRY_MACHINEGUN_6,
-	MZ2_INFANTRY_MACHINEGUN_7,
-	MZ2_INFANTRY_MACHINEGUN_8,
-	MZ2_INFANTRY_MACHINEGUN_9,
-	MZ2_INFANTRY_MACHINEGUN_10,
-	MZ2_INFANTRY_MACHINEGUN_11,
-	MZ2_INFANTRY_MACHINEGUN_12,
-	MZ2_INFANTRY_MACHINEGUN_13,
-
-	MZ2_SOLDIER_BLASTER_1,
-	MZ2_SOLDIER_BLASTER_2,
-	MZ2_SOLDIER_SHOTGUN_1,
-	MZ2_SOLDIER_SHOTGUN_2,
-	MZ2_SOLDIER_MACHINEGUN_1,
-	MZ2_SOLDIER_MACHINEGUN_2,
-
-	MZ2_GUNNER_MACHINEGUN_1,
-	MZ2_GUNNER_MACHINEGUN_2,
-	MZ2_GUNNER_MACHINEGUN_3,
-	MZ2_GUNNER_MACHINEGUN_4,
-	MZ2_GUNNER_MACHINEGUN_5,
-	MZ2_GUNNER_MACHINEGUN_6,
-	MZ2_GUNNER_MACHINEGUN_7,
-	MZ2_GUNNER_MACHINEGUN_8,
-	MZ2_GUNNER_GRENADE_1,
-	MZ2_GUNNER_GRENADE_2,
-	MZ2_GUNNER_GRENADE_3,
-	MZ2_GUNNER_GRENADE_4,
-
-	MZ2_CHICK_ROCKET_1,
-
-	MZ2_FLYER_BLASTER_1,
-	MZ2_FLYER_BLASTER_2,
-
-	MZ2_MEDIC_BLASTER_1,
-
-	MZ2_GLADIATOR_RAILGUN_1,
-
-	MZ2_HOVER_BLASTER_1,
-
-	MZ2_ACTOR_MACHINEGUN_1,
-
-	MZ2_SUPERTANK_MACHINEGUN_1,
-	MZ2_SUPERTANK_MACHINEGUN_2,
-	MZ2_SUPERTANK_MACHINEGUN_3,
-	MZ2_SUPERTANK_MACHINEGUN_4,
-	MZ2_SUPERTANK_MACHINEGUN_5,
-	MZ2_SUPERTANK_MACHINEGUN_6,
-	MZ2_SUPERTANK_ROCKET_1,
-	MZ2_SUPERTANK_ROCKET_2,
-	MZ2_SUPERTANK_ROCKET_3,
-
-	MZ2_BOSS2_MACHINEGUN_L1,
-	MZ2_BOSS2_MACHINEGUN_L2,
-	MZ2_BOSS2_MACHINEGUN_L3,
-	MZ2_BOSS2_MACHINEGUN_L4,
-	MZ2_BOSS2_MACHINEGUN_L5,
-	MZ2_BOSS2_ROCKET_1,
-	MZ2_BOSS2_ROCKET_2,
-	MZ2_BOSS2_ROCKET_3,
-	MZ2_BOSS2_ROCKET_4,
-
-	MZ2_FLOAT_BLASTER_1,
-
-	MZ2_SOLDIER_BLASTER_3,
-	MZ2_SOLDIER_SHOTGUN_3,
-	MZ2_SOLDIER_MACHINEGUN_3,
-	MZ2_SOLDIER_BLASTER_4,
-	MZ2_SOLDIER_SHOTGUN_4,
-	MZ2_SOLDIER_MACHINEGUN_4,
-	MZ2_SOLDIER_BLASTER_5,
-	MZ2_SOLDIER_SHOTGUN_5,
-	MZ2_SOLDIER_MACHINEGUN_5,
-	MZ2_SOLDIER_BLASTER_6,
-	MZ2_SOLDIER_SHOTGUN_6,
-	MZ2_SOLDIER_MACHINEGUN_6,
-	MZ2_SOLDIER_BLASTER_7,
-	MZ2_SOLDIER_SHOTGUN_7,
-	MZ2_SOLDIER_MACHINEGUN_7,
-	MZ2_SOLDIER_BLASTER_8,
-	MZ2_SOLDIER_SHOTGUN_8,
-	MZ2_SOLDIER_MACHINEGUN_8,
-
-	// --- Xian shit below ---
-	MZ2_MAKRON_BFG,
-	MZ2_MAKRON_BLASTER_1,
-	MZ2_MAKRON_BLASTER_2,
-	MZ2_MAKRON_BLASTER_3,
-	MZ2_MAKRON_BLASTER_4,
-	MZ2_MAKRON_BLASTER_5,
-	MZ2_MAKRON_BLASTER_6,
-	MZ2_MAKRON_BLASTER_7,
-	MZ2_MAKRON_BLASTER_8,
-	MZ2_MAKRON_BLASTER_9,
-	MZ2_MAKRON_BLASTER_10,
-	MZ2_MAKRON_BLASTER_11,
-	MZ2_MAKRON_BLASTER_12,
-	MZ2_MAKRON_BLASTER_13,
-	MZ2_MAKRON_BLASTER_14,
-	MZ2_MAKRON_BLASTER_15,
-	MZ2_MAKRON_BLASTER_16,
-	MZ2_MAKRON_BLASTER_17,
-	MZ2_MAKRON_RAILGUN_1,
-	MZ2_JORG_MACHINEGUN_L1,
-	MZ2_JORG_MACHINEGUN_L2,
-	MZ2_JORG_MACHINEGUN_L3,
-	MZ2_JORG_MACHINEGUN_L4,
-	MZ2_JORG_MACHINEGUN_L5,
-	MZ2_JORG_MACHINEGUN_L6,
-	MZ2_JORG_MACHINEGUN_R1,
-	MZ2_JORG_MACHINEGUN_R2,
-	MZ2_JORG_MACHINEGUN_R3,
-	MZ2_JORG_MACHINEGUN_R4,
-	MZ2_JORG_MACHINEGUN_R5,
-	MZ2_JORG_MACHINEGUN_R6,
-	MZ2_JORG_BFG_1,
-	MZ2_BOSS2_MACHINEGUN_R1,
-	MZ2_BOSS2_MACHINEGUN_R2,
-	MZ2_BOSS2_MACHINEGUN_R3,
-	MZ2_BOSS2_MACHINEGUN_R4,
-	MZ2_BOSS2_MACHINEGUN_R5,
-
-	//ROGUE
-	MZ2_CARRIER_MACHINEGUN_L1,
-	MZ2_CARRIER_MACHINEGUN_R1,
-	MZ2_CARRIER_GRENADE,
-	MZ2_TURRET_MACHINEGUN,
-	MZ2_TURRET_ROCKET,
-	MZ2_TURRET_BLASTER,
-	MZ2_STALKER_BLASTER,
-	MZ2_DAEDALUS_BLASTER,
-	MZ2_MEDIC_BLASTER_2,
-	MZ2_CARRIER_RAILGUN,
-	MZ2_WIDOW_DISRUPTOR,
-	MZ2_WIDOW_BLASTER,
-	MZ2_WIDOW_RAIL,
-	MZ2_WIDOW_PLASMABEAM,		// PMM - not used
-	MZ2_CARRIER_MACHINEGUN_L2,
-	MZ2_CARRIER_MACHINEGUN_R2,
-	MZ2_WIDOW_RAIL_LEFT,
-	MZ2_WIDOW_RAIL_RIGHT,
-	MZ2_WIDOW_BLASTER_SWEEP1,
-	MZ2_WIDOW_BLASTER_SWEEP2,
-	MZ2_WIDOW_BLASTER_SWEEP3,
-	MZ2_WIDOW_BLASTER_SWEEP4,
-	MZ2_WIDOW_BLASTER_SWEEP5,
-	MZ2_WIDOW_BLASTER_SWEEP6,
-	MZ2_WIDOW_BLASTER_SWEEP7,
-	MZ2_WIDOW_BLASTER_SWEEP8,
-	MZ2_WIDOW_BLASTER_SWEEP9,
-	MZ2_WIDOW_BLASTER_100,
-	MZ2_WIDOW_BLASTER_90,
-	MZ2_WIDOW_BLASTER_80,
-	MZ2_WIDOW_BLASTER_70,
-	MZ2_WIDOW_BLASTER_60,
-	MZ2_WIDOW_BLASTER_50,
-	MZ2_WIDOW_BLASTER_40,
-	MZ2_WIDOW_BLASTER_30,
-	MZ2_WIDOW_BLASTER_20,
-	MZ2_WIDOW_BLASTER_10,
-	MZ2_WIDOW_BLASTER_0,
-	MZ2_WIDOW_BLASTER_10L,
-	MZ2_WIDOW_BLASTER_20L,
-	MZ2_WIDOW_BLASTER_30L,
-	MZ2_WIDOW_BLASTER_40L,
-	MZ2_WIDOW_BLASTER_50L,
-	MZ2_WIDOW_BLASTER_60L,
-	MZ2_WIDOW_BLASTER_70L,
-	MZ2_WIDOW_RUN_1,
-	MZ2_WIDOW_RUN_2,
-	MZ2_WIDOW_RUN_3,
-	MZ2_WIDOW_RUN_4,
-	MZ2_WIDOW_RUN_5,
-	MZ2_WIDOW_RUN_6,
-	MZ2_WIDOW_RUN_7,
-	MZ2_WIDOW_RUN_8,
-	MZ2_CARRIER_ROCKET_1,
-	MZ2_CARRIER_ROCKET_2,
-	MZ2_CARRIER_ROCKET_3,
-	MZ2_CARRIER_ROCKET_4,
-	MZ2_WIDOW2_BEAMER_1,
-	MZ2_WIDOW2_BEAMER_2,
-	MZ2_WIDOW2_BEAMER_3,
-	MZ2_WIDOW2_BEAMER_4,
-	MZ2_WIDOW2_BEAMER_5,
-	MZ2_WIDOW2_BEAM_SWEEP_1,
-	MZ2_WIDOW2_BEAM_SWEEP_2,
-	MZ2_WIDOW2_BEAM_SWEEP_3,
-	MZ2_WIDOW2_BEAM_SWEEP_4,
-	MZ2_WIDOW2_BEAM_SWEEP_5,
-	MZ2_WIDOW2_BEAM_SWEEP_6,
-	MZ2_WIDOW2_BEAM_SWEEP_7,
-	MZ2_WIDOW2_BEAM_SWEEP_8,
-	MZ2_WIDOW2_BEAM_SWEEP_9,
-	MZ2_WIDOW2_BEAM_SWEEP_10,
-	MZ2_WIDOW2_BEAM_SWEEP_11
-// ROGUE
-};
-
 #include "m_flash.h"
 
 // temp entity events
@@ -1238,24 +748,25 @@ enum imageindex_t
 // need to render in some way
 struct entity_state_t
 {
-	int32_t		number;			// edict index
-
-	vec3_t	origin;
-	vec3_t	angles;
-	vec3_t	old_origin;		// for lerping
-	modelindex_t modelindex;
-	modelindex_t modelindex2, modelindex3, modelindex4;	// weapons, CTF flags, etc
-	int32_t		frame;
-	int32_t		skinnum;
-	entity_effects_t		effects;		// PGM - we're filling it, so it needs to be unsigned
-	entity_renderfx_t		renderfx;
-	int32_t		solid;			// for client side prediction, 8*(bits 0-4) is x/y radius
-							// 8*(bits 5-9) is z down distance, 8(bits10-15) is z up
-							// gi.linkentity sets this properly
-	soundindex_t sound;			// for looping sounds, to guarantee shutoff
-	entity_event_t event;	// impulse events -- muzzle flashes, footsteps, etc
-							// events only go out for a single frame, they
-							// are automatically cleared each frame
+	int32_t				number;				// edict index
+	vec3_t				origin;
+	vec3_t				angles;
+	vec3_t				old_origin;			// for lerping
+	modelindex_t		modelindex;
+	modelindex_t		modelindex2,
+						modelindex3,
+						modelindex4;		// weapons, CTF flags, etc
+	int32_t				frame;
+	int32_t				skinnum;
+	entity_effects_t	effects;		// PGM - we're filling it, so it needs to be unsigned
+	entity_renderfx_t	renderfx;
+	int32_t				solid;			// for client side prediction, 8*(bits 0-4) is x/y radius
+										// 8*(bits 5-9) is z down distance, 8(bits10-15) is z up
+										// gi.linkentity sets this properly
+	soundindex_t		sound;			// for looping sounds, to guarantee shutoff
+	entity_event_t		event;			// impulse events -- muzzle flashes, footsteps, etc
+										// events only go out for a single frame, they
+										// are automatically cleared each frame
 };
 
 //==============================================
@@ -1267,27 +778,25 @@ struct entity_state_t
 // frame rates
 struct player_state_t
 {
-	pmove_state_t	pmove;		// for prediction
+	pmove_state_t	pmove;				// for prediction
 
-	// these fields do not need to be communicated bit-precise
+	vec3_t			viewangles;			// for fixed views
+	vec3_t			viewoffset;			// add to pmovestate->origin
+	vec3_t			kick_angles;		// add to view direction to get render angles
+										// set by weapon kicks, pain effects, etc
 
-	vec3_t		viewangles;		// for fixed views
-	vec3_t		viewoffset;		// add to pmovestate->origin
-	vec3_t		kick_angles;	// add to view direction to get render angles
-								// set by weapon kicks, pain effects, etc
-
-	vec3_t		gunangles;
-	vec3_t		gunoffset;
-	modelindex_t gunindex;
+	vec3_t			gunangles;
+	vec3_t			gunoffset;
+	modelindex_t	gunindex;
 	int32_t			gunframe;
 
-	vec_t		blend[4];		// rgba full screen effect
+	vec_t			blend[4];			// rgba full screen effect
 	
-	vec_t		fov;			// horizontal field of view
+	vec_t			fov;				// horizontal field of view
 
-	refdef_flags_t	rdflags;		// refdef flags
+	refdef_flags_t	rdflags;			// refdef flags
 
-	int16_t		stats[MAX_STATS];		// fast status bar updates
+	int16_t			stats[MAX_STATS];	// fast status bar updates
 };
 
 #include "g_local.h"

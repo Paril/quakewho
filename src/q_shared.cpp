@@ -23,8 +23,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <cassert>
 #include <cstdarg>
 
-vec3_t vec3_origin = { 0, 0, 0 };
-
 //====================================================================================
 
 /*
@@ -39,10 +37,10 @@ FIXME: make this buffer size safe someday
 char	*va(char *format, ...)
 {
 	va_list		argptr;
-	static char		string[1024];
+	static char	string[1024];
 	
 	va_start (argptr, format);
-	vsprintf (string, format,argptr);
+	vsnprintf (string, sizeof(string), format, argptr);
 	va_end (argptr);
 
 	return string;	
@@ -269,25 +267,25 @@ void Info_SetValueForKey (char *s, char *key, char *value)
 
 	if (strstr (key, "\\") || strstr (value, "\\") )
 	{
-		Com_Printf ("Can't use keys or values with a \\\n");
+		gi.dprintf ("Can't use keys or values with a \\\n");
 		return;
 	}
 
 	if (strstr (key, ";") )
 	{
-		Com_Printf ("Can't use keys or values with a semicolon\n");
+		gi.dprintf ("Can't use keys or values with a semicolon\n");
 		return;
 	}
 
 	if (strstr (key, "\"") || strstr (value, "\"") )
 	{
-		Com_Printf ("Can't use keys or values with a \"\n");
+		gi.dprintf ("Can't use keys or values with a \"\n");
 		return;
 	}
 
 	if (strlen(key) > MAX_INFO_KEY-1 || strlen(value) > MAX_INFO_KEY-1)
 	{
-		Com_Printf ("Keys and values must be < 64 characters.\n");
+		gi.dprintf ("Keys and values must be < 64 characters.\n");
 		return;
 	}
 	Info_RemoveKey (s, key);
@@ -298,7 +296,7 @@ void Info_SetValueForKey (char *s, char *key, char *value)
 
 	if (strlen(newi) + strlen(s) > maxsize)
 	{
-		Com_Printf ("Info string length exceeded\n");
+		gi.dprintf ("Info string length exceeded\n");
 		return;
 	}
 

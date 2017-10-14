@@ -1,5 +1,8 @@
 #pragma once
 
+template<typename T>
+inline constexpr T bit(const T &place) { return 1u << place; }
+
 #include <type_traits>
 
 #define BITFLAG_TYPE(T) std::underlying_type_t<T>

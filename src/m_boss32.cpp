@@ -665,7 +665,7 @@ void makron_dead (edict_t *self)
 }
 
 
-void makron_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int32_t damage, vec3_t point)
+void makron_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int32_t damage, const vec3_t point)
 {
 	edict_t *tempent;
 

@@ -747,7 +747,7 @@ MAKE_BITFLAGS(damageflag_t);
 
 bool OnSameTeam (edict_t *ent1, edict_t *ent2);
 bool CanDamage (edict_t *targ, edict_t *inflictor);
-void T_Damage (edict_t *targ, edict_t *inflictor, edict_t *attacker, vec3_t dir, vec3_t point, vec3_t normal, int32_t damage, int32_t knockback, damageflag_t dflags, meansofdeath_t mod);
+void T_Damage (edict_t *targ, edict_t *inflictor, edict_t *attacker, const vec3_t dir, const vec3_t point, const vec3_t normal, int32_t damage, int32_t knockback, damageflag_t dflags, meansofdeath_t mod);
 void T_RadiusDamage (edict_t *inflictor, edict_t *attacker, vec_t damage, edict_t *ignore, vec_t radius, meansofdeath_t mod);
 
 const int32_t DEFAULT_BULLET_HSPREAD	= 300;
@@ -846,7 +846,7 @@ void ClientBeginServerFrame (edict_t *ent);
 // g_player.c
 //
 void player_pain (edict_t *self, edict_t *other, vec_t kick, int32_t damage);
-void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int32_t damage, vec3_t point);
+void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int32_t damage, const vec3_t point);
 
 //
 // g_svcmds.c
@@ -926,29 +926,29 @@ struct client_persistant_t
 									// just don't have a connection yet
 
 	// values saved and restored from edicts when changing levels
-	int32_t			health;
-	int32_t			max_health;
+	int32_t		health;
+	int32_t		max_health;
 	edictflags_t savedFlags;
 
-	int32_t			selected_item;
-	int32_t			inventory[MAX_ITEMS];
+	int32_t		selected_item;
+	int32_t		inventory[MAX_ITEMS];
 
 	// ammo capacities
-	int32_t			max_bullets;
-	int32_t			max_shells;
-	int32_t			max_rockets;
-	int32_t			max_grenades;
-	int32_t			max_cells;
-	int32_t			max_slugs;
+	int32_t		max_bullets;
+	int32_t		max_shells;
+	int32_t		max_rockets;
+	int32_t		max_grenades;
+	int32_t		max_cells;
+	int32_t		max_slugs;
 
 	gitem_t		*weapon;
 	gitem_t		*lastweapon;
 
-	int32_t			power_cubes;	// used for tracking the cubes in coop games
-	int32_t			score;			// for calculating total unit score in coop games
+	int32_t		power_cubes;	// used for tracking the cubes in coop games
+	int32_t		score;			// for calculating total unit score in coop games
 
-	int32_t			game_helpchanged;
-	int32_t			helpchanged;
+	int32_t		game_helpchanged;
+	int32_t		helpchanged;
 
 	bool		spectator;			// client is a spectator
 };
@@ -959,9 +959,9 @@ struct client_respawn_t
 	client_persistant_t	coop_respawn;	// what to set client->pers to on a respawn
 	int32_t			enterframe;			// level.framenum the client entered the game
 	int32_t			score;				// frags, etc
-	vec3_t		cmd_angles;			// angles sent over in the last command
+	vec3_t			cmd_angles;			// angles sent over in the last command
 
-	bool		spectator;			// client is a spectator
+	bool			spectator;			// client is a spectator
 };
 
 // this structure is cleared on each PutClientInServer(),
@@ -969,7 +969,7 @@ struct client_respawn_t
 struct gclient_t
 {
 	player_state_t	ps;				// communicated by server to clients
-	int32_t				ping;
+	int32_t			ping;
 	
 	// DO NOT MODIFY ANYTHING ABOVE THIS, THE SERVER
 	// EXPECTS THE FIELDS IN THAT ORDER!
@@ -984,7 +984,7 @@ struct gclient_t
 	bool		showhelp;
 	bool		showhelpicon;
 
-	int32_t			ammo_index;
+	int32_t		ammo_index;
 
 	button_t	buttons;
 	button_t	oldbuttons;
@@ -996,10 +996,10 @@ struct gclient_t
 
 	// sum up damage over an entire frame, so
 	// shotgun blasts give a single big kick
-	int32_t			damage_armor;		// damage absorbed by armor
-	int32_t			damage_parmor;		// damage absorbed by power armor
-	int32_t			damage_blood;		// damage taken out of health
-	int32_t			damage_knockback;	// impact damage
+	int32_t		damage_armor;		// damage absorbed by armor
+	int32_t		damage_parmor;		// damage absorbed by power armor
+	int32_t		damage_blood;		// damage taken out of health
+	int32_t		damage_knockback;	// impact damage
 	vec3_t		damage_from;		// origin for vector calculation
 
 	vec_t		killer_yaw;			// when dead, look at killer
@@ -1021,10 +1021,10 @@ struct gclient_t
 	waterlevel_t old_waterlevel;
 	bool		breather_sound;
 
-	int32_t			machinegun_shots;	// for weapon raising
+	int32_t		machinegun_shots;	// for weapon raising
 
 	// animation vars
-	int32_t			anim_end;
+	int32_t		anim_end;
 	animpriority_t anim_priority;
 	bool		anim_duck;
 	bool		anim_run;
@@ -1037,14 +1037,14 @@ struct gclient_t
 
 	bool		grenade_blew_up;
 	vec_t		grenade_time;
-	int32_t			silencer_shots;
+	int32_t		silencer_shots;
 	soundindex_t weapon_sound;
 
 	vec_t		pickup_msg_time;
 
 	vec_t		flood_locktill;		// locked from talking
 	vec_t		flood_when[10];		// when messages were said
-	int32_t			flood_whenhead;		// head pointer for when said
+	int32_t		flood_whenhead;		// head pointer for when said
 
 	vec_t		respawn_time;		// can respawn when time > this
 
@@ -1062,15 +1062,15 @@ struct edict_t
 									// but the rest of it is opaque
 
 	qboolean	inuse;
-	int32_t			linkcount;
+	int32_t		linkcount;
 
 	// FIXME: move these fields to a server private sv_entity_t
 	link_t		area;				// linked to a division node or leaf
 	
-	int32_t			num_clusters;		// if -1, use headnode instead
-	int32_t			clusternums[MAX_ENT_CLUSTERS];
-	int32_t			headnode;			// unused if num_clusters != -1
-	int32_t			areanum, areanum2;
+	int32_t		num_clusters;		// if -1, use headnode instead
+	int32_t		clusternums[MAX_ENT_CLUSTERS];
+	int32_t		headnode;			// unused if num_clusters != -1
+	int32_t		areanum, areanum2;
 
 	//================================
 
@@ -1117,7 +1117,7 @@ struct edict_t
 
 	vec3_t		velocity;
 	vec3_t		avelocity;
-	int32_t			mass;
+	int32_t		mass;
 	vec_t		air_finished;
 	vec_t		gravity;		// per entity gravity multiplier (1.0 is normal)
 								// use for lowgrav artifact, flares
@@ -1134,7 +1134,7 @@ struct edict_t
 	void		(*touch)(edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf);
 	void		(*use)(edict_t *self, edict_t *other, edict_t *activator);
 	void		(*pain)(edict_t *self, edict_t *other, vec_t kick, int32_t damage);
-	void		(*die)(edict_t *self, edict_t *inflictor, edict_t *attacker, int32_t damage, vec3_t point);
+	void		(*die)(edict_t *self, edict_t *inflictor, edict_t *attacker, int32_t damage, const vec3_t point);
 
 	vec_t		touch_debounce_time;		// are all these legit?  do we need more/less of them?
 	vec_t		pain_debounce_time;
@@ -1142,9 +1142,9 @@ struct edict_t
 	vec_t		fly_sound_debounce_time;	//move to clientinfo
 	vec_t		last_move_time;
 
-	int32_t			health;
-	int32_t			max_health;
-	int32_t			gib_health;
+	int32_t		health;
+	int32_t		max_health;
+	int32_t		gib_health;
 	deadflag_t	deadflag;
 	vec_t		show_hostile;
 
@@ -1152,20 +1152,20 @@ struct edict_t
 
 	char		*map;			// target_changelevel
 
-	int32_t			viewheight;		// height above origin where eyesight is determined
+	int32_t		viewheight;		// height above origin where eyesight is determined
 	damage_t	takedamage;
-	int32_t			dmg;
-	int32_t			radius_dmg;
+	int32_t		dmg;
+	int32_t		radius_dmg;
 	vec_t		dmg_radius;
-	int32_t			sounds;			//make this a spawntemp var?
-	int32_t			count;
+	int32_t		sounds;			//make this a spawntemp var?
+	int32_t		count;
 
 	edict_t		*chain;
 	edict_t		*enemy;
 	edict_t		*oldenemy;
 	edict_t		*activator;
 	edict_t		*groundentity;
-	int32_t			groundentity_linkcount;
+	int32_t		groundentity_linkcount;
 	edict_t		*teamchain;
 	edict_t		*teammaster;
 
@@ -1191,9 +1191,9 @@ struct edict_t
 	vec3_t		move_angles;
 
 	// move this to clientinfo?
-	int32_t			light_level;
+	int32_t		light_level;
 
-	int32_t			style;			// also used as areaportal number
+	int32_t		style;			// also used as areaportal number
 
 	gitem_t		*item;			// for bonus items
 

@@ -504,7 +504,7 @@ void boss2_dead (edict_t *self)
 	gi.linkentity (self);
 }
 
-void boss2_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int32_t damage, vec3_t point)
+void boss2_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int32_t damage, const vec3_t point)
 {
 	gi.sound (self, CHAN_VOICE, sound_death, 1, ATTN_NONE, 0);
 	self->deadflag = DEAD_DEAD;

@@ -559,7 +559,7 @@ void flyer_pain (edict_t *self, edict_t *other, vec_t kick, int32_t damage)
 }
 
 
-void flyer_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int32_t damage, vec3_t point)
+void flyer_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int32_t damage, const vec3_t point)
 {
 	gi.sound (self, CHAN_VOICE, sound_die, 1, ATTN_NORM, 0);
 	BecomeExplosion1(self);

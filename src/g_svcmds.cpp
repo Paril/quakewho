@@ -246,9 +246,9 @@ void SVCmd_WriteIP_f (void)
 	sv_game = gi.cvar("game", "", CVAR_NONE);
 
 	if (!*sv_game->string)
-		sprintf (name, "%s/listip.cfg", GAMEVERSION);
+		snprintf (name, MAX_OSPATH, "%s/listip.cfg", GAMEVERSION);
 	else
-		sprintf (name, "%s/listip.cfg", sv_game->string);
+		snprintf (name, MAX_OSPATH, "%s/listip.cfg", sv_game->string);
 
 	gi.cprintf (nullptr, PRINT_HIGH, "Writing %s.\n", name);
 

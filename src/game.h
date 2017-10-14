@@ -142,7 +142,7 @@ struct game_import_t
 	// solidity changes, it must be relinked.
 	void	(*linkentity) (edict_t *ent);
 	void	(*unlinkentity) (edict_t *ent);		// call before removing an interactive edict
-	int32_t		(*BoxEdicts) (const vec3_t mins, const vec3_t maxs, edict_t **list,	int32_t maxcount, areatype_t areatype);
+	int32_t	(*BoxEdicts) (const vec3_t mins, const vec3_t maxs, edict_t **list,	int32_t maxcount, areatype_t areatype);
 	void	(*Pmove) (pmove_t *pmove);		// player movement code common with client prediction
 
 	// network messaging
@@ -169,7 +169,7 @@ struct game_import_t
 	cvar_t	*(*cvar_forceset) (char *var_name, const char *value);
 
 	// ClientCommand and ServerCommand parameter access
-	int32_t		(*argc) (void);
+	int32_t	(*argc) (void);
 	char	*(*argv) (int32_t n);
 	char	*(*args) (void);	// concatenation of all argv >= 1
 
@@ -232,9 +232,7 @@ struct game_export_t
 	// 
 	// The size will be fixed when ge->Init() is called
 	edict_t		*edicts;
-	int32_t			edict_size;
-	int32_t			num_edicts;		// current number, <= max_edicts
-	int32_t			max_edicts;
+	int32_t		edict_size;
+	int32_t		num_edicts;		// current number, <= max_edicts
+	int32_t		max_edicts;
 };
-
-game_export_t *GetGameApi (game_import_t *import);

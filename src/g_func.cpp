@@ -107,7 +107,7 @@ void Move_Begin (edict_t *ent)
 
 void Think_AccelMove (edict_t *ent);
 
-void Move_Calc (edict_t *ent, vec3_t dest, void(*func)(edict_t*))
+void Move_Calc (edict_t *ent, const vec3_t dest, void(*func)(edict_t*))
 {
 	VectorClear (ent->velocity);
 	VectorSubtract (dest, ent->s.origin, ent->moveinfo.dir);
@@ -751,7 +751,7 @@ void button_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *s
 	button_fire (self);
 }
 
-void button_killed (edict_t *self, edict_t *inflictor, edict_t *attacker, int32_t damage, vec3_t point)
+void button_killed (edict_t *self, edict_t *inflictor, edict_t *attacker, int32_t damage, const vec3_t point)
 {
 	self->activator = attacker;
 	self->health = self->max_health;
@@ -1109,7 +1109,7 @@ void door_blocked  (edict_t *self, edict_t *other)
 	}
 }
 
-void door_killed (edict_t *self, edict_t *inflictor, edict_t *attacker, int32_t damage, vec3_t point)
+void door_killed (edict_t *self, edict_t *inflictor, edict_t *attacker, int32_t damage, const vec3_t point)
 {
 	edict_t	*ent;
 
@@ -1956,7 +1956,7 @@ void door_secret_blocked  (edict_t *self, edict_t *other)
 	T_Damage (other, self, self, vec3_origin, other->s.origin, vec3_origin, self->dmg, 1, DAMAGE_NONE, MOD_CRUSH);
 }
 
-void door_secret_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int32_t damage, vec3_t point)
+void door_secret_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int32_t damage, const vec3_t point)
 {
 	self->takedamage = DAMAGE_NO;
 	door_secret_use (self, attacker, attacker);

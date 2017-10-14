@@ -248,5 +248,8 @@
     <ClInclude Include="src\m_flash.h">
       <Filter>inc</Filter>
     </ClInclude>
+    <ClInclude Include="src\q_math.h">
+      <Filter>inc</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
