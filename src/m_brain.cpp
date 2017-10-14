@@ -349,7 +349,7 @@ mframe_t brain_frames_duck [] =
 };
 mmove_t brain_move_duck = {FRAME_duck01, FRAME_duck08, brain_frames_duck, brain_run};
 
-void brain_dodge (edict_t *self, edict_t *attacker, float eta)
+void brain_dodge (edict_t *self, edict_t *attacker, vec_t eta)
 {
 	if (prandom(75))
 		return;
@@ -539,7 +539,7 @@ void brain_run (edict_t *self)
 }
 
 
-void brain_pain (edict_t *self, edict_t *other, float kick, int damage)
+void brain_pain (edict_t *self, edict_t *other, vec_t kick, int32_t damage)
 {
 	if (self->health < (self->max_health / 2))
 		self->s.skinnum = 1;
@@ -551,7 +551,7 @@ void brain_pain (edict_t *self, edict_t *other, float kick, int damage)
 	if (skill->value == 3)
 		return;		// no pain anims in nightmare
 
-	int r = irandom(2);
+	int32_t r = irandom(2);
 	if (r == 0)
 	{
 		gi.sound (self, CHAN_VOICE, sound_pain1, 1, ATTN_NORM, 0);
@@ -581,9 +581,9 @@ void brain_dead (edict_t *self)
 
 
 
-void brain_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
+void brain_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int32_t damage, vec3_t point)
 {
-	int		n;
+	int32_t		n;
 
 	self->s.effects = EF_NONE;
 	self->monsterinfo.power_armor_type = POWER_ARMOR_NONE;

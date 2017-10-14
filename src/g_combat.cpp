@@ -89,7 +89,7 @@ bool CanDamage (edict_t *targ, edict_t *inflictor)
 Killed
 ============
 */
-void Killed (edict_t *targ, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
+void Killed (edict_t *targ, edict_t *inflictor, edict_t *attacker, int32_t damage, vec3_t point)
 {
 	if (targ->health < -999)
 		targ->health = -999;
@@ -131,7 +131,7 @@ void Killed (edict_t *targ, edict_t *inflictor, edict_t *attacker, int damage, v
 SpawnDamage
 ================
 */
-void SpawnDamage (int type, vec3_t origin, vec3_t normal, int damage)
+void SpawnDamage (int32_t type, vec3_t origin, vec3_t normal, int32_t damage)
 {
 	if (damage > 255)
 		damage = 255;
@@ -168,16 +168,16 @@ dflags		these flags are used to control how T_Damage works
 	DAMAGE_NO_PROTECTION	kills godmode, armor, everything
 ============
 */
-static int CheckPowerArmor (edict_t *ent, vec3_t point, vec3_t normal, int damage, damageflag_t dflags)
+static int32_t CheckPowerArmor (edict_t *ent, vec3_t point, vec3_t normal, int32_t damage, damageflag_t dflags)
 {
 	gclient_t	*client;
-	int			save;
+	int32_t			save;
 	powerarmor_t	power_armor_type;
-	int			index = 0;
-	int			damagePerCell;
-	int			pa_te_type;
-	int			power = 0;
-	int			power_used;
+	int32_t			index = 0;
+	int32_t			damagePerCell;
+	int32_t			pa_te_type;
+	int32_t			power = 0;
+	int32_t			power_used;
 
 	if (!damage)
 		return 0;
@@ -212,7 +212,7 @@ static int CheckPowerArmor (edict_t *ent, vec3_t point, vec3_t normal, int damag
 	if (power_armor_type == POWER_ARMOR_SCREEN)
 	{
 		vec3_t		vec;
-		float		dot;
+		vec_t		dot;
 		vec3_t		forward;
 
 		// only works if damage point is in front
@@ -252,11 +252,11 @@ static int CheckPowerArmor (edict_t *ent, vec3_t point, vec3_t normal, int damag
 	return save;
 }
 
-static int CheckArmor (edict_t *ent, vec3_t point, vec3_t normal, int damage, int te_sparks, damageflag_t dflags)
+static int32_t CheckArmor (edict_t *ent, vec3_t point, vec3_t normal, int32_t damage, int32_t te_sparks, damageflag_t dflags)
 {
 	gclient_t	*client;
-	int			save;
-	int			index;
+	int32_t			save;
+	int32_t			index;
 	gitem_t		*armor;
 
 	if (!damage)
@@ -374,14 +374,14 @@ bool CheckTeamDamage (edict_t *targ, edict_t *attacker)
 	return false;
 }
 
-void T_Damage (edict_t *targ, edict_t *inflictor, edict_t *attacker, vec3_t dir, vec3_t point, vec3_t normal, int damage, int knockback, damageflag_t dflags, meansofdeath_t mod)
+void T_Damage (edict_t *targ, edict_t *inflictor, edict_t *attacker, vec3_t dir, vec3_t point, vec3_t normal, int32_t damage, int32_t knockback, damageflag_t dflags, meansofdeath_t mod)
 {
 	gclient_t	*client;
-	int			take;
-	int			save;
-	int			asave;
-	int			psave;
-	int			te_sparks;
+	int32_t			take;
+	int32_t			save;
+	int32_t			asave;
+	int32_t			psave;
+	int32_t			te_sparks;
 
 	if (!targ->takedamage)
 		return;
@@ -431,7 +431,7 @@ void T_Damage (edict_t *targ, edict_t *inflictor, edict_t *attacker, vec3_t dir,
 		if ((knockback) && (targ->movetype != MOVETYPE_NONE) && (targ->movetype != MOVETYPE_BOUNCE) && (targ->movetype != MOVETYPE_PUSH) && (targ->movetype != MOVETYPE_STOP))
 		{
 			vec3_t	kvel;
-			float	mass;
+			vec_t	mass;
 
 			if (targ->mass < 50)
 				mass = 50;
@@ -439,9 +439,9 @@ void T_Damage (edict_t *targ, edict_t *inflictor, edict_t *attacker, vec3_t dir,
 				mass = targ->mass;
 
 			if (targ->client  && attacker == targ)
-				VectorScale (dir, 1600.0 * (float)knockback / mass, kvel);	// the rocket jump hack...
+				VectorScale (dir, 1600.0 * (vec_t)knockback / mass, kvel);	// the rocket jump hack...
 			else
-				VectorScale (dir, 500.0 * (float)knockback / mass, kvel);
+				VectorScale (dir, 500.0 * (vec_t)knockback / mass, kvel);
 
 			VectorAdd (targ->velocity, kvel, targ->velocity);
 		}
@@ -544,9 +544,9 @@ void T_Damage (edict_t *targ, edict_t *inflictor, edict_t *attacker, vec3_t dir,
 T_RadiusDamage
 ============
 */
-void T_RadiusDamage (edict_t *inflictor, edict_t *attacker, float damage, edict_t *ignore, float radius, meansofdeath_t mod)
+void T_RadiusDamage (edict_t *inflictor, edict_t *attacker, vec_t damage, edict_t *ignore, vec_t radius, meansofdeath_t mod)
 {
-	float	points;
+	vec_t	points;
 	edict_t	*ent = nullptr;
 	vec3_t	v;
 	vec3_t	dir;
@@ -569,7 +569,7 @@ void T_RadiusDamage (edict_t *inflictor, edict_t *attacker, float damage, edict_
 			if (CanDamage (ent, inflictor))
 			{
 				VectorSubtract (ent->s.origin, inflictor->s.origin, dir);
-				T_Damage (ent, inflictor, attacker, dir, inflictor->s.origin, vec3_origin, (int)points, (int)points, DAMAGE_RADIUS, mod);
+				T_Damage (ent, inflictor, attacker, dir, inflictor->s.origin, vec3_origin, (int32_t)points, (int32_t)points, DAMAGE_RADIUS, mod);
 			}
 		}
 	}

@@ -53,7 +53,7 @@ static soundindex_t	sound_hit;
 
 void makron_taunt (edict_t *self)
 {
-	int r = irandom(2);
+	int32_t r = irandom(2);
 
 	if (r == 0)
 		gi.sound (self, CHAN_AUTO, sound_taunt1, 1, ATTN_NONE, 0);
@@ -518,7 +518,7 @@ void MakronHyperblaster (edict_t *self)
 	vec3_t	vec;
 	vec3_t	start;
 	vec3_t	forward, right;
-	int		flash_number;
+	int32_t		flash_number;
 
 	flash_number = MZ2_MAKRON_BLASTER_1 + (self->s.frame - FRAME_attak405);
 
@@ -549,7 +549,7 @@ void MakronHyperblaster (edict_t *self)
 }	
 
 
-void makron_pain (edict_t *self, edict_t *other, float kick, int damage)
+void makron_pain (edict_t *self, edict_t *other, vec_t kick, int32_t damage)
 {
 
 	if (self->health < (self->max_health / 2))
@@ -603,8 +603,8 @@ void makron_sight(edict_t *self, edict_t *other)
 void makron_attack(edict_t *self)
 {
 	vec3_t	vec;
-	float	range;
-	int		r = irandom(2);
+	vec_t	range;
+	int32_t		r = irandom(2);
 
 	VectorSubtract (self->enemy->s.origin, self->s.origin, vec);
 	range = VectorLength (vec);
@@ -665,11 +665,11 @@ void makron_dead (edict_t *self)
 }
 
 
-void makron_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
+void makron_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int32_t damage, vec3_t point)
 {
 	edict_t *tempent;
 
-	int		n;
+	int32_t		n;
 
 	self->s.sound = SOUND_NONE;
 
@@ -708,11 +708,11 @@ bool Makron_CheckAttack (edict_t *self)
 {
 	vec3_t	spot1, spot2;
 	vec3_t	temp;
-	int		chance;
+	int32_t		chance;
 	trace_t	tr;
 	bool		enemy_infront;
-	int			enemy_range;
-	float		enemy_yaw;
+	int32_t			enemy_range;
+	vec_t		enemy_yaw;
 
 	if (self->enemy->health > 0)
 	{

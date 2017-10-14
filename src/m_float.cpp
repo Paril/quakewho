@@ -51,7 +51,7 @@ void floater_idle (edict_t *self)
 
 //void floater_stand1 (edict_t *self);
 void floater_dead (edict_t *self);
-void floater_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point);
+void floater_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int32_t damage, vec3_t point);
 void floater_run (edict_t *self);
 void floater_wham (edict_t *self);
 void floater_zap (edict_t *self);
@@ -563,9 +563,9 @@ void floater_melee(edict_t *self)
 }
 
 
-void floater_pain (edict_t *self, edict_t *other, float kick, int damage)
+void floater_pain (edict_t *self, edict_t *other, vec_t kick, int32_t damage)
 {
-	int		n;
+	int32_t		n;
 
 	if (self->health < (self->max_health / 2))
 		self->s.skinnum = 1;
@@ -600,7 +600,7 @@ void floater_dead (edict_t *self)
 	gi.linkentity (self);
 }
 
-void floater_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
+void floater_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int32_t damage, vec3_t point)
 {
 	gi.sound (self, CHAN_VOICE, sound_death1, 1, ATTN_NORM, 0);
 	BecomeExplosion1(self);
@@ -630,7 +630,7 @@ void SP_monster_floater (edict_t *self)
 
 	self->movetype = MOVETYPE_STEP;
 	self->solid = SOLID_BBOX;
-	self->s.modelindex = gi.modelindex ("models/monsters/float/tris.md2");
+	self->s.modelindex = gi.modelindex ("models/monsters/vec_t/tris.md2");
 	VectorSet (self->mins, -24, -24, -24);
 	VectorSet (self->maxs, 24, 24, 32);
 

@@ -28,7 +28,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 // and we can mess it up based on skill.  Spread should be for normal
 // and we can tighten or loosen based on skill.  We could muck with
 // the damages too, but I'm not sure that's such a good idea.
-void monster_fire_bullet (edict_t *self, vec3_t start, vec3_t dir, int damage, int kick, int hspread, int vspread, int flashtype)
+void monster_fire_bullet (edict_t *self, vec3_t start, vec3_t dir, int32_t damage, int32_t kick, int32_t hspread, int32_t vspread, int32_t flashtype)
 {
 	fire_bullet (self, start, dir, damage, kick, hspread, vspread, MOD_UNKNOWN);
 
@@ -38,7 +38,7 @@ void monster_fire_bullet (edict_t *self, vec3_t start, vec3_t dir, int damage, i
 	gi.multicast (start, MULTICAST_PVS);
 }
 
-void monster_fire_shotgun (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick, int hspread, int vspread, int count, int flashtype)
+void monster_fire_shotgun (edict_t *self, vec3_t start, vec3_t aimdir, int32_t damage, int32_t kick, int32_t hspread, int32_t vspread, int32_t count, int32_t flashtype)
 {
 	fire_shotgun (self, start, aimdir, damage, kick, hspread, vspread, count, MOD_UNKNOWN);
 
@@ -48,7 +48,7 @@ void monster_fire_shotgun (edict_t *self, vec3_t start, vec3_t aimdir, int damag
 	gi.multicast (start, MULTICAST_PVS);
 }
 
-void monster_fire_blaster (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, int flashtype, entity_effects_t effect)
+void monster_fire_blaster (edict_t *self, vec3_t start, vec3_t dir, int32_t damage, int32_t speed, int32_t flashtype, entity_effects_t effect)
 {
 	fire_blaster (self, start, dir, damage, speed, effect, false);
 
@@ -58,7 +58,7 @@ void monster_fire_blaster (edict_t *self, vec3_t start, vec3_t dir, int damage, 
 	gi.multicast (start, MULTICAST_PVS);
 }	
 
-void monster_fire_grenade (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int speed, int flashtype)
+void monster_fire_grenade (edict_t *self, vec3_t start, vec3_t aimdir, int32_t damage, int32_t speed, int32_t flashtype)
 {
 	fire_grenade (self, start, aimdir, damage, speed, 2.5, damage+40);
 
@@ -68,7 +68,7 @@ void monster_fire_grenade (edict_t *self, vec3_t start, vec3_t aimdir, int damag
 	gi.multicast (start, MULTICAST_PVS);
 }
 
-void monster_fire_rocket (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, int flashtype)
+void monster_fire_rocket (edict_t *self, vec3_t start, vec3_t dir, int32_t damage, int32_t speed, int32_t flashtype)
 {
 	fire_rocket (self, start, dir, damage, speed, damage+20, damage);
 
@@ -78,7 +78,7 @@ void monster_fire_rocket (edict_t *self, vec3_t start, vec3_t dir, int damage, i
 	gi.multicast (start, MULTICAST_PVS);
 }	
 
-void monster_fire_railgun (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick, int flashtype)
+void monster_fire_railgun (edict_t *self, vec3_t start, vec3_t aimdir, int32_t damage, int32_t kick, int32_t flashtype)
 {
 	fire_rail (self, start, aimdir, damage, kick);
 
@@ -88,7 +88,7 @@ void monster_fire_railgun (edict_t *self, vec3_t start, vec3_t aimdir, int damag
 	gi.multicast (start, MULTICAST_PVS);
 }
 
-void monster_fire_bfg (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int speed, int kick, float damage_radius, int flashtype)
+void monster_fire_bfg (edict_t *self, vec3_t start, vec3_t aimdir, int32_t damage, int32_t speed, int32_t kick, vec_t damage_radius, int32_t flashtype)
 {
 	fire_bfg (self, start, aimdir, damage, speed, damage_radius);
 
@@ -132,7 +132,7 @@ void M_FlyCheck (edict_t *self)
 	self->nextthink = level.time + irandom(5, 15);
 }
 
-void AttackFinished (edict_t *self, float time)
+void AttackFinished (edict_t *self, vec_t time)
 {
 	self->monsterinfo.attack_finished = level.time + time;
 }
@@ -217,7 +217,7 @@ void M_CatagorizePosition (edict_t *ent)
 
 void M_WorldEffects (edict_t *ent)
 {
-	int		dmg;
+	int32_t		dmg;
 
 	if (ent->health > 0)
 	{
@@ -361,7 +361,7 @@ void M_SetEffects (edict_t *ent)
 void M_MoveFrame (edict_t *self)
 {
 	mmove_t	*move;
-	int		index;
+	int32_t		index;
 
 	move = self->monsterinfo.currentmove;
 	self->nextthink = level.time + FRAMETIME;
@@ -626,9 +626,9 @@ void monster_start_go (edict_t *self)
 			if (strcmp(target->classname, "point_combat") != 0)
 			{
 				gi.dprintf("%s at (%i %i %i) has a bad combattarget %s : %s at (%i %i %i)\n",
-					self->classname, (int)self->s.origin[0], (int)self->s.origin[1], (int)self->s.origin[2],
-					self->combattarget, target->classname, (int)target->s.origin[0], (int)target->s.origin[1],
-					(int)target->s.origin[2]);
+					self->classname, (int32_t)self->s.origin[0], (int32_t)self->s.origin[1], (int32_t)self->s.origin[2],
+					self->combattarget, target->classname, (int32_t)target->s.origin[0], (int32_t)target->s.origin[1],
+					(int32_t)target->s.origin[2]);
 			}
 		}
 	}

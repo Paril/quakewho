@@ -278,7 +278,7 @@ mframe_t gunner_frames_pain1 [] =
 };
 mmove_t gunner_move_pain1 = {FRAME_pain101, FRAME_pain118, gunner_frames_pain1, gunner_run};
 
-void gunner_pain (edict_t *self, edict_t *other, float kick, int damage)
+void gunner_pain (edict_t *self, edict_t *other, vec_t kick, int32_t damage)
 {
 	if (self->health < (self->max_health / 2))
 		self->s.skinnum = 1;
@@ -330,9 +330,9 @@ mframe_t gunner_frames_death [] =
 };
 mmove_t gunner_move_death = {FRAME_death01, FRAME_death11, gunner_frames_death, gunner_dead};
 
-void gunner_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
+void gunner_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int32_t damage, vec3_t point)
 {
-	int		n;
+	int32_t		n;
 
 // check for gib
 	if (self->health <= self->gib_health)
@@ -404,7 +404,7 @@ mframe_t gunner_frames_duck [] =
 };
 mmove_t	gunner_move_duck = {FRAME_duck01, FRAME_duck08, gunner_frames_duck, gunner_run};
 
-void gunner_dodge (edict_t *self, edict_t *attacker, float eta)
+void gunner_dodge (edict_t *self, edict_t *attacker, vec_t eta)
 {
 	if (prandom(75))
 		return;
@@ -427,7 +427,7 @@ void GunnerFire (edict_t *self)
 	vec3_t	forward, right;
 	vec3_t	target;
 	vec3_t	aim;
-	int		flash_number;
+	int32_t		flash_number;
 
 	flash_number = MZ2_GUNNER_MACHINEGUN_1 + (self->s.frame - FRAME_attak216);
 
@@ -449,7 +449,7 @@ void GunnerGrenade (edict_t *self)
 	vec3_t	start;
 	vec3_t	forward, right;
 	vec3_t	aim;
-	int		flash_number;
+	int32_t		flash_number;
 
 	if (self->s.frame == FRAME_attak105)
 		flash_number = MZ2_GUNNER_GRENADE_1;

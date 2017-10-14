@@ -21,7 +21,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "q_shared.h"
 
-const float STEPSIZE	= 18;
+const vec_t STEPSIZE	= 18;
 
 /*
 =============
@@ -32,14 +32,14 @@ is not a staircase.
 
 =============
 */
-int c_yes, c_no;
+int32_t c_yes, c_no;
 
 bool M_CheckBottom (edict_t *ent)
 {
 	vec3_t	mins, maxs, start, stop;
 	trace_t	trace;
-	int		x, y;
-	float	mid, bottom;
+	int32_t		x, y;
+	vec_t	mid, bottom;
 	
 	VectorAdd (ent->s.origin, ent->mins, mins);
 	VectorAdd (ent->s.origin, ent->maxs, maxs);
@@ -111,11 +111,11 @@ pr_global_struct->trace_normal is set to the normal of the blocking wall
 //it again later in catagorize position?
 bool SV_movestep (edict_t *ent, vec3_t move, bool relink)
 {
-	float		dz;
+	vec_t		dz;
 	vec3_t		oldorg, neworg, end;
 	trace_t		trace;
-	int			i;
-	float		stepsize;
+	int32_t			i;
+	vec_t		stepsize;
 	vec3_t		test;
 	brushcontents_t contents;
 
@@ -303,10 +303,10 @@ M_ChangeYaw
 */
 void M_ChangeYaw (edict_t *ent)
 {
-	float	ideal;
-	float	current;
-	float	move;
-	float	speed;
+	vec_t	ideal;
+	vec_t	current;
+	vec_t	move;
+	vec_t	speed;
 	
 	current = anglemod(ent->s.angles[YAW]);
 	ideal = ent->ideal_yaw;
@@ -350,10 +350,10 @@ facing it.
 
 ======================
 */
-bool SV_StepDirection (edict_t *ent, float yaw, float dist)
+bool SV_StepDirection (edict_t *ent, vec_t yaw, vec_t dist)
 {
 	vec3_t		move, oldorigin;
-	float		delta;
+	vec_t		delta;
 	
 	ent->ideal_yaw = yaw;
 	M_ChangeYaw (ent);
@@ -400,19 +400,19 @@ SV_NewChaseDir
 ================
 */
 
-const int DI_NODIR	= -1;
+const int32_t DI_NODIR	= -1;
 
-void SV_NewChaseDir (edict_t *actor, edict_t *enemy, float dist)
+void SV_NewChaseDir (edict_t *actor, edict_t *enemy, vec_t dist)
 {
-	float	deltax,deltay;
-	float	d[3];
-	float	tdir, olddir, turnaround;
+	vec_t	deltax,deltay;
+	vec_t	d[3];
+	vec_t	tdir, olddir, turnaround;
 
 	//FIXME: how did we get here with no enemy
 	if (!enemy)
 		return;
 
-	olddir = anglemod( (int)(actor->ideal_yaw/45)*45 );
+	olddir = anglemod( (int32_t)(actor->ideal_yaw/45)*45 );
 	turnaround = anglemod(olddir - 180);
 
 	deltax = enemy->s.origin[0] - actor->s.origin[0];
@@ -494,9 +494,9 @@ SV_CloseEnough
 
 ======================
 */
-bool SV_CloseEnough (edict_t *ent, edict_t *goal, float dist)
+bool SV_CloseEnough (edict_t *ent, edict_t *goal, vec_t dist)
 {
-	int		i;
+	int32_t		i;
 	
 	for (i=0 ; i<3 ; i++)
 	{
@@ -514,7 +514,7 @@ bool SV_CloseEnough (edict_t *ent, edict_t *goal, float dist)
 M_MoveToGoal
 ======================
 */
-void M_MoveToGoal (edict_t *ent, float dist)
+void M_MoveToGoal (edict_t *ent, vec_t dist)
 {
 	edict_t		*goal;
 	
@@ -541,7 +541,7 @@ void M_MoveToGoal (edict_t *ent, float dist)
 M_walkmove
 ===============
 */
-bool M_walkmove (edict_t *ent, float yaw, float dist)
+bool M_walkmove (edict_t *ent, vec_t yaw, vec_t dist)
 {
 	vec3_t	move;
 	

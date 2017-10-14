@@ -226,9 +226,9 @@ char *messages[] =
 	"Check your targets"
 };
 
-void actor_pain (edict_t *self, edict_t *other, float kick, int damage)
+void actor_pain (edict_t *self, edict_t *other, vec_t kick, int32_t damage)
 {
-	int		n;
+	int32_t		n;
 
 	if (self->health < (self->max_health / 2))
 		self->s.skinnum = 1;
@@ -335,9 +335,9 @@ mframe_t actor_frames_death2 [] =
 };
 mmove_t actor_move_death2 = {FRAME_death201, FRAME_death213, actor_frames_death2, actor_dead};
 
-void actor_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
+void actor_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int32_t damage, vec3_t point)
 {
-	int		n;
+	int32_t		n;
 
 // check for gib
 	if (self->health <= -80)
@@ -389,7 +389,7 @@ mmove_t actor_move_attack = {FRAME_attak01, FRAME_attak04, actor_frames_attack, 
 
 void actor_attack(edict_t *self)
 {
-	int		n;
+	int32_t		n;
 
 	self->monsterinfo.currentmove = &actor_move_attack;
 	n = irandom(10, 25);
@@ -506,7 +506,7 @@ void target_actor_touch (edict_t *self, edict_t *other, cplane_t *plane, csurfac
 
 	if (self->message)
 	{
-		int		n;
+		int32_t		n;
 		edict_t	*ent;
 
 		for (n = 1; n <= game.maxclients; n++)

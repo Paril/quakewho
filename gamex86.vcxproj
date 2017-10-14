@@ -118,7 +118,7 @@
     <ClCompile Include="src\m_boss32.cpp" />
     <ClCompile Include="src\m_brain.cpp" />
     <ClCompile Include="src\m_chick.cpp" />
-    <ClCompile Include="src\m_flash.cpp" />
+    <ClInclude Include="src\m_flash.h" />
     <ClCompile Include="src\m_flipper.cpp" />
     <ClCompile Include="src\m_float.cpp" />
     <ClCompile Include="src\m_flyer.cpp" />

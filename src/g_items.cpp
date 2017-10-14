@@ -41,17 +41,17 @@ gitem_armor_t jacketarmor_info	= { 25,  50, .30f, .00f, ARMOR_JACKET};
 gitem_armor_t combatarmor_info	= { 50, 100, .60f, .30f, ARMOR_COMBAT};
 gitem_armor_t bodyarmor_info	= {100, 200, .80f, .60f, ARMOR_BODY};
 
-static int	jacket_armor_index;
-static int	combat_armor_index;
-static int	body_armor_index;
-static int	power_screen_index;
-static int	power_shield_index;
+static int32_t	jacket_armor_index;
+static int32_t	combat_armor_index;
+static int32_t	body_armor_index;
+static int32_t	power_screen_index;
+static int32_t	power_shield_index;
 
-const int HEALTH_IGNORE_MAX	= bit(0);
-const int HEALTH_TIMED		= bit(1);
+const int32_t HEALTH_IGNORE_MAX	= bit(0);
+const int32_t HEALTH_TIMED		= bit(1);
 
 void Use_Quad (edict_t *ent, gitem_t *item);
-static int	quad_drop_timeout_hack;
+static int32_t	quad_drop_timeout_hack;
 
 //======================================================================
 
@@ -60,7 +60,7 @@ static int	quad_drop_timeout_hack;
 GetItemByIndex
 ===============
 */
-gitem_t	*GetItemByIndex (int index)
+gitem_t	*GetItemByIndex (int32_t index)
 {
 	if (index == 0 || index >= game.num_items)
 		return nullptr;
@@ -77,7 +77,7 @@ FindItemByClassname
 */
 gitem_t	*FindItemByClassname (char *classname)
 {
-	int		i;
+	int32_t		i;
 	gitem_t	*it;
 
 	it = itemlist;
@@ -85,7 +85,7 @@ gitem_t	*FindItemByClassname (char *classname)
 	{
 		if (!it->classname)
 			continue;
-		if (!Q_stricmp(it->classname, classname))
+		if (!stricmp(it->classname, classname))
 			return it;
 	}
 
@@ -100,7 +100,7 @@ FindItem
 */
 gitem_t	*FindItem (char *pickup_name)
 {
-	int		i;
+	int32_t		i;
 	gitem_t	*it;
 
 	it = itemlist;
@@ -108,7 +108,7 @@ gitem_t	*FindItem (char *pickup_name)
 	{
 		if (!it->pickup_name)
 			continue;
-		if (!Q_stricmp(it->pickup_name, pickup_name))
+		if (!stricmp(it->pickup_name, pickup_name))
 			return it;
 	}
 
@@ -122,8 +122,8 @@ void DoRespawn (edict_t *ent)
 	if (ent->team)
 	{
 		edict_t	*master;
-		int	count;
-		int choice;
+		int32_t	count;
+		int32_t choice;
 
 		master = ent->teammaster;
 
@@ -144,7 +144,7 @@ void DoRespawn (edict_t *ent)
 	ent->s.event = EV_ITEM_RESPAWN;
 }
 
-void SetRespawn (edict_t *ent, float delay)
+void SetRespawn (edict_t *ent, vec_t delay)
 {
 	ent->flags |= FL_RESPAWN;
 	ent->svflags |= SVF_NOCLIENT;
@@ -159,7 +159,7 @@ void SetRespawn (edict_t *ent, float delay)
 
 bool Pickup_Powerup (edict_t *ent, edict_t *other)
 {
-	int		quantity;
+	int32_t		quantity;
 
 	quantity = other->client->pers.inventory[ITEM_INDEX(ent->item)];
 	if ((skill->value == 1 && quantity >= 2) || (skill->value >= 2 && quantity >= 1))
@@ -222,7 +222,7 @@ bool Pickup_AncientHead (edict_t *ent, edict_t *other)
 bool Pickup_Bandolier (edict_t *ent, edict_t *other)
 {
 	gitem_t	*item;
-	int		index;
+	int32_t		index;
 
 	if (other->client->pers.max_bullets < 250)
 		other->client->pers.max_bullets = 250;
@@ -260,7 +260,7 @@ bool Pickup_Bandolier (edict_t *ent, edict_t *other)
 bool Pickup_Pack (edict_t *ent, edict_t *other)
 {
 	gitem_t	*item;
-	int		index;
+	int32_t		index;
 
 	if (other->client->pers.max_bullets < 300)
 		other->client->pers.max_bullets = 300;
@@ -339,7 +339,7 @@ bool Pickup_Pack (edict_t *ent, edict_t *other)
 
 void Use_Quad (edict_t *ent, gitem_t *item)
 {
-	int		timeout;
+	int32_t		timeout;
 
 	ent->client->pers.inventory[ITEM_INDEX(item)]--;
 	ValidateSelectedItem (ent);
@@ -445,10 +445,10 @@ bool Pickup_Key (edict_t *ent, edict_t *other)
 
 //======================================================================
 
-bool Add_Ammo (edict_t *ent, gitem_t *item, int count)
+bool Add_Ammo (edict_t *ent, gitem_t *item, int32_t count)
 {
-	int			index;
-	int			max;
+	int32_t			index;
+	int32_t			max;
 
 	if (!ent->client)
 		return false;
@@ -483,8 +483,8 @@ bool Add_Ammo (edict_t *ent, gitem_t *item, int count)
 
 bool Pickup_Ammo (edict_t *ent, edict_t *other)
 {
-	int			oldcount;
-	int			count;
+	int32_t			oldcount;
+	int32_t			count;
 	bool		weapon;
 
 	weapon = (ent->item->flags & IT_WEAPON);
@@ -514,7 +514,7 @@ bool Pickup_Ammo (edict_t *ent, edict_t *other)
 void Drop_Ammo (edict_t *ent, gitem_t *item)
 {
 	edict_t	*dropped;
-	int		index;
+	int32_t		index;
 
 	index = ITEM_INDEX(item);
 	dropped = Drop_Item (ent, item);
@@ -588,7 +588,7 @@ bool Pickup_Health (edict_t *ent, edict_t *other)
 
 //======================================================================
 
-int ArmorIndex (edict_t *ent)
+int32_t ArmorIndex (edict_t *ent)
 {
 	if (!ent->client)
 		return 0;
@@ -607,12 +607,12 @@ int ArmorIndex (edict_t *ent)
 
 bool Pickup_Armor (edict_t *ent, edict_t *other)
 {
-	int				old_armor_index;
+	int32_t				old_armor_index;
 	gitem_armor_t	*oldinfo;
 	gitem_armor_t	*newinfo;
-	int				newcount;
-	float			salvage;
-	int				salvagecount;
+	int32_t				newcount;
+	vec_t			salvage;
+	int32_t				salvagecount;
 
 	// get info on new armor
 	newinfo = (gitem_armor_t *)ent->item->info;
@@ -705,7 +705,7 @@ powerarmor_t PowerArmorType (edict_t *ent)
 
 void Use_PowerArmor (edict_t *ent, gitem_t *item)
 {
-	int		index;
+	int32_t		index;
 
 	if (ent->flags & FL_POWER_ARMOR)
 	{
@@ -727,7 +727,7 @@ void Use_PowerArmor (edict_t *ent, gitem_t *item)
 
 bool Pickup_PowerArmor (edict_t *ent, edict_t *other)
 {
-	int		quantity;
+	int32_t		quantity;
 
 	quantity = other->client->pers.inventory[ITEM_INDEX(ent->item)];
 
@@ -920,7 +920,7 @@ void droptofloor (edict_t *ent)
 {
 	trace_t		tr;
 	vec3_t		dest;
-	float		*v;
+	vec_t		*v;
 
 	v = tv(-15,-15,-15);
 	VectorCopy (v, ent->mins);
@@ -995,7 +995,7 @@ void PrecacheItem (gitem_t *it)
 {
 	char	*s, *start;
 	char	data[MAX_QPATH];
-	int		len;
+	int32_t		len;
 	gitem_t	*ammo;
 
 	if (!it)
@@ -2198,7 +2198,7 @@ Called by worldspawn
 */
 void SetItemNames (void)
 {
-	int		i;
+	int32_t		i;
 	gitem_t	*it;
 
 	for (i=0 ; i<game.num_items ; i++)

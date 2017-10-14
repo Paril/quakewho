@@ -40,15 +40,15 @@ the player has been recently.  It is used by monsters for pursuit.
 const size_t TRAIL_LENGTH	= 8;
 
 edict_t		*trail[TRAIL_LENGTH];
-int			trail_head;
+int32_t			trail_head;
 bool		trail_active = false;
 
-inline int NEXT(const int &n) { return (n + 1) % TRAIL_LENGTH; }
-inline int PREV(const int &n) { return (n - 1) % TRAIL_LENGTH; }
+inline int32_t NEXT(const int32_t &n) { return (n + 1) % TRAIL_LENGTH; }
+inline int32_t PREV(const int32_t &n) { return (n - 1) % TRAIL_LENGTH; }
 
 void PlayerTrail_Init (void)
 {
-	int		n;
+	int32_t		n;
 
 	if (deathmatch->value /* FIXME || coop */)
 		return;
@@ -94,8 +94,8 @@ void PlayerTrail_New (vec3_t spot)
 
 edict_t *PlayerTrail_PickFirst (edict_t *self)
 {
-	int		marker;
-	int		n;
+	int32_t		marker;
+	int32_t		n;
 
 	if (!trail_active)
 		return nullptr;
@@ -123,8 +123,8 @@ edict_t *PlayerTrail_PickFirst (edict_t *self)
 
 edict_t *PlayerTrail_PickNext (edict_t *self)
 {
-	int		marker;
-	int		n;
+	int32_t		marker;
+	int32_t		n;
 
 	if (!trail_active)
 		return nullptr;

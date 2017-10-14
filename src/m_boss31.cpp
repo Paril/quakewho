@@ -51,7 +51,7 @@ void MakronToss (edict_t *self);
 
 void jorg_search (edict_t *self)
 {
-	int r = irandom(2);
+	int32_t r = irandom(2);
 
 	if (r == 0)
 		gi.sound (self, CHAN_VOICE, sound_search1, 1, ATTN_NORM, 0);
@@ -410,7 +410,7 @@ void jorg_attack1(edict_t *self)
 	self->monsterinfo.currentmove = &jorg_move_attack1;
 }
 
-void jorg_pain (edict_t *self, edict_t *other, float kick, int damage)
+void jorg_pain (edict_t *self, edict_t *other, vec_t kick, int32_t damage)
 {
 	if (self->health < (self->max_health / 2))
 		self->s.skinnum = 1;
@@ -486,11 +486,11 @@ void jorgBFG (edict_t *self)
 	/*void monster_fire_bfg (edict_t *self, 
 							 vec3_t start, 
 							 vec3_t aimdir, 
-							 int damage, 
-							 int speed, 
-							 int kick, 
-							 float damage_radius, 
-							 int flashtype)*/
+							 int32_t damage, 
+							 int32_t speed, 
+							 int32_t kick, 
+							 vec_t damage_radius, 
+							 int32_t flashtype)*/
 	monster_fire_bfg (self, start, dir, 50, 300, 100, 200, MZ2_JORG_BFG_1);
 }	
 
@@ -535,7 +535,7 @@ void jorg_firebullet (edict_t *self)
 void jorg_attack(edict_t *self)
 {
 	vec3_t	vec;
-	float	range;
+	vec_t	range;
 	
 	VectorSubtract (self->enemy->s.origin, self->s.origin, vec);
 	range = VectorLength (vec);
@@ -582,7 +582,7 @@ void jorg_dead (edict_t *self)
 }
 
 
-void jorg_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
+void jorg_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int32_t damage, vec3_t point)
 {
 	gi.sound (self, CHAN_VOICE, sound_death, 1, ATTN_NORM, 0);
 	self->deadflag = DEAD_DEAD;
@@ -596,11 +596,11 @@ bool Jorg_CheckAttack (edict_t *self)
 {
 	vec3_t	spot1, spot2;
 	vec3_t	temp;
-	int		chance;
+	int32_t		chance;
 	trace_t	tr;
 	bool		enemy_infront;
-	int			enemy_range;
-	float		enemy_yaw;
+	int32_t			enemy_range;
+	vec_t		enemy_yaw;
 
 	if (self->enemy->health > 0)
 	{

@@ -447,7 +447,7 @@ void supertank_reattack1(edict_t *self)
 		self->monsterinfo.currentmove = &supertank_move_end_attack1;
 }
 
-void supertank_pain (edict_t *self, edict_t *other, float kick, int damage)
+void supertank_pain (edict_t *self, edict_t *other, vec_t kick, int32_t damage)
 {
 
 	if (self->health < (self->max_health / 2))
@@ -495,7 +495,7 @@ void supertankRocket (edict_t *self)
 	vec3_t	start;
 	vec3_t	dir;
 	vec3_t	vec;
-	int		flash_number;
+	int32_t		flash_number;
 
 	if (self->s.frame == FRAME_attak2_8)
 		flash_number = MZ2_SUPERTANK_ROCKET_1;
@@ -521,7 +521,7 @@ void supertankMachineGun (edict_t *self)
 	vec3_t	vec;
 	vec3_t	start;
 	vec3_t	forward, right;
-	int		flash_number;
+	int32_t		flash_number;
 
 	flash_number = MZ2_SUPERTANK_MACHINEGUN_1 + (self->s.frame - FRAME_attak1_1);
 
@@ -549,8 +549,8 @@ void supertankMachineGun (edict_t *self)
 void supertank_attack(edict_t *self)
 {
 	vec3_t	vec;
-	float	range;
-	//float	r;
+	vec_t	range;
+	//vec_t	r;
 
 	VectorSubtract (self->enemy->s.origin, self->s.origin, vec);
 	range = VectorLength (vec);
@@ -592,7 +592,7 @@ void supertank_dead (edict_t *self)
 void BossExplode (edict_t *self)
 {
 	vec3_t	org;
-	int		n;
+	int32_t		n;
 
 	self->think = BossExplode;
 	VectorCopy (self->s.origin, org);
@@ -652,7 +652,7 @@ void BossExplode (edict_t *self)
 }
 
 
-void supertank_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
+void supertank_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int32_t damage, vec3_t point)
 {
 	gi.sound (self, CHAN_VOICE, sound_death, 1, ATTN_NORM, 0);
 	self->deadflag = DEAD_DEAD;

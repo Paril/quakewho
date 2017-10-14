@@ -312,7 +312,7 @@ mframe_t berserk_frames_pain2 [] =
 };
 mmove_t berserk_move_pain2 = {FRAME_painb1, FRAME_painb20, berserk_frames_pain2, berserk_run};
 
-void berserk_pain (edict_t *self, edict_t *other, float kick, int damage)
+void berserk_pain (edict_t *self, edict_t *other, vec_t kick, int32_t damage)
 {
 	if (self->health < (self->max_health / 2))
 		self->s.skinnum = 1;
@@ -378,9 +378,9 @@ mframe_t berserk_frames_death2 [] =
 mmove_t berserk_move_death2 = {FRAME_deathc1, FRAME_deathc8, berserk_frames_death2, berserk_dead};
 
 
-void berserk_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
+void berserk_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int32_t damage, vec3_t point)
 {
-	int		n;
+	int32_t		n;
 
 	if (self->health <= self->gib_health)
 	{

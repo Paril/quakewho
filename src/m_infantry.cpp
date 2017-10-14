@@ -212,9 +212,9 @@ mframe_t infantry_frames_pain2 [] =
 };
 mmove_t infantry_move_pain2 = {FRAME_pain201, FRAME_pain210, infantry_frames_pain2, infantry_run};
 
-void infantry_pain (edict_t *self, edict_t *other, float kick, int damage)
+void infantry_pain (edict_t *self, edict_t *other, vec_t kick, int32_t damage)
 {
-	int		n;
+	int32_t		n;
 
 	if (self->health < (self->max_health / 2))
 		self->s.skinnum = 1;
@@ -262,7 +262,7 @@ void InfantryMachineGun (edict_t *self)
 	vec3_t	start, target;
 	vec3_t	forward, right;
 	vec3_t	vec;
-	int		flash_number;
+	int32_t		flash_number;
 
 	if (self->s.frame == FRAME_attak111)
 	{
@@ -383,9 +383,9 @@ mframe_t infantry_frames_death3 [] =
 mmove_t infantry_move_death3 = {FRAME_death301, FRAME_death309, infantry_frames_death3, infantry_dead};
 
 
-void infantry_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
+void infantry_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int32_t damage, vec3_t point)
 {
-	int		n;
+	int32_t		n;
 
 // check for gib
 	if (self->health <= self->gib_health)
@@ -463,7 +463,7 @@ mframe_t infantry_frames_duck [] =
 };
 mmove_t infantry_move_duck = {FRAME_duck01, FRAME_duck05, infantry_frames_duck, infantry_run};
 
-void infantry_dodge (edict_t *self, edict_t *attacker, float eta)
+void infantry_dodge (edict_t *self, edict_t *attacker, vec_t eta)
 {
 	if (prandom(75))
 		return;
@@ -477,7 +477,7 @@ void infantry_dodge (edict_t *self, edict_t *attacker, float eta)
 
 void infantry_cock_gun (edict_t *self)
 {
-	int		n;
+	int32_t		n;
 
 	gi.sound (self, CHAN_WEAPON, sound_weapon_cock, 1, ATTN_NORM, 0);
 	n = irandom(10, 25);

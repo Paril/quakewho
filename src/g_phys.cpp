@@ -71,7 +71,7 @@ SV_CheckVelocity
 */
 void SV_CheckVelocity (edict_t *ent)
 {
-	int		i;
+	int32_t		i;
 
 //
 // bound velocity
@@ -94,7 +94,7 @@ Runs thinking code for this frame if necessary
 */
 bool SV_RunThink (edict_t *ent)
 {
-	float	thinktime;
+	vec_t	thinktime;
 
 	thinktime = ent->nextthink;
 	if (thinktime <= 0)
@@ -140,13 +140,13 @@ Slide off of the impacting object
 returns the blocked flags (1 = floor, 2 = step / wall)
 ==================
 */
-const float STOP_EPSILON	= 0.1;
+const vec_t STOP_EPSILON	= 0.1;
 
-int ClipVelocity (vec3_t in, vec3_t normal, vec3_t out, float overbounce)
+int32_t ClipVelocity (vec3_t in, vec3_t normal, vec3_t out, vec_t overbounce)
 {
-	float	backoff;
-	float	change;
-	int		i, blocked;
+	vec_t	backoff;
+	vec_t	change;
+	int32_t		i, blocked;
 	
 	blocked = 0;
 	if (normal[2] > 0)
@@ -180,20 +180,20 @@ Returns the clipflags if the velocity was modified (hit something solid)
 ============
 */
 const size_t MAX_CLIP_PLANES	= 5;
-int SV_FlyMove (edict_t *ent, float time, brushcontents_t mask)
+int32_t SV_FlyMove (edict_t *ent, vec_t time, brushcontents_t mask)
 {
 	edict_t		*hit;
-	int			bumpcount, numbumps;
+	int32_t			bumpcount, numbumps;
 	vec3_t		dir;
-	float		d;
-	int			numplanes;
+	vec_t		d;
+	int32_t			numplanes;
 	vec3_t		planes[MAX_CLIP_PLANES];
 	vec3_t		primal_velocity, original_velocity, new_velocity;
-	int			i, j;
+	int32_t			i, j;
 	trace_t		trace;
 	vec3_t		end;
-	float		time_left;
-	int			blocked;
+	vec_t		time_left;
+	int32_t			blocked;
 	
 	numbumps = 4;
 	
@@ -386,7 +386,7 @@ struct pushed_t
 	edict_t	*ent;
 	vec3_t	origin;
 	vec3_t	angles;
-	float	deltayaw;
+	vec_t	deltayaw;
 };
 
 pushed_t	pushed[MAX_EDICTS], *pushed_p;
@@ -403,7 +403,7 @@ otherwise riders would continue to slide.
 */
 bool SV_Push (edict_t *pusher, vec3_t move, vec3_t amove)
 {
-	int			i, e;
+	int32_t			i, e;
 	edict_t		*check, *block;
 	vec3_t		mins, maxs;
 	pushed_t	*p;
@@ -413,13 +413,13 @@ bool SV_Push (edict_t *pusher, vec3_t move, vec3_t amove)
 	// be accurate for client side prediction
 	for (i=0 ; i<3 ; i++)
 	{
-		float	temp;
+		vec_t	temp;
 		temp = move[i]*8.0;
 		if (temp > 0.0)
 			temp += 0.5;
 		else
 			temp -= 0.5;
-		move[i] = 0.125 * (int)temp;
+		move[i] = 0.125 * (int32_t)temp;
 	}
 
 	// find the bounding box
@@ -672,7 +672,7 @@ void SV_Physics_Toss (edict_t *ent)
 {
 	trace_t		trace;
 	vec3_t		move;
-	float		backoff;
+	vec_t		backoff;
 	edict_t		*slave;
 	bool		wasinwater;
 	bool		isinwater;
@@ -785,14 +785,14 @@ FIXME: is this true?
 */
 
 //FIXME: hacked in for E3 demo
-const float sv_stopspeed		= 100;
-const float sv_friction			= 6;
-const float sv_waterfriction	= 1;
+const vec_t sv_stopspeed		= 100;
+const vec_t sv_friction			= 6;
+const vec_t sv_waterfriction	= 1;
 
 void SV_AddRotationalFriction (edict_t *ent)
 {
-	int		n;
-	float	adjustment;
+	int32_t		n;
+	vec_t	adjustment;
 
 	VectorMA (ent->s.angles, FRAMETIME, ent->avelocity, ent->s.angles);
 	adjustment = FRAMETIME * sv_stopspeed * sv_friction;
@@ -817,9 +817,9 @@ void SV_Physics_Step (edict_t *ent)
 {
 	bool		wasonground;
 	bool		hitsound = false;
-	float		*vel;
-	float		speed, newspeed, control;
-	float		friction;
+	vec_t		*vel;
+	vec_t		speed, newspeed, control;
+	vec_t		friction;
 	edict_t		*groundentity;
 	brushcontents_t mask;
 
@@ -935,7 +935,7 @@ void G_RunEntity (edict_t *ent)
 	if (ent->prethink)
 		ent->prethink (ent);
 
-	switch ( (int)ent->movetype)
+	switch ( (int32_t)ent->movetype)
 	{
 	case MOVETYPE_PUSH:
 	case MOVETYPE_STOP:
@@ -957,6 +957,6 @@ void G_RunEntity (edict_t *ent)
 		SV_Physics_Toss (ent);
 		break;
 	default:
-		gi.error ("SV_Physics: bad movetype %i", (int)ent->movetype);			
+		gi.error ("SV_Physics: bad movetype %i", (int32_t)ent->movetype);			
 	}
 }

@@ -54,7 +54,7 @@ static void SP_FixCoopSpots (edict_t *self)
 		VectorSubtract(self->s.origin, spot->s.origin, d);
 		if (VectorLength(d) < 384)
 		{
-			if ((!self->targetname) || Q_stricmp(self->targetname, spot->targetname) != 0)
+			if ((!self->targetname) || stricmp(self->targetname, spot->targetname) != 0)
 			{
 //				gi.dprintf("FixCoopSpots changed %s at %s targetname from %s to %s\n", self->classname, vtos(self->s.origin), self->targetname, spot->targetname);
 				self->targetname = spot->targetname;
@@ -72,7 +72,7 @@ static void SP_CreateCoopSpots (edict_t *self)
 {
 	edict_t	*spot;
 
-	if(Q_stricmp(level.mapname, "security") == 0)
+	if(stricmp(level.mapname, "security") == 0)
 	{
 		spot = G_Spawn();
 		spot->classname = "info_player_coop";
@@ -110,7 +110,7 @@ void SP_info_player_start(edict_t *self)
 {
 	if (!coop->value)
 		return;
-	if(Q_stricmp(level.mapname, "security") == 0)
+	if(stricmp(level.mapname, "security") == 0)
 	{
 		// invoke one of our gross, ugly, disgusting hacks
 		self->think = SP_CreateCoopSpots;
@@ -143,20 +143,20 @@ void SP_info_player_coop(edict_t *self)
 		return;
 	}
 
-	if((Q_stricmp(level.mapname, "jail2") == 0)   ||
-	   (Q_stricmp(level.mapname, "jail4") == 0)   ||
-	   (Q_stricmp(level.mapname, "mine1") == 0)   ||
-	   (Q_stricmp(level.mapname, "mine2") == 0)   ||
-	   (Q_stricmp(level.mapname, "mine3") == 0)   ||
-	   (Q_stricmp(level.mapname, "mine4") == 0)   ||
-	   (Q_stricmp(level.mapname, "lab") == 0)     ||
-	   (Q_stricmp(level.mapname, "boss1") == 0)   ||
-	   (Q_stricmp(level.mapname, "fact3") == 0)   ||
-	   (Q_stricmp(level.mapname, "biggun") == 0)  ||
-	   (Q_stricmp(level.mapname, "space") == 0)   ||
-	   (Q_stricmp(level.mapname, "command") == 0) ||
-	   (Q_stricmp(level.mapname, "power2") == 0) ||
-	   (Q_stricmp(level.mapname, "strike") == 0))
+	if((stricmp(level.mapname, "jail2") == 0)   ||
+	   (stricmp(level.mapname, "jail4") == 0)   ||
+	   (stricmp(level.mapname, "mine1") == 0)   ||
+	   (stricmp(level.mapname, "mine2") == 0)   ||
+	   (stricmp(level.mapname, "mine3") == 0)   ||
+	   (stricmp(level.mapname, "mine4") == 0)   ||
+	   (stricmp(level.mapname, "lab") == 0)     ||
+	   (stricmp(level.mapname, "boss1") == 0)   ||
+	   (stricmp(level.mapname, "fact3") == 0)   ||
+	   (stricmp(level.mapname, "biggun") == 0)  ||
+	   (stricmp(level.mapname, "space") == 0)   ||
+	   (stricmp(level.mapname, "command") == 0) ||
+	   (stricmp(level.mapname, "power2") == 0) ||
+	   (stricmp(level.mapname, "strike") == 0))
 	{
 		// invoke one of our gross, ugly, disgusting hacks
 		self->think = SP_FixCoopSpots;
@@ -177,7 +177,7 @@ void SP_info_player_intermission(edict_t *ent)
 //=======================================================================
 
 
-void player_pain (edict_t *self, edict_t *other, float kick, int damage)
+void player_pain (edict_t *self, edict_t *other, vec_t kick, int32_t damage)
 {
 	// player pain is handled at the end of the frame in P_DamageFeedback
 }
@@ -417,7 +417,7 @@ void TossClientWeapon (edict_t *self)
 	gitem_t		*item;
 	edict_t		*drop;
 	bool		quad;
-	float		spread;
+	vec_t		spread;
 
 	if (!deathmatch->value)
 		return;
@@ -503,9 +503,9 @@ void LookAtKiller (edict_t *self, edict_t *inflictor, edict_t *attacker)
 player_die
 ==================
 */
-void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
+void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int32_t damage, vec3_t point)
 {
-	int		n;
+	int32_t		n;
 
 	VectorClear (self->avelocity);
 
@@ -565,7 +565,7 @@ void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 	{	// normal death
 		if (!self->deadflag)
 		{
-			static int i;
+			static int32_t i;
 
 			i = (i+1)%3;
 			// start a death animation
@@ -654,7 +654,7 @@ edicts are wiped.
 */
 void SaveClientData (void)
 {
-	int		i;
+	int32_t		i;
 	edict_t	*ent;
 
 	for (i=0 ; i<game.maxclients ; i++)
@@ -696,13 +696,13 @@ PlayersRangeFromSpot
 Returns the distance to the nearest player from the given spot
 ================
 */
-float	PlayersRangeFromSpot (edict_t *spot)
+vec_t	PlayersRangeFromSpot (edict_t *spot)
 {
 	edict_t	*player;
-	float	bestplayerdistance;
+	vec_t	bestplayerdistance;
 	vec3_t	v;
-	int		n;
-	float	playerdistance;
+	int32_t		n;
+	vec_t	playerdistance;
 
 
 	bestplayerdistance = 9999999;
@@ -738,9 +738,9 @@ to other players
 edict_t *SelectRandomDeathmatchSpawnPoint (void)
 {
 	edict_t	*spot, *spot1, *spot2;
-	int		count = 0;
-	int		selection;
-	float	range, range1, range2;
+	int32_t		count = 0;
+	int32_t		selection;
+	vec_t	range, range1, range2;
 
 	spot = nullptr;
 	range1 = range2 = 99999;
@@ -794,7 +794,7 @@ SelectFarthestDeathmatchSpawnPoint
 edict_t *SelectFarthestDeathmatchSpawnPoint (void)
 {
 	edict_t	*bestspot;
-	float	bestdistance, bestplayerdistance;
+	vec_t	bestdistance, bestplayerdistance;
 	edict_t	*spot;
 
 
@@ -835,7 +835,7 @@ edict_t *SelectDeathmatchSpawnPoint (void)
 
 edict_t *SelectCoopSpawnPoint (edict_t *ent)
 {
-	int		index;
+	int32_t		index;
 	edict_t	*spot = nullptr;
 	char	*target;
 
@@ -857,7 +857,7 @@ edict_t *SelectCoopSpawnPoint (edict_t *ent)
 		target = spot->targetname;
 		if (!target)
 			target = "";
-		if ( Q_stricmp(game.spawnpoint, target) == 0 )
+		if ( stricmp(game.spawnpoint, target) == 0 )
 		{	// this is a coop spawn point for one of the clients here
 			index--;
 			if (!index)
@@ -897,7 +897,7 @@ void	SelectSpawnPoint (edict_t *ent, vec3_t origin, vec3_t angles)
 			if (!game.spawnpoint[0] || !spot->targetname)
 				continue;
 
-			if (Q_stricmp(game.spawnpoint, spot->targetname) == 0)
+			if (stricmp(game.spawnpoint, spot->targetname) == 0)
 				break;
 		}
 
@@ -922,7 +922,7 @@ void	SelectSpawnPoint (edict_t *ent, vec3_t origin, vec3_t angles)
 
 void InitBodyQue (void)
 {
-	int		i;
+	int32_t		i;
 	edict_t	*ent;
 
 	level.body_que = 0;
@@ -933,9 +933,9 @@ void InitBodyQue (void)
 	}
 }
 
-void body_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
+void body_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int32_t damage, vec3_t point)
 {
-	int	n;
+	int32_t	n;
 
 	if (self->health < -40)
 	{
@@ -953,7 +953,7 @@ void CopyToBodyQue (edict_t *ent)
 	edict_t		*body;
 
 	// grab a body que and cycle to the next one
-	body = &g_edicts[(int)maxclients->value + level.body_que + 1];
+	body = &g_edicts[(int32_t)maxclients->value + level.body_que + 1];
 	level.body_que = (level.body_que + 1) % BODY_QUEUE_SIZE;
 
 	// FIXME: send an effect on the removed body
@@ -1014,7 +1014,7 @@ void respawn (edict_t *self)
  */
 void spectator_respawn (edict_t *ent)
 {
-	int i, numspec;
+	int32_t i, numspec;
 
 	// if the user wants to become a spectator, make sure he doesn't
 	// exceed max_spectators
@@ -1103,10 +1103,10 @@ void PutClientInServer (edict_t *ent)
 {
 	vec3_t	mins = {-16, -16, -24};
 	vec3_t	maxs = {16, 16, 32};
-	int		index;
+	int32_t		index;
 	vec3_t	spawn_origin, spawn_angles;
 	gclient_t	*client;
-	int		i;
+	int32_t		i;
 	client_persistant_t	saved;
 	client_respawn_t	resp;
 
@@ -1130,7 +1130,7 @@ void PutClientInServer (edict_t *ent)
 	}
 	else if (coop->value)
 	{
-//		int			n;
+//		int32_t			n;
 		char		userinfo[MAX_INFO_STRING];
 
 		resp = client->resp;
@@ -1309,7 +1309,7 @@ to be placed into the game.  This will happen every level load.
 */
 void ClientBegin (edict_t *ent)
 {
-	int		i;
+	int32_t		i;
 
 	ent->client = game.clients + (ent - g_edicts - 1);
 
@@ -1376,7 +1376,7 @@ The game can override any of the settings in place
 void ClientUserinfoChanged (edict_t *ent, char *userinfo)
 {
 	char	*s;
-	int		playernum;
+	int32_t		playernum;
 
 	// check for malformed or illegal info strings
 	if (!Info_Validate(userinfo))
@@ -1456,7 +1456,7 @@ qboolean ClientConnect (edict_t *ent, char *userinfo)
 	// check for a spectator
 	value = Info_ValueForKey (userinfo, "spectator");
 	if (deathmatch->value && *value && strcmp(value, "0")) {
-		int i, numspec;
+		int32_t i, numspec;
 
 		if (*spectator_password->string && 
 			strcmp(spectator_password->string, "none") && 
@@ -1518,7 +1518,7 @@ Will not be called between levels.
 */
 void ClientDisconnect (edict_t *ent)
 {
-	int		playernum;
+	int32_t		playernum;
 
 	if (!ent->client)
 		return;
@@ -1557,23 +1557,6 @@ trace_t	PM_trace (vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end)
 		return gi.trace (start, mins, maxs, end, pm_passent, MASK_DEADSOLID);
 }
 
-unsigned CheckBlock (void *b, int c)
-{
-	int	v,i;
-	v = 0;
-	for (i=0 ; i<c ; i++)
-		v+= ((byte *)b)[i];
-	return (unsigned) v;
-}
-void PrintPmove (pmove_t *pm)
-{
-	unsigned	c1, c2;
-
-	c1 = CheckBlock (&pm->s, sizeof(pm->s));
-	c2 = CheckBlock (&pm->cmd, sizeof(pm->cmd));
-	Com_Printf ("sv %3i:%i %i\n", pm->cmd.impulse, c1, c2);
-}
-
 /*
 ==============
 ClientThink
@@ -1586,7 +1569,7 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 {
 	gclient_t	*client;
 	edict_t	*other;
-	int		i, j;
+	int32_t		i, j;
 	pmove_t	pm;
 
 	level.current_entity = ent;
@@ -1770,7 +1753,7 @@ any other entities in the world.
 void ClientBeginServerFrame (edict_t *ent)
 {
 	gclient_t	*client;
-	int			buttonMask;
+	int32_t			buttonMask;
 
 	if (level.intermissiontime)
 		return;

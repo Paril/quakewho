@@ -27,11 +27,11 @@ static	edict_t		*current_player;
 static	gclient_t	*current_client;
 
 static	vec3_t	forward, right, up;
-float	xyspeed;
+vec_t	xyspeed;
 
-float	bobmove;
-int		bobcycle;		// odd cycles are right foot going forward
-float	bobfracsin;		// sin(bobfrac*M_PI)
+vec_t	bobmove;
+int32_t		bobcycle;		// odd cycles are right foot going forward
+vec_t	bobfracsin;		// sin(bobfrac*M_PI)
 
 /*
 ===============
@@ -39,11 +39,11 @@ SV_CalcRoll
 
 ===============
 */
-float SV_CalcRoll (vec3_t angles, vec3_t velocity)
+vec_t SV_CalcRoll (vec3_t angles, vec3_t velocity)
 {
-	float	sign;
-	float	side;
-	float	value;
+	vec_t	sign;
+	vec_t	side;
+	vec_t	value;
 	
 	side = DotProduct (velocity, right);
 	sign = side < 0 ? -1 : 1;
@@ -71,10 +71,10 @@ Handles color blends and view kicks
 void P_DamageFeedback (edict_t *player)
 {
 	gclient_t	*client;
-	float	side;
-	float	realcount, count, kick;
+	vec_t	side;
+	vec_t	realcount, count, kick;
 	vec3_t	v;
-	int		r, l;
+	int32_t		r, l;
 	static	vec3_t	power_color = {0.0, 1.0, 0.0};
 	static	vec3_t	acolor = {1.0, 1.0, 1.0};
 	static	vec3_t	bcolor = {1.0, 0.0, 0.0};
@@ -96,7 +96,7 @@ void P_DamageFeedback (edict_t *player)
 	// start a pain animation if still in the player model
 	if (client->anim_priority < ANIM_PAIN && player->s.modelindex == 255)
 	{
-		static int		i;
+		static int32_t		i;
 
 		client->anim_priority = ANIM_PAIN;
 		if (client->ps.pmove.pm_flags & PMF_DUCKED)
@@ -158,11 +158,11 @@ void P_DamageFeedback (edict_t *player)
 	// by different armors
 	VectorClear (v);
 	if (client->damage_parmor)
-		VectorMA (v, (float)client->damage_parmor/realcount, power_color, v);
+		VectorMA (v, (vec_t)client->damage_parmor/realcount, power_color, v);
 	if (client->damage_armor)
-		VectorMA (v, (float)client->damage_armor/realcount,  acolor, v);
+		VectorMA (v, (vec_t)client->damage_armor/realcount,  acolor, v);
 	if (client->damage_blood)
-		VectorMA (v, (float)client->damage_blood/realcount,  bcolor, v);
+		VectorMA (v, (vec_t)client->damage_blood/realcount,  bcolor, v);
 	VectorCopy (v, client->damage_blend);
 
 
@@ -221,10 +221,10 @@ Auto pitching on slopes?
 */
 void SV_CalcViewOffset (edict_t *ent)
 {
-	float		*angles;
-	float		bob;
-	float		ratio;
-	float		delta;
+	vec_t		*angles;
+	vec_t		bob;
+	vec_t		ratio;
+	vec_t		delta;
 	vec3_t		v;
 
 
@@ -344,8 +344,8 @@ SV_CalcGunOffset
 */
 void SV_CalcGunOffset (edict_t *ent)
 {
-	int		i;
-	float	delta;
+	int32_t		i;
+	vec_t	delta;
 
 	// gun angles from bobbing
 	ent->client->ps.gunangles[ROLL] = xyspeed * bobfracsin * 0.005;
@@ -394,9 +394,9 @@ void SV_CalcGunOffset (edict_t *ent)
 SV_AddBlend
 =============
 */
-void SV_AddBlend (float r, float g, float b, float a, float *v_blend)
+void SV_AddBlend (vec_t r, vec_t g, vec_t b, vec_t a, vec_t *v_blend)
 {
-	float	a2, a3;
+	vec_t	a2, a3;
 
 	if (a <= 0)
 		return;
@@ -419,7 +419,7 @@ void SV_CalcBlend (edict_t *ent)
 {
 	brushcontents_t contents;
 	vec3_t	vieworg;
-	int		remaining;
+	int32_t		remaining;
 
 	ent->client->ps.blend[0] = ent->client->ps.blend[1] = 
 		ent->client->ps.blend[2] = ent->client->ps.blend[3] = 0;
@@ -500,8 +500,8 @@ P_FallingDamage
 */
 void P_FallingDamage (edict_t *ent)
 {
-	float	delta;
-	int		damage;
+	vec_t	delta;
+	int32_t		damage;
 	vec3_t	dir;
 
 	if (ent->s.modelindex != 255)
@@ -657,7 +657,7 @@ void P_WorldEffects (void)
 		{
 			current_player->air_finished = level.time + 10;
 
-			if (((int)(current_client->breather_framenum - level.framenum) % 25) == 0)
+			if (((int32_t)(current_client->breather_framenum - level.framenum) % 25) == 0)
 			{
 				if (!current_client->breather_sound)
 					gi.sound (current_player, CHAN_AUTO, gi.soundindex("player/u_breath1.wav"), 1, ATTN_NORM, 0);
@@ -744,8 +744,8 @@ G_SetClientEffects
 */
 void G_SetClientEffects (edict_t *ent)
 {
-	int		pa_type;
-	int		remaining;
+	int32_t		pa_type;
+	int32_t		remaining;
 
 	ent->s.effects = EF_NONE;
 	ent->s.renderfx = RF_NONE;
@@ -802,7 +802,7 @@ void G_SetClientEvent (edict_t *ent)
 
 	if ( ent->groundentity && xyspeed > 225)
 	{
-		if ( (int)(current_client->bobtime+bobmove) != bobcycle )
+		if ( (int32_t)(current_client->bobtime+bobmove) != bobcycle )
 			ent->s.event = EV_FOOTSTEP;
 	}
 }
@@ -957,8 +957,8 @@ and right after spawning
 */
 void ClientEndServerFrame (edict_t *ent)
 {
-	float	bobtime;
-	int		i;
+	vec_t	bobtime;
+	int32_t		i;
 
 	current_player = ent;
 	current_client = ent->client;
@@ -1033,7 +1033,7 @@ void ClientEndServerFrame (edict_t *ent)
 	if (current_client->ps.pmove.pm_flags & PMF_DUCKED)
 		bobtime *= 4;
 
-	bobcycle = (int)bobtime;
+	bobcycle = (int32_t)bobtime;
 	bobfracsin = fabs(sin(bobtime*M_PI));
 
 	// detect hitting the floor

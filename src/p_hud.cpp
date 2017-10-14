@@ -71,7 +71,7 @@ void MoveClientToIntermission (edict_t *ent)
 
 void BeginIntermission (edict_t *targ)
 {
-	int		i, n;
+	int32_t		i, n;
 	edict_t	*ent, *client;
 
 	if (level.intermissiontime)
@@ -164,13 +164,13 @@ void DeathmatchScoreboardMessage (edict_t *ent, edict_t *killer)
 {
 	char	entry[1024];
 	char	string[1400];
-	int		stringlength;
-	int		i, j, k;
-	int		sorted[MAX_CLIENTS];
-	int		sortedscores[MAX_CLIENTS];
-	int		score, total;
-	int		picnum;
-	int		x, y;
+	int32_t		stringlength;
+	int32_t		i, j, k;
+	int32_t		sorted[MAX_CLIENTS];
+	int32_t		sortedscores[MAX_CLIENTS];
+	int32_t		score, total;
+	int32_t		picnum;
+	int32_t		x, y;
 	gclient_t	*cl;
 	edict_t		*cl_ent;
 	char	*tag;
@@ -225,7 +225,7 @@ void DeathmatchScoreboardMessage (edict_t *ent, edict_t *killer)
 			tag = nullptr;
 		if (tag)
 		{
-			Com_sprintf (entry, sizeof(entry),
+			snprintf (entry, sizeof(entry),
 				"xv %i yv %i picn %s ",x+32, y, tag);
 			j = strlen(entry);
 			if (stringlength + j > 1024)
@@ -235,7 +235,7 @@ void DeathmatchScoreboardMessage (edict_t *ent, edict_t *killer)
 		}
 
 		// send the layout
-		Com_sprintf (entry, sizeof(entry),
+		snprintf (entry, sizeof(entry),
 			"client %i %i %i %i %i %i ",
 			x, y, sorted[i], cl->resp.score, cl->ping, (level.framenum - cl->resp.enterframe)/600);
 		j = strlen(entry);
@@ -255,7 +255,7 @@ void DeathmatchScoreboardMessage (edict_t *ent, edict_t *killer)
 DeathmatchScoreboard
 
 Draw instead of help message.
-Note that it isn't that hard to overflow the 1400 byte message limit!
+Note that it isn't that hard to overflow the 1400 uint8_t message limit!
 ==================
 */
 void DeathmatchScoreboard (edict_t *ent)
@@ -313,7 +313,7 @@ void HelpComputer (edict_t *ent)
 		sk = "hard+";
 
 	// send the layout
-	Com_sprintf (string, sizeof(string),
+	snprintf (string, sizeof(string),
 		"xv 32 yv 8 picn help "			// background
 		"xv 202 yv 12 string2 \"%s\" "		// skill
 		"xv 0 yv 24 cstring2 \"%s\" "		// level name
@@ -376,8 +376,8 @@ G_SetStats
 void G_SetStats (edict_t *ent)
 {
 	gitem_t		*item;
-	int			index, cells = 0;
-	int			power_armor_type;
+	int32_t			index, cells = 0;
+	int32_t			power_armor_type;
 
 	//
 	// health
@@ -528,7 +528,7 @@ G_CheckChaseStats
 */
 void G_CheckChaseStats (edict_t *ent)
 {
-	int i;
+	int32_t i;
 	gclient_t *cl;
 
 	for (i = 1; i <= maxclients->value; i++) {

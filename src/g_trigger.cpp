@@ -213,7 +213,7 @@ Use "item" to specify the required key, for example "key_data_cd"
 */
 void trigger_key_use (edict_t *self, edict_t *other, edict_t *activator)
 {
-	int			index;
+	int32_t			index;
 
 	if (!self->item)
 		return;
@@ -234,12 +234,12 @@ void trigger_key_use (edict_t *self, edict_t *other, edict_t *activator)
 	gi.sound (activator, CHAN_AUTO, gi.soundindex ("misc/keyuse.wav"), 1, ATTN_NORM, 0);
 	if (coop->value)
 	{
-		int		player;
+		int32_t		player;
 		edict_t	*ent;
 
 		if (strcmp(self->item->classname, "key_power_cube") == 0)
 		{
-			int	cube;
+			int32_t	cube;
 
 			for (cube = 0; cube < 8; cube++)
 				if (activator->client->pers.power_cubes & (1 << cube))
@@ -389,7 +389,7 @@ trigger_push
 ==============================================================================
 */
 
-const int PUSH_ONCE		= bit(0);
+const int32_t PUSH_ONCE		= bit(0);
 
 static soundindex_t windsound;
 

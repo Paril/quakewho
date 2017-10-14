@@ -272,7 +272,7 @@ mframe_t parasite_frames_pain1 [] =
 };
 mmove_t parasite_move_pain1 = {FRAME_pain101, FRAME_pain111, parasite_frames_pain1, parasite_start_run};
 
-void parasite_pain (edict_t *self, edict_t *other, float kick, int damage)
+void parasite_pain (edict_t *self, edict_t *other, vec_t kick, int32_t damage)
 {
 	if (self->health < (self->max_health / 2))
 		self->s.skinnum = 1;
@@ -317,7 +317,7 @@ void parasite_drain_attack (edict_t *self)
 {
 	vec3_t	offset, start, f, r, end, dir;
 	trace_t	tr;
-	int damage;
+	int32_t damage;
 
 	AngleVectors (self->s.angles, f, r, nullptr);
 	VectorSet (offset, 24, 0, 6);
@@ -468,9 +468,9 @@ mframe_t parasite_frames_death [] =
 };
 mmove_t parasite_move_death = {FRAME_death101, FRAME_death107, parasite_frames_death, parasite_dead};
 
-void parasite_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
+void parasite_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int32_t damage, vec3_t point)
 {
-	int		n;
+	int32_t		n;
 
 // check for gib
 	if (self->health <= self->gib_health)

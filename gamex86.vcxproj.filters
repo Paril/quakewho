@@ -90,9 +90,6 @@
     <ClCompile Include="src\m_chick.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="src\m_flash.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
     <ClCompile Include="src\m_flipper.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -246,6 +243,9 @@
       <Filter>inc</Filter>
     </ClInclude>
     <ClInclude Include="src\q_bitflags.h">
+      <Filter>inc</Filter>
+    </ClInclude>
+    <ClInclude Include="src\m_flash.h">
       <Filter>inc</Filter>
     </ClInclude>
   </ItemGroup>

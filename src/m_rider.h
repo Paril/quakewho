@@ -66,4 +66,4 @@ enum
 	FRAME_stand260
 };
 
-const float MODEL_SCALE		= 1.000000;
+const vec_t MODEL_SCALE		= 1.000000;

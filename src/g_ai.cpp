@@ -23,12 +23,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 extern cvar_t	*maxclients;
 
-bool ai_checkattack (edict_t *self, float dist);
+bool ai_checkattack (edict_t *self, vec_t dist);
 
 bool		enemy_vis;
 bool		enemy_infront;
 range_t		enemy_range;
-float		enemy_yaw;
+vec_t		enemy_yaw;
 
 //============================================================================
 
@@ -49,7 +49,7 @@ In coop games, sight_client will cycle between the clients.
 void AI_SetSightClient (void)
 {
 	edict_t	*ent;
-	int		start, check;
+	int32_t		start, check;
 
 	if (level.sight_client == nullptr)
 		start = 1;
@@ -88,7 +88,7 @@ Move the specified distance at current facing.
 This replaces the QC functions: ai_forward, ai_back, ai_pain, and ai_painforward
 ==============
 */
-void ai_move (edict_t *self, float dist)
+void ai_move (edict_t *self, vec_t dist)
 {
 	M_walkmove (self, self->s.angles[YAW], dist);
 }
@@ -102,7 +102,7 @@ Used for standing around and looking for players
 Distance is for slight position adjustments needed by the animations
 ==============
 */
-void ai_stand (edict_t *self, float dist)
+void ai_stand (edict_t *self, vec_t dist)
 {
 	vec3_t	v;
 
@@ -159,7 +159,7 @@ ai_walk
 The monster is walking it's beat
 =============
 */
-void ai_walk (edict_t *self, float dist)
+void ai_walk (edict_t *self, vec_t dist)
 {
 	M_MoveToGoal (self, dist);
 
@@ -190,7 +190,7 @@ Turns towards target and advances
 Use this call with a distnace of 0 to replace ai_face
 ==============
 */
-void ai_charge (edict_t *self, float dist)
+void ai_charge (edict_t *self, vec_t dist)
 {
 	vec3_t	v;
 
@@ -211,7 +211,7 @@ don't move, but turn towards ideal_yaw
 Distance is for slight position adjustments needed by the animations
 =============
 */
-void ai_turn (edict_t *self, float dist)
+void ai_turn (edict_t *self, vec_t dist)
 {
 	if (dist)
 		M_walkmove (self, self->s.angles[YAW], dist);
@@ -263,7 +263,7 @@ returns the range catagorization of an entity reletive to self
 range_t range (edict_t *self, edict_t *other)
 {
 	vec3_t	v;
-	float	len;
+	vec_t	len;
 
 	VectorSubtract (self->s.origin, other->s.origin, v);
 	len = VectorLength (v);
@@ -311,7 +311,7 @@ returns 1 if the entity is in front (in sight) of self
 bool infront (edict_t *self, edict_t *other)
 {
 	vec3_t	vec;
-	float	dot;
+	vec_t	dot;
 	vec3_t	forward;
 	
 	AngleVectors (self->s.angles, forward, nullptr, nullptr);
@@ -407,7 +407,7 @@ bool FindTarget (edict_t *self)
 {
 	edict_t		*client;
 	bool		heardit;
-	int			r;
+	int32_t			r;
 
 	if (self->monsterinfo.aiflags & AI_GOOD_GUY)
 	{
@@ -592,7 +592,7 @@ FacingIdeal
 */
 bool FacingIdeal(edict_t *self)
 {
-	float	delta;
+	vec_t	delta;
 
 	delta = anglemod(self->s.angles[YAW] - self->ideal_yaw);
 	if (delta > 45 && delta < 315)
@@ -606,7 +606,7 @@ bool FacingIdeal(edict_t *self)
 bool M_CheckAttack (edict_t *self)
 {
 	vec3_t	spot1, spot2;
-	int	chance;
+	int32_t	chance;
 	trace_t	tr;
 
 	if (self->enemy->health > 0)
@@ -739,9 +739,9 @@ ai_run_slide
 Strafe sideways, but stay at aproximately the same range
 =============
 */
-void ai_run_slide(edict_t *self, float distance)
+void ai_run_slide(edict_t *self, vec_t distance)
 {
-	float	ofs;
+	vec_t	ofs;
 	
 	self->ideal_yaw = enemy_yaw;
 	M_ChangeYaw (self);
@@ -767,7 +767,7 @@ Decides if we're going to attack or do something else
 used by ai_run and ai_stand
 =============
 */
-bool ai_checkattack (edict_t *self, float dist)
+bool ai_checkattack (edict_t *self, vec_t dist)
 {
 	vec3_t		temp;
 	bool		hesDeadJim;
@@ -910,17 +910,17 @@ ai_run
 The monster has an enemy it is trying to kill
 =============
 */
-void ai_run (edict_t *self, float dist)
+void ai_run (edict_t *self, vec_t dist)
 {
 	vec3_t		v;
 	edict_t		*tempgoal;
 	edict_t		*save;
 	bool	new_target;
 	edict_t		*marker;
-	float		d1, d2;
+	vec_t		d1, d2;
 	trace_t		tr;
 	vec3_t		v_forward, v_right;
-	float		left, center, right;
+	vec_t		left, center, right;
 	vec3_t		left_target, right_target;
 
 	// if we're going to a combat point, just proceed

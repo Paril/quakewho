@@ -54,15 +54,15 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 =========================================================
 */
 
-const int PLAT_LOW_TRIGGER		= bit(0);
+const int32_t PLAT_LOW_TRIGGER		= bit(0);
 
-const int DOOR_START_OPEN		= bit(0);
-const int DOOR_REVERSE			= bit(1);
-const int DOOR_CRUSHER			= bit(2);
-const int DOOR_NOMONSTER		= bit(3);
-const int DOOR_TOGGLE			= bit(5);
-const int DOOR_X_AXIS			= bit(6);
-const int DOOR_Y_AXIS			= bit(7);
+const int32_t DOOR_START_OPEN		= bit(0);
+const int32_t DOOR_REVERSE			= bit(1);
+const int32_t DOOR_CRUSHER			= bit(2);
+const int32_t DOOR_NOMONSTER		= bit(3);
+const int32_t DOOR_TOGGLE			= bit(5);
+const int32_t DOOR_X_AXIS			= bit(6);
+const int32_t DOOR_Y_AXIS			= bit(7);
 
 
 //
@@ -91,7 +91,7 @@ void Move_Final (edict_t *ent)
 
 void Move_Begin (edict_t *ent)
 {
-	float	frames;
+	vec_t	frames;
 
 	if ((ent->moveinfo.speed * FRAMETIME) >= ent->moveinfo.remaining_distance)
 	{
@@ -170,9 +170,9 @@ void AngleMove_Final (edict_t *ent)
 void AngleMove_Begin (edict_t *ent)
 {
 	vec3_t	destdelta;
-	float	len;
-	float	traveltime;
-	float	frames;
+	vec_t	len;
+	vec_t	traveltime;
+	vec_t	frames;
 
 	// set destdelta to the vector needed to move
 	if (ent->moveinfo.state == STATE_UP)
@@ -226,15 +226,15 @@ The team has completed a frame of movement, so
 change the speed for the next frame
 ==============
 */
-inline float AccelerationDistance(const float &target, const float &rate)
+inline vec_t AccelerationDistance(const vec_t &target, const vec_t &rate)
 {
 	return (target * ((target / rate) + 1) / 2);
 }
 
 void plat_CalcAcceleratedMove(moveinfo_t *moveinfo)
 {
-	float	accel_dist;
-	float	decel_dist;
+	vec_t	accel_dist;
+	vec_t	decel_dist;
 
 	moveinfo->move_speed = moveinfo->speed;
 
@@ -249,7 +249,7 @@ void plat_CalcAcceleratedMove(moveinfo_t *moveinfo)
 
 	if ((moveinfo->remaining_distance - accel_dist - decel_dist) < 0)
 	{
-		float	f;
+		vec_t	f;
 
 		f = (moveinfo->accel + moveinfo->decel) / (moveinfo->accel * moveinfo->decel);
 		moveinfo->move_speed = (-2 + sqrt(4 - 4 * f * (-2 * moveinfo->remaining_distance))) / (2 * f);
@@ -282,9 +282,9 @@ void plat_Accelerate (moveinfo_t *moveinfo)
 	if (moveinfo->current_speed == moveinfo->move_speed)
 		if ((moveinfo->remaining_distance - moveinfo->current_speed) < moveinfo->decel_distance)
 		{
-			float	p1_distance;
-			float	p2_distance;
-			float	distance;
+			vec_t	p1_distance;
+			vec_t	p2_distance;
+			vec_t	distance;
 
 			p1_distance = moveinfo->remaining_distance - moveinfo->decel_distance;
 			p2_distance = moveinfo->move_speed * (1.0 - (p1_distance / moveinfo->move_speed));
@@ -297,11 +297,11 @@ void plat_Accelerate (moveinfo_t *moveinfo)
 	// are we accelerating?
 	if (moveinfo->current_speed < moveinfo->speed)
 	{
-		float	old_speed;
-		float	p1_distance;
-		float	p1_speed;
-		float	p2_distance;
-		float	distance;
+		vec_t	old_speed;
+		vec_t	p1_distance;
+		vec_t	p1_speed;
+		vec_t	p2_distance;
+		vec_t	distance;
 
 		old_speed = moveinfo->current_speed;
 
@@ -751,7 +751,7 @@ void button_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *s
 	button_fire (self);
 }
 
-void button_killed (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
+void button_killed (edict_t *self, edict_t *inflictor, edict_t *attacker, int32_t damage, vec3_t point)
 {
 	self->activator = attacker;
 	self->health = self->max_health;
@@ -762,7 +762,7 @@ void button_killed (edict_t *self, edict_t *inflictor, edict_t *attacker, int da
 void SP_func_button (edict_t *ent)
 {
 	vec3_t	abs_movedir;
-	float	dist;
+	vec_t	dist;
 
 	G_SetMovedir (ent->s.angles, ent->movedir);
 	ent->movetype = MOVETYPE_STOP;
@@ -857,7 +857,7 @@ void door_use_areaportals (edict_t *self, bool open)
 
 	while ((t = G_Find (t, FOFS(targetname), self->target)))
 	{
-		if (Q_stricmp(t->classname, "func_areaportal") == 0)
+		if (stricmp(t->classname, "func_areaportal") == 0)
 		{
 			gi.SetAreaPortalState (t->style, open);
 		}
@@ -997,11 +997,11 @@ void Touch_DoorTrigger (edict_t *self, edict_t *other, cplane_t *plane, csurface
 void Think_CalcMoveSpeed (edict_t *self)
 {
 	edict_t	*ent;
-	float	min;
-	float	time;
-	float	newspeed;
-	float	ratio;
-	float	dist;
+	vec_t	min;
+	vec_t	time;
+	vec_t	newspeed;
+	vec_t	ratio;
+	vec_t	dist;
 
 	if (self->flags & FL_TEAMSLAVE)
 		return;		// only the team master does this
@@ -1109,7 +1109,7 @@ void door_blocked  (edict_t *self, edict_t *other)
 	}
 }
 
-void door_killed (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
+void door_killed (edict_t *self, edict_t *inflictor, edict_t *attacker, int32_t damage, vec3_t point)
 {
 	edict_t	*ent;
 
@@ -1441,9 +1441,9 @@ void SP_func_water (edict_t *self)
 }
 
 
-const int TRAIN_START_ON	= bit(0);
-const int TRAIN_TOGGLE		= bit(1);
-const int TRAIN_BLOCK_STOPS	= bit(2);
+const int32_t TRAIN_START_ON	= bit(0);
+const int32_t TRAIN_TOGGLE		= bit(1);
+const int32_t TRAIN_BLOCK_STOPS	= bit(2);
 
 /*QUAKED func_train (0 .5 .8) ? START_ON TOGGLE BLOCK_STOPS
 Trains are moving platforms that players can ride.
@@ -1870,9 +1870,9 @@ always_shoot	door is shootebale even if targeted
 "wait"		how long to hold in the open position (default 5, -1 means hold)
 */
 
-const int SECRET_ALWAYS_SHOOT	= bit(0);
-const int SECRET_1ST_LEFT		= bit(1);
-const int SECRET_1ST_DOWN		= bit(2);
+const int32_t SECRET_ALWAYS_SHOOT	= bit(0);
+const int32_t SECRET_1ST_LEFT		= bit(1);
+const int32_t SECRET_1ST_DOWN		= bit(2);
 
 void door_secret_move1 (edict_t *self);
 void door_secret_move2 (edict_t *self);
@@ -1956,7 +1956,7 @@ void door_secret_blocked  (edict_t *self, edict_t *other)
 	T_Damage (other, self, self, vec3_origin, other->s.origin, vec3_origin, self->dmg, 1, DAMAGE_NONE, MOD_CRUSH);
 }
 
-void door_secret_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
+void door_secret_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int32_t damage, vec3_t point)
 {
 	self->takedamage = DAMAGE_NO;
 	door_secret_use (self, attacker, attacker);
@@ -1965,9 +1965,9 @@ void door_secret_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int 
 void SP_func_door_secret (edict_t *ent)
 {
 	vec3_t	forward, right, up;
-	float	side;
-	float	width;
-	float	length;
+	vec_t	side;
+	vec_t	width;
+	vec_t	length;
 
 	ent->moveinfo.sound_start = gi.soundindex  ("doors/dr1_strt.wav");
 	ent->moveinfo.sound_middle = gi.soundindex  ("doors/dr1_mid.wav");

@@ -197,7 +197,7 @@ mmove_t gladiator_move_attack_gun = {FRAME_attack1, FRAME_attack9, gladiator_fra
 
 void gladiator_attack(edict_t *self)
 {
-	float	range;
+	vec_t	range;
 	vec3_t	v;
 
 	// a small safe zone
@@ -237,7 +237,7 @@ mframe_t gladiator_frames_pain_air [] =
 };
 mmove_t gladiator_move_pain_air = {FRAME_painup1, FRAME_painup7, gladiator_frames_pain_air, gladiator_run};
 
-void gladiator_pain (edict_t *self, edict_t *other, float kick, int damage)
+void gladiator_pain (edict_t *self, edict_t *other, vec_t kick, int32_t damage)
 {
 
 	if (self->health < (self->max_health / 2))
@@ -305,9 +305,9 @@ mframe_t gladiator_frames_death [] =
 };
 mmove_t gladiator_move_death = {FRAME_death1, FRAME_death22, gladiator_frames_death, gladiator_dead};
 
-void gladiator_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
+void gladiator_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int32_t damage, vec3_t point)
 {
-	int		n;
+	int32_t		n;
 
 // check for gib
 	if (self->health <= self->gib_health)

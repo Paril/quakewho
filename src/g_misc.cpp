@@ -56,7 +56,7 @@ void SP_func_areaportal (edict_t *ent)
 Misc functions
 =================
 */
-void VelocityForDamage (int damage, vec3_t v)
+void VelocityForDamage (int32_t damage, vec3_t v)
 {
 	v[0] = crandom(100);
 	v[1] = crandom(100);
@@ -128,18 +128,18 @@ void gib_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf
 	}
 }
 
-void gib_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
+void gib_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int32_t damage, vec3_t point)
 {
 	G_FreeEdict (self);
 }
 
-void ThrowGib (edict_t *self, char *gibname, int damage, gibtype_t type)
+void ThrowGib (edict_t *self, char *gibname, int32_t damage, gibtype_t type)
 {
 	edict_t *gib;
 	vec3_t	vd;
 	vec3_t	origin;
 	vec3_t	size;
-	float	vscale;
+	vec_t	vscale;
 
 	gib = G_Spawn();
 
@@ -181,10 +181,10 @@ void ThrowGib (edict_t *self, char *gibname, int damage, gibtype_t type)
 	gi.linkentity (gib);
 }
 
-void ThrowHead (edict_t *self, char *gibname, int damage, gibtype_t type)
+void ThrowHead (edict_t *self, char *gibname, int32_t damage, gibtype_t type)
 {
 	vec3_t	vd;
-	float	vscale;
+	vec_t	vscale;
 
 	self->s.skinnum = 0;
 	self->s.frame = 0;
@@ -227,7 +227,7 @@ void ThrowHead (edict_t *self, char *gibname, int damage, gibtype_t type)
 }
 
 
-void ThrowClientHead (edict_t *self, int damage)
+void ThrowClientHead (edict_t *self, int32_t damage)
 {
 	vec3_t	vd;
 	char	*gibname;
@@ -279,12 +279,12 @@ void ThrowClientHead (edict_t *self, int damage)
 debris
 =================
 */
-void debris_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
+void debris_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int32_t damage, vec3_t point)
 {
 	G_FreeEdict (self);
 }
 
-void ThrowDebris (edict_t *self, char *modelname, float speed, vec3_t origin)
+void ThrowDebris (edict_t *self, char *modelname, vec_t speed, vec3_t origin)
 {
 	edict_t	*chunk;
 	vec3_t	v;
@@ -541,7 +541,7 @@ If targeted, will toggle between on and off.
 Default _cone value is 10 (used to set size of light for spotlights)
 */
 
-const int START_OFF	= bit(0);
+const int32_t START_OFF	= bit(0);
 
 static void light_use (edict_t *self, edict_t *other, edict_t *activator)
 {
@@ -743,13 +743,13 @@ mass defaults to 75.  This determines how much debris is emitted when
 it explodes.  You get one large chunk per 100 of mass (up to 8) and
 one small chunk per 25 of mass (up to 16).  So 800 gives the most.
 */
-void func_explosive_explode (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
+void func_explosive_explode (edict_t *self, edict_t *inflictor, edict_t *attacker, int32_t damage, vec3_t point)
 {
 	vec3_t	origin;
 	vec3_t	chunkorigin;
 	vec3_t	size;
-	int		count;
-	int		mass;
+	int32_t		count;
+	int32_t		mass;
 
 	// bmodel origins are (0 0 0), we need to adjust that here
 	VectorScale (self->size, 0.5, size);
@@ -874,13 +874,13 @@ health (80), and dmg (150).
 void barrel_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf)
 
 {
-	float	ratio;
+	vec_t	ratio;
 	vec3_t	v;
 
 	if ((!other->groundentity) || (other->groundentity == self))
 		return;
 
-	ratio = (float)other->mass / (float)self->mass;
+	ratio = (vec_t)other->mass / (vec_t)self->mass;
 	VectorSubtract (self->s.origin, other->s.origin, v);
 	M_walkmove (self, vectoyaw(v), 20 * ratio * FRAMETIME);
 }
@@ -888,7 +888,7 @@ void barrel_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *s
 void barrel_explode (edict_t *self)
 {
 	vec3_t	org;
-	float	spd;
+	vec_t	spd;
 	vec3_t	save;
 
 	T_RadiusDamage (self, self->activator, self->dmg, nullptr, self->dmg+40, MOD_BARREL);
@@ -897,7 +897,7 @@ void barrel_explode (edict_t *self)
 	VectorMA (self->absmin, 0.5, self->size, self->s.origin);
 
 	// a few big chunks
-	spd = 1.5 * (float)self->dmg / 200.0;
+	spd = 1.5 * (vec_t)self->dmg / 200.0;
 	org[0] = self->s.origin[0] + crandom() * self->size[0];
 	org[1] = self->s.origin[1] + crandom() * self->size[1];
 	org[2] = self->s.origin[2] + crandom() * self->size[2];
@@ -908,7 +908,7 @@ void barrel_explode (edict_t *self)
 	ThrowDebris (self, "models/objects/debris1/tris.md2", spd, org);
 
 	// bottom corners
-	spd = 1.75 * (float)self->dmg / 200.0;
+	spd = 1.75 * (vec_t)self->dmg / 200.0;
 	VectorCopy (self->absmin, org);
 	ThrowDebris (self, "models/objects/debris3/tris.md2", spd, org);
 	VectorCopy (self->absmin, org);
@@ -964,7 +964,7 @@ void barrel_explode (edict_t *self)
 		BecomeExplosion1 (self);
 }
 
-void barrel_delay (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
+void barrel_delay (edict_t *self, edict_t *inflictor, edict_t *attacker, int32_t damage, vec3_t point)
 {
 	self->takedamage = DAMAGE_NO;
 	self->nextthink = level.time + 2 * FRAMETIME;
@@ -1215,9 +1215,9 @@ void SP_misc_banner (edict_t *ent)
 /*QUAKED misc_deadsoldier (1 .5 0) (-16 -16 0) (16 16 16) ON_BACK ON_STOMACH BACK_DECAP FETAL_POS SIT_DECAP IMPALED
 This is the dead player model. Comes in 6 exciting different poses!
 */
-void misc_deadsoldier_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
+void misc_deadsoldier_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int32_t damage, vec3_t point)
 {
-	int		n;
+	int32_t		n;
 
 	if (self->health > -80)
 		return;
@@ -1340,7 +1340,7 @@ void misc_viper_bomb_touch (edict_t *self, edict_t *other, cplane_t *plane, csur
 void misc_viper_bomb_prethink (edict_t *self)
 {
 	vec3_t	v;
-	float	diff;
+	vec_t	diff;
 
 	self->groundentity = nullptr;
 
@@ -1578,7 +1578,7 @@ void SP_target_character (edict_t *self)
 void target_string_use (edict_t *self, edict_t *other, edict_t *activator)
 {
 	edict_t *e;
-	int		n;
+	int32_t		n;
 	char	c;
 
 	size_t l = strlen(self->message);
@@ -1587,7 +1587,7 @@ void target_string_use (edict_t *self, edict_t *other, edict_t *activator)
 		if (!e->count)
 			continue;
 		n = e->count - 1;
-		if (n > (int) l)
+		if (n > (int32_t) l)
 		{
 			e->s.frame = 12;
 			continue;
@@ -1650,13 +1650,13 @@ static void func_clock_format_countdown (edict_t *self)
 {
 	if (self->style == 0)
 	{
-		Com_sprintf (self->message, CLOCK_MESSAGE_SIZE, "%2i", self->health);
+		snprintf (self->message, CLOCK_MESSAGE_SIZE, "%2i", self->health);
 		return;
 	}
 
 	if (self->style == 1)
 	{
-		Com_sprintf(self->message, CLOCK_MESSAGE_SIZE, "%2i:%2i", self->health / 60, self->health % 60);
+		snprintf(self->message, CLOCK_MESSAGE_SIZE, "%2i:%2i", self->health / 60, self->health % 60);
 		if (self->message[3] == ' ')
 			self->message[3] = '0';
 		return;
@@ -1664,7 +1664,7 @@ static void func_clock_format_countdown (edict_t *self)
 
 	if (self->style == 2)
 	{
-		Com_sprintf(self->message, CLOCK_MESSAGE_SIZE, "%2i:%2i:%2i", self->health / 3600, (self->health - (self->health / 3600) * 3600) / 60, self->health % 60);
+		snprintf(self->message, CLOCK_MESSAGE_SIZE, "%2i:%2i:%2i", self->health / 3600, (self->health - (self->health / 3600) * 3600) / 60, self->health % 60);
 		if (self->message[3] == ' ')
 			self->message[3] = '0';
 		if (self->message[6] == ' ')
@@ -1699,7 +1699,7 @@ void func_clock_think (edict_t *self)
 
 		time(&gmtime);
 		ltime = localtime(&gmtime);
-		Com_sprintf (self->message, CLOCK_MESSAGE_SIZE, "%2i:%2i:%2i", ltime->tm_hour, ltime->tm_min, ltime->tm_sec);
+		snprintf (self->message, CLOCK_MESSAGE_SIZE, "%2i:%2i:%2i", ltime->tm_hour, ltime->tm_min, ltime->tm_sec);
 		if (self->message[3] == ' ')
 			self->message[3] = '0';
 		if (self->message[6] == ' ')
@@ -1784,7 +1784,7 @@ void SP_func_clock (edict_t *self)
 void teleporter_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf)
 {
 	edict_t		*dest;
-	int			i;
+	int32_t			i;
 
 	if (!other->client)
 		return;

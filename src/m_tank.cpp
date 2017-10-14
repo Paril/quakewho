@@ -285,7 +285,7 @@ mframe_t tank_frames_pain3 [] =
 mmove_t	tank_move_pain3 = {FRAME_pain301, FRAME_pain316, tank_frames_pain3, tank_run};
 
 
-void tank_pain (edict_t *self, edict_t *other, float kick, int damage)
+void tank_pain (edict_t *self, edict_t *other, vec_t kick, int32_t damage)
 {
 	if (self->health < (self->max_health / 2))
 			self->s.skinnum |= 1;
@@ -334,7 +334,7 @@ void TankBlaster (edict_t *self)
 	vec3_t	start;
 	vec3_t	end;
 	vec3_t	dir;
-	int		flash_number;
+	int32_t		flash_number;
 
 	if (self->s.frame == FRAME_attak110)
 		flash_number = MZ2_TANK_BLASTER_1;
@@ -364,7 +364,7 @@ void TankRocket (edict_t *self)
 	vec3_t	start;
 	vec3_t	dir;
 	vec3_t	vec;
-	int		flash_number;
+	int32_t		flash_number;
 
 	if (self->s.frame == FRAME_attak324)
 		flash_number = MZ2_TANK_ROCKET_1;
@@ -390,7 +390,7 @@ void TankMachineGun (edict_t *self)
 	vec3_t	vec;
 	vec3_t	start;
 	vec3_t	forward, right;
-	int		flash_number;
+	int32_t		flash_number;
 
 	flash_number = MZ2_TANK_MACHINEGUN_1 + (self->s.frame - FRAME_attak406);
 
@@ -655,7 +655,7 @@ void tank_doattack_rocket (edict_t *self)
 void tank_attack(edict_t *self)
 {
 	vec3_t	vec;
-	float	range;
+	vec_t	range;
 
 	if (self->enemy->health < 0)
 	{
@@ -667,7 +667,7 @@ void tank_attack(edict_t *self)
 	VectorSubtract (self->enemy->s.origin, self->s.origin, vec);
 	range = VectorLength (vec);
 
-	float r = random();
+	vec_t r = random();
 
 	if (range <= 125)
 	{
@@ -749,9 +749,9 @@ mframe_t tank_frames_death1 [] =
 };
 mmove_t	tank_move_death = {FRAME_death101, FRAME_death132, tank_frames_death1, tank_dead};
 
-void tank_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
+void tank_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int32_t damage, vec3_t point)
 {
-	int		n;
+	int32_t		n;
 
 // check for gib
 	if (self->health <= self->gib_health)

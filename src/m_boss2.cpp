@@ -50,7 +50,7 @@ void boss2_dead (edict_t *self);
 void boss2_attack (edict_t *self);
 void boss2_attack_mg (edict_t *self);
 void boss2_reattack_mg (edict_t *self);
-void boss2_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point);
+void boss2_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int32_t damage, vec3_t point);
 
 void Boss2Rocket (edict_t *self)
 {
@@ -133,7 +133,7 @@ void Boss2MachineGun (edict_t *self)
 	vec3_t	start;
 	vec3_t	dir;
 	vec3_t	vec;
-	int		flash_number;
+	int32_t		flash_number;
 
 	AngleVectors (self->s.angles, forward, right, nullptr);
 
@@ -432,7 +432,7 @@ void boss2_walk (edict_t *self)
 void boss2_attack (edict_t *self)
 {
 	vec3_t	vec;
-	float	range;
+	vec_t	range;
 
 	VectorSubtract (self->enemy->s.origin, self->s.origin, vec);
 	range = VectorLength (vec);
@@ -467,7 +467,7 @@ void boss2_reattack_mg (edict_t *self)
 }
 
 
-void boss2_pain (edict_t *self, edict_t *other, float kick, int damage)
+void boss2_pain (edict_t *self, edict_t *other, vec_t kick, int32_t damage)
 {
 	if (self->health < (self->max_health / 2))
 		self->s.skinnum = 1;
@@ -504,7 +504,7 @@ void boss2_dead (edict_t *self)
 	gi.linkentity (self);
 }
 
-void boss2_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
+void boss2_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int32_t damage, vec3_t point)
 {
 	gi.sound (self, CHAN_VOICE, sound_death, 1, ATTN_NONE, 0);
 	self->deadflag = DEAD_DEAD;
@@ -512,7 +512,7 @@ void boss2_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage
 	self->count = 0;
 	self->monsterinfo.currentmove = &boss2_move_death;
 #if 0
-	int		n;
+	int32_t		n;
 
 	self->s.sound = 0;
 	// check for gib
@@ -541,11 +541,11 @@ bool Boss2_CheckAttack (edict_t *self)
 {
 	vec3_t	spot1, spot2;
 	vec3_t	temp;
-	int		chance;
+	int32_t		chance;
 	trace_t	tr;
 	bool		enemy_infront;
-	int			enemy_range;
-	float		enemy_yaw;
+	int32_t			enemy_range;
+	vec_t		enemy_yaw;
 
 	if (self->enemy->health > 0)
 	{

@@ -204,29 +204,29 @@ void InitGame (void)
 	// items
 	InitItems ();
 
-	Com_sprintf (game.helpmessage1, sizeof(game.helpmessage1), "");
+	snprintf (game.helpmessage1, sizeof(game.helpmessage1), "");
 
-	Com_sprintf (game.helpmessage2, sizeof(game.helpmessage2), "");
+	snprintf (game.helpmessage2, sizeof(game.helpmessage2), "");
 
 	// initialize all entities for this game
 	game.maxentities = maxentities->value;
-	g_edicts = (edict_t *) gi.TagMalloc ((int) (game.maxentities * sizeof(g_edicts[0])), TAG_GAME);
+	g_edicts = (edict_t *) gi.TagMalloc ((int32_t) (game.maxentities * sizeof(g_edicts[0])), TAG_GAME);
 	globals.edicts = g_edicts;
 	globals.max_edicts = game.maxentities;
 
 	// initialize all clients for this game
 	game.maxclients = maxclients->value;
-	game.clients = (gclient_t *) gi.TagMalloc ((int) (game.maxclients * sizeof(game.clients[0])), TAG_GAME);
+	game.clients = (gclient_t *) gi.TagMalloc ((int32_t) (game.maxclients * sizeof(game.clients[0])), TAG_GAME);
 	globals.num_edicts = game.maxclients+1;
 }
 
 //=========================================================
 
-void WriteField1 (FILE *f, field_t *field, byte *base)
+void WriteField1 (FILE *f, field_t *field, uint8_t *base)
 {
 	void		*p;
 	size_t		len;
-	int			index;
+	int32_t			index;
 
 	if (field->flags & FFL_SPAWNTEMP)
 		return;
@@ -247,46 +247,46 @@ void WriteField1 (FILE *f, field_t *field, byte *base)
 			len = strlen(*(char **)p) + 1;
 		else
 			len = 0;
-		*(int *)p = (int) len;
+		*(int32_t *)p = (int32_t) len;
 		break;
 	case F_EDICT:
 		if ( *(edict_t **)p == nullptr)
 			index = -1;
 		else
 			index = *(edict_t **)p - g_edicts;
-		*(int *)p = index;
+		*(int32_t *)p = index;
 		break;
 	case F_CLIENT:
 		if ( *(gclient_t **)p == nullptr)
 			index = -1;
 		else
 			index = *(gclient_t **)p - game.clients;
-		*(int *)p = index;
+		*(int32_t *)p = index;
 		break;
 	case F_ITEM:
 		if ( *(edict_t **)p == nullptr)
 			index = -1;
 		else
 			index = *(gitem_t **)p - itemlist;
-		*(int *)p = index;
+		*(int32_t *)p = index;
 		break;
 
 	//relative to code segment
 	case F_FUNCTION:
-		if (*(byte **)p == nullptr)
+		if (*(uint8_t **)p == nullptr)
 			index = 0;
 		else
-			index = *(byte **)p - ((byte *)InitGame);
-		*(int *)p = index;
+			index = *(uint8_t **)p - ((uint8_t *)InitGame);
+		*(int32_t *)p = index;
 		break;
 
 	//relative to data segment
 	case F_MMOVE:
-		if (*(byte **)p == nullptr)
+		if (*(uint8_t **)p == nullptr)
 			index = 0;
 		else
-			index = *(byte **)p - (byte *)&mmove_reloc;
-		*(int *)p = index;
+			index = *(uint8_t **)p - (uint8_t *)&mmove_reloc;
+		*(int32_t *)p = index;
 		break;
 
 	default:
@@ -295,7 +295,7 @@ void WriteField1 (FILE *f, field_t *field, byte *base)
 }
 
 
-void WriteField2 (FILE *f, field_t *field, byte *base)
+void WriteField2 (FILE *f, field_t *field, uint8_t *base)
 {
 	size_t		len;
 	void		*p;
@@ -319,11 +319,11 @@ void WriteField2 (FILE *f, field_t *field, byte *base)
 	}
 }
 
-void ReadField (FILE *f, field_t *field, byte *base)
+void ReadField (FILE *f, field_t *field, uint8_t *base)
 {
 	void		*p;
 	size_t		len;
-	int			index;
+	int32_t			index;
 
 	if (field->flags & FFL_SPAWNTEMP)
 		return;
@@ -339,31 +339,31 @@ void ReadField (FILE *f, field_t *field, byte *base)
 		break;
 
 	case F_LSTRING:
-		len = (size_t) *(int *)p;
+		len = (size_t) *(int32_t *)p;
 		if (!len)
 			*(char **)p = nullptr;
 		else
 		{
-			*(char **)p = (char *) gi.TagMalloc ((int) len, TAG_LEVEL);
+			*(char **)p = (char *) gi.TagMalloc ((int32_t) len, TAG_LEVEL);
 			fread (*(char **)p, len, 1, f);
 		}
 		break;
 	case F_EDICT:
-		index = *(int *)p;
+		index = *(int32_t *)p;
 		if ( index == -1 )
 			*(edict_t **)p = nullptr;
 		else
 			*(edict_t **)p = &g_edicts[index];
 		break;
 	case F_CLIENT:
-		index = *(int *)p;
+		index = *(int32_t *)p;
 		if ( index == -1 )
 			*(gclient_t **)p = nullptr;
 		else
 			*(gclient_t **)p = &game.clients[index];
 		break;
 	case F_ITEM:
-		index = *(int *)p;
+		index = *(int32_t *)p;
 		if ( index == -1 )
 			*(gitem_t **)p = nullptr;
 		else
@@ -372,20 +372,20 @@ void ReadField (FILE *f, field_t *field, byte *base)
 
 	//relative to code segment
 	case F_FUNCTION:
-		index = *(int *)p;
+		index = *(int32_t *)p;
 		if ( index == 0 )
-			*(byte **)p = nullptr;
+			*(uint8_t **)p = nullptr;
 		else
-			*(byte **)p = ((byte *)InitGame) + index;
+			*(uint8_t **)p = ((uint8_t *)InitGame) + index;
 		break;
 
 	//relative to data segment
 	case F_MMOVE:
-		index = *(int *)p;
+		index = *(int32_t *)p;
 		if (index == 0)
-			*(byte **)p = nullptr;
+			*(uint8_t **)p = nullptr;
 		else
-			*(byte **)p = (byte *)&mmove_reloc + index;
+			*(uint8_t **)p = (uint8_t *)&mmove_reloc + index;
 		break;
 
 	default:
@@ -413,7 +413,7 @@ void WriteClient (FILE *f, gclient_t *client)
 	// change the pointers to lengths or indexes
 	for (field=clientfields ; field->name ; field++)
 	{
-		WriteField1 (f, field, (byte *)&temp);
+		WriteField1 (f, field, (uint8_t *)&temp);
 	}
 
 	// write the block
@@ -422,7 +422,7 @@ void WriteClient (FILE *f, gclient_t *client)
 	// now write any allocated data following the edict
 	for (field=clientfields ; field->name ; field++)
 	{
-		WriteField2 (f, field, (byte *)client);
+		WriteField2 (f, field, (uint8_t *)client);
 	}
 }
 
@@ -441,7 +441,7 @@ void ReadClient (FILE *f, gclient_t *client)
 
 	for (field=clientfields ; field->name ; field++)
 	{
-		ReadField (f, field, (byte *)client);
+		ReadField (f, field, (uint8_t *)client);
 	}
 }
 
@@ -462,7 +462,7 @@ last save position.
 void WriteGame (char *filename, qboolean autosave)
 {
 	FILE	*f;
-	int		i;
+	int32_t		i;
 	char	str[16];
 
 	if (!autosave)
@@ -489,7 +489,7 @@ void WriteGame (char *filename, qboolean autosave)
 void ReadGame (char *filename)
 {
 	FILE	*f;
-	int		i;
+	int32_t		i;
 	char	str[16];
 
 	gi.FreeTags (TAG_GAME);
@@ -505,11 +505,11 @@ void ReadGame (char *filename)
 		gi.error ("Savegame from an older version.\n");
 	}
 
-	g_edicts = (edict_t *) gi.TagMalloc ((int) (game.maxentities * sizeof(g_edicts[0])), TAG_GAME);
+	g_edicts = (edict_t *) gi.TagMalloc ((int32_t) (game.maxentities * sizeof(g_edicts[0])), TAG_GAME);
 	globals.edicts = g_edicts;
 
 	fread (&game, sizeof(game), 1, f);
-	game.clients = (gclient_t *) gi.TagMalloc ((int) (game.maxclients * sizeof(game.clients[0])), TAG_GAME);
+	game.clients = (gclient_t *) gi.TagMalloc ((int32_t) (game.maxclients * sizeof(game.clients[0])), TAG_GAME);
 	for (i=0 ; i<game.maxclients ; i++)
 		ReadClient (f, &game.clients[i]);
 
@@ -537,7 +537,7 @@ void WriteEdict (FILE *f, edict_t *ent)
 	// change the pointers to lengths or indexes
 	for (field=fields ; field->name ; field++)
 	{
-		WriteField1 (f, field, (byte *)&temp);
+		WriteField1 (f, field, (uint8_t *)&temp);
 	}
 
 	// write the block
@@ -546,7 +546,7 @@ void WriteEdict (FILE *f, edict_t *ent)
 	// now write any allocated data following the edict
 	for (field=fields ; field->name ; field++)
 	{
-		WriteField2 (f, field, (byte *)ent);
+		WriteField2 (f, field, (uint8_t *)ent);
 	}
 
 }
@@ -569,7 +569,7 @@ void WriteLevelLocals (FILE *f)
 	// change the pointers to lengths or indexes
 	for (field=levelfields ; field->name ; field++)
 	{
-		WriteField1 (f, field, (byte *)&temp);
+		WriteField1 (f, field, (uint8_t *)&temp);
 	}
 
 	// write the block
@@ -578,7 +578,7 @@ void WriteLevelLocals (FILE *f)
 	// now write any allocated data following the edict
 	for (field=levelfields ; field->name ; field++)
 	{
-		WriteField2 (f, field, (byte *)&level);
+		WriteField2 (f, field, (uint8_t *)&level);
 	}
 }
 
@@ -598,7 +598,7 @@ void ReadEdict (FILE *f, edict_t *ent)
 
 	for (field=fields ; field->name ; field++)
 	{
-		ReadField (f, field, (byte *)ent);
+		ReadField (f, field, (uint8_t *)ent);
 	}
 }
 
@@ -617,7 +617,7 @@ void ReadLevelLocals (FILE *f)
 
 	for (field=levelfields ; field->name ; field++)
 	{
-		ReadField (f, field, (byte *)&level);
+		ReadField (f, field, (uint8_t *)&level);
 	}
 }
 
@@ -629,7 +629,7 @@ WriteLevel
 */
 void WriteLevel (char *filename)
 {
-	int		i;
+	int32_t		i;
 	edict_t	*ent;
 	FILE	*f;
 	void	*base;
@@ -683,9 +683,9 @@ No clients are connected yet.
 */
 void ReadLevel (char *filename)
 {
-	int		entnum;
+	int32_t		entnum;
 	FILE	*f;
-	int		i;
+	int32_t		i;
 	void	*base;
 	edict_t	*ent;
 
@@ -718,7 +718,7 @@ void ReadLevel (char *filename)
 		gi.error ("ReadLevel: function pointers have moved");
 	}
 #else
-	gi.dprintf("Function offsets %d\n", ((byte *)base) - ((byte *)InitGame));
+	gi.dprintf("Function offsets %d\n", ((uint8_t *)base) - ((uint8_t *)InitGame));
 #endif
 
 	// load the level locals

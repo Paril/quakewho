@@ -279,7 +279,7 @@ void ED_CallSpawn (edict_t *ent)
 {
 	spawn_t	*s;
 	gitem_t	*item;
-	int		i;
+	int32_t		i;
 
 	if (!ent->classname)
 	{
@@ -323,7 +323,7 @@ char *ED_NewString (char *string)
 	
 	l = strlen(string) + 1;
 
-	newb = (char *) gi.TagMalloc ((int) l, TAG_LEVEL);
+	newb = (char *) gi.TagMalloc ((int32_t) l, TAG_LEVEL);
 
 	new_p = newb;
 
@@ -358,18 +358,18 @@ in an edict
 void ED_ParseField (char *key, char *value, edict_t *ent)
 {
 	field_t	*f;
-	byte	*b;
-	float	v;
+	uint8_t	*b;
+	vec_t	v;
 	vec3_t	vec;
 
 	for (f=fields ; f->name ; f++)
 	{
-		if (!(f->flags & FFL_NOSPAWN) && !Q_stricmp(f->name, key))
+		if (!(f->flags & FFL_NOSPAWN) && !stricmp(f->name, key))
 		{	// found it
 			if (f->flags & FFL_SPAWNTEMP)
-				b = (byte *)&st;
+				b = (uint8_t *)&st;
 			else
-				b = (byte *)ent;
+				b = (uint8_t *)ent;
 
 			switch (f->type)
 			{
@@ -378,21 +378,21 @@ void ED_ParseField (char *key, char *value, edict_t *ent)
 				break;
 			case F_VECTOR:
 				sscanf (value, "%f %f %f", &vec[0], &vec[1], &vec[2]);
-				((float *)(b+f->ofs))[0] = vec[0];
-				((float *)(b+f->ofs))[1] = vec[1];
-				((float *)(b+f->ofs))[2] = vec[2];
+				((vec_t *)(b+f->ofs))[0] = vec[0];
+				((vec_t *)(b+f->ofs))[1] = vec[1];
+				((vec_t *)(b+f->ofs))[2] = vec[2];
 				break;
 			case F_INT:
-				*(int *)(b+f->ofs) = atoi(value);
+				*(int32_t *)(b+f->ofs) = atoi(value);
 				break;
 			case F_FLOAT:
-				*(float *)(b+f->ofs) = atof(value);
+				*(vec_t *)(b+f->ofs) = atof(value);
 				break;
 			case F_ANGLEHACK:
 				v = atof(value);
-				((float *)(b+f->ofs))[0] = 0;
-				((float *)(b+f->ofs))[1] = v;
-				((float *)(b+f->ofs))[2] = 0;
+				((vec_t *)(b+f->ofs))[0] = 0;
+				((vec_t *)(b+f->ofs))[1] = v;
+				((vec_t *)(b+f->ofs))[2] = 0;
 				break;
 			default:
 				break;
@@ -470,8 +470,8 @@ All but the last will have the teamchain field set to the next one
 void G_FindTeams (void)
 {
 	edict_t	*e, *e2, *chain;
-	int		i, j;
-	int		c, c2;
+	int32_t		i, j;
+	int32_t		c, c2;
 
 	c = 0;
 	c2 = 0;
@@ -520,10 +520,10 @@ parsing textual entity definitions out of an ent file.
 void SpawnEntities (char *mapname, char *entities, char *spawnpoint)
 {
 	edict_t		*ent;
-	int			inhibit;
+	int32_t			inhibit;
 	char		*com_token;
-	int			i;
-	float		skill_level;
+	int32_t			i;
+	vec_t		skill_level;
 
 	skill_level = floor (skill->value);
 	if (skill_level < 0)
@@ -567,7 +567,7 @@ void SpawnEntities (char *mapname, char *entities, char *spawnpoint)
 		entities = ED_ParseEdict (entities, ent);
 
 		// yet another map hack
-		if (!Q_stricmp(level.mapname, "command") && !Q_stricmp(ent->classname, "trigger_once") && !Q_stricmp(ent->model, "*27"))
+		if (!stricmp(level.mapname, "command") && !stricmp(ent->classname, "trigger_once") && !stricmp(ent->model, "*27"))
 			ent->spawnflags &= ~SPAWNFLAG_NOT_HARD;
 
 		// remove things (except the world) from different skill levels or deathmatch
@@ -833,7 +833,7 @@ void SP_worldspawn (edict_t *ent)
 
 	gi.configstring (CS_CDTRACK, va("%i", ent->sounds) );
 
-	gi.configstring (CS_MAXCLIENTS, va("%i", (int)(maxclients->value) ) );
+	gi.configstring (CS_MAXCLIENTS, va("%i", (int32_t)(maxclients->value) ) );
 
 	// status bar program
 	if (deathmatch->value)

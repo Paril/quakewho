@@ -311,7 +311,7 @@ mframe_t medic_frames_pain2 [] =
 };
 mmove_t medic_move_pain2 = {FRAME_painb1, FRAME_painb15, medic_frames_pain2, medic_run};
 
-void medic_pain (edict_t *self, edict_t *other, float kick, int damage)
+void medic_pain (edict_t *self, edict_t *other, vec_t kick, int32_t damage)
 {
 	if (self->health < (self->max_health / 2))
 		self->s.skinnum = 1;
@@ -407,9 +407,9 @@ mframe_t medic_frames_death [] =
 };
 mmove_t medic_move_death = {FRAME_death1, FRAME_death30, medic_frames_death, medic_dead};
 
-void medic_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
+void medic_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int32_t damage, vec3_t point)
 {
-	int		n;
+	int32_t		n;
 
 	// if we had a pending patient, free him up for another medic
 	if ((self->enemy) && (self->enemy->owner == self))
@@ -488,7 +488,7 @@ mframe_t medic_frames_duck [] =
 };
 mmove_t medic_move_duck = {FRAME_duck1, FRAME_duck16, medic_frames_duck, medic_run};
 
-void medic_dodge (edict_t *self, edict_t *attacker, float eta)
+void medic_dodge (edict_t *self, edict_t *attacker, vec_t eta)
 {
 	if (prandom(75))
 		return;
@@ -575,7 +575,7 @@ void medic_cable_attack (edict_t *self)
 	vec3_t	offset, start, end, f, r;
 	trace_t	tr;
 	vec3_t	dir, angles;
-	float	distance;
+	vec_t	distance;
 
 	if (!self->enemy->inuse)
 		return;

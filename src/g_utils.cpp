@@ -22,7 +22,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "q_shared.h"
 
 
-void G_ProjectSource (vec3_t point, vec3_t distance, vec3_t forward, vec3_t right, vec3_t result)
+void G_ProjectSource (const vec3_t point, const vec3_t distance, const vec3_t forward, const vec3_t right, vec3_t result)
 {
 	result[0] = point[0] + forward[0] * distance[0] + right[0] * distance[1];
 	result[1] = point[1] + forward[1] * distance[0] + right[1] * distance[1];
@@ -42,7 +42,7 @@ nullptr will be returned if the end of the list is reached.
 
 =============
 */
-edict_t *G_Find (edict_t *from, int fieldofs, char *match)
+edict_t *G_Find (edict_t *from, int32_t fieldofs, char *match)
 {
 	char	*s;
 
@@ -55,10 +55,10 @@ edict_t *G_Find (edict_t *from, int fieldofs, char *match)
 	{
 		if (!from->inuse)
 			continue;
-		s = *(char **) ((byte *)from + fieldofs);
+		s = *(char **) ((uint8_t *)from + fieldofs);
 		if (!s)
 			continue;
-		if (!Q_stricmp (s, match))
+		if (!stricmp (s, match))
 			return from;
 	}
 
@@ -75,10 +75,10 @@ Returns entities that have origins within a spherical area
 findradius (origin, radius)
 =================
 */
-edict_t *findradius (edict_t *from, vec3_t org, float rad)
+edict_t *findradius (edict_t *from, vec3_t org, vec_t rad)
 {
 	vec3_t	eorg;
-	int		j;
+	int32_t		j;
 
 	if (!from)
 		from = g_edicts;
@@ -118,7 +118,7 @@ const size_t MAXCHOICES	= 8;
 edict_t *G_PickTarget (char *targetname)
 {
 	edict_t	*ent = nullptr;
-	int		num_choices = 0;
+	int32_t		num_choices = 0;
 	edict_t	*choice[MAXCHOICES];
 
 	if (!targetname)
@@ -232,8 +232,8 @@ void G_UseTargets (edict_t *ent, edict_t *activator)
 		while ((t = G_Find (t, FOFS(targetname), ent->target)))
 		{
 			// doors fire area portals in a specific way
-			if (!Q_stricmp(t->classname, "func_areaportal") &&
-				(!Q_stricmp(ent->classname, "func_door") || !Q_stricmp(ent->classname, "func_door_rotating")))
+			if (!stricmp(t->classname, "func_areaportal") &&
+				(!stricmp(ent->classname, "func_door") || !stricmp(ent->classname, "func_door_rotating")))
 				continue;
 
 			if (t == ent)
@@ -263,11 +263,11 @@ This is just a convenience function
 for making temporary vectors for function calls
 =============
 */
-float	*tv (float x, float y, float z)
+vec_t	*tv (vec_t x, vec_t y, vec_t z)
 {
-	static	int		index;
+	static	int32_t		index;
 	static	vec3_t	vecs[8];
-	float	*v;
+	vec_t	*v;
 
 	// use an array so that multiple tempvectors won't collide
 	// for a while
@@ -292,7 +292,7 @@ for printing vectors
 */
 char	*vtos (vec3_t v)
 {
-	static	int		index;
+	static	int32_t		index;
 	static	char	str[8][32];
 	char	*s;
 
@@ -300,7 +300,7 @@ char	*vtos (vec3_t v)
 	s = str[index];
 	index = (index + 1)&7;
 
-	Com_sprintf (s, 32, "(%i %i %i)", (int)v[0], (int)v[1], (int)v[2]);
+	snprintf (s, 32, "(%i %i %i)", (int32_t)v[0], (int32_t)v[1], (int32_t)v[2]);
 
 	return s;
 }
@@ -330,9 +330,9 @@ void G_SetMovedir (vec3_t angles, vec3_t movedir)
 }
 
 
-float vectoyaw (vec3_t vec)
+vec_t vectoyaw (vec3_t vec)
 {
-	float	yaw;
+	vec_t	yaw;
 	
 	if (/*vec[YAW] == 0 &&*/ vec[PITCH] == 0) 
 	{
@@ -344,7 +344,7 @@ float vectoyaw (vec3_t vec)
 	} 
 	else
 	{
-		yaw = (int) (atan2(vec[YAW], vec[PITCH]) * 180 / M_PI);
+		yaw = (int32_t) (atan2(vec[YAW], vec[PITCH]) * 180 / M_PI);
 		if (yaw < 0)
 			yaw += 360;
 	}
@@ -355,8 +355,8 @@ float vectoyaw (vec3_t vec)
 
 void vectoangles (vec3_t value1, vec3_t angles)
 {
-	float	forward;
-	float	yaw, pitch;
+	vec_t	forward;
+	vec_t	yaw, pitch;
 	
 	if (value1[1] == 0 && value1[0] == 0)
 	{
@@ -369,7 +369,7 @@ void vectoangles (vec3_t value1, vec3_t angles)
 	else
 	{
 		if (value1[0])
-			yaw = (int) (atan2(value1[1], value1[0]) * 180 / M_PI);
+			yaw = (int32_t) (atan2(value1[1], value1[0]) * 180 / M_PI);
 		else if (value1[1] > 0)
 			yaw = 90;
 		else
@@ -378,7 +378,7 @@ void vectoangles (vec3_t value1, vec3_t angles)
 			yaw += 360;
 
 		forward = sqrt (value1[0]*value1[0] + value1[1]*value1[1]);
-		pitch = (int) (atan2(value1[2], forward) * 180 / M_PI);
+		pitch = (int32_t) (atan2(value1[2], forward) * 180 / M_PI);
 		if (pitch < 0)
 			pitch += 360;
 	}
@@ -392,7 +392,7 @@ char *G_CopyString (char *in)
 {
 	char	*out;
 	
-	out = (char *) gi.TagMalloc ((int) (strlen(in)+1), TAG_LEVEL);
+	out = (char *) gi.TagMalloc ((int32_t) (strlen(in)+1), TAG_LEVEL);
 	strcpy (out, in);
 	return out;
 }
@@ -419,10 +419,10 @@ angles and bad trails.
 */
 edict_t *G_Spawn (void)
 {
-	int			i;
+	int32_t			i;
 	edict_t		*e;
 
-	e = &g_edicts[(int)maxclients->value+1];
+	e = &g_edicts[(int32_t)maxclients->value+1];
 	for ( i=maxclients->value+1 ; i<globals.num_edicts ; i++, e++)
 	{
 		// the first couple seconds of server time can involve a lot of
@@ -474,7 +474,7 @@ G_TouchTriggers
 */
 void	G_TouchTriggers (edict_t *ent)
 {
-	int			i, num;
+	int32_t			i, num;
 	edict_t		*touch[MAX_EDICTS], *hit;
 
 	// dead things don't activate triggers!
@@ -507,7 +507,7 @@ to force all entities it covers to immediately touch it
 */
 void	G_TouchSolids (edict_t *ent)
 {
-	int			i, num;
+	int32_t			i, num;
 	edict_t		*touch[MAX_EDICTS], *hit;
 
 	num = gi.BoxEdicts (ent->absmin, ent->absmax, touch

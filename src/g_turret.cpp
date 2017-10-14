@@ -34,14 +34,14 @@ void AnglesNormalize(vec3_t vec)
 		vec[1] += 360;
 }
 
-float SnapToEights(float x)
+vec_t SnapToEights(vec_t x)
 {
 	x *= 8.0;
 	if (x > 0.0)
 		x += 0.5;
 	else
 		x -= 0.5;
-	return 0.125 * (int)x;
+	return 0.125 * (int32_t)x;
 }
 
 
@@ -79,8 +79,8 @@ void turret_breach_fire (edict_t *self)
 {
 	vec3_t	f, r, u;
 	vec3_t	start;
-	int		damage;
-	int		speed;
+	int32_t		damage;
+	int32_t		speed;
 
 	AngleVectors (self->s.angles, f, r, u);
 	VectorMA (self->s.origin, self->move_origin[0], f, start);
@@ -114,7 +114,7 @@ void turret_breach_think (edict_t *self)
 
 	if ((self->move_angles[YAW] < self->pos1[YAW]) || (self->move_angles[YAW] > self->pos2[YAW]))
 	{
-		float	dmin, dmax;
+		vec_t	dmin, dmax;
 
 		dmin = fabs(self->pos1[YAW] - self->move_angles[YAW]);
 		if (dmin < -180)
@@ -162,9 +162,9 @@ void turret_breach_think (edict_t *self)
 	// if we have adriver, adjust his velocities
 	if (self->owner)
 	{
-		float	angle;
-		float	target_z;
-		float	diff;
+		vec_t	angle;
+		vec_t	target_z;
+		vec_t	diff;
 		vec3_t	target;
 		vec3_t	dir;
 
@@ -271,11 +271,11 @@ Must NOT be on the team with the rest of the turret parts.
 Instead it must target the turret_breach.
 */
 
-void infantry_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point);
+void infantry_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int32_t damage, vec3_t point);
 void infantry_stand (edict_t *self);
 void monster_use (edict_t *self, edict_t *other, edict_t *activator);
 
-void turret_driver_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
+void turret_driver_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int32_t damage, vec3_t point)
 {
 	edict_t	*ent;
 
@@ -299,7 +299,7 @@ void turret_driver_think (edict_t *self)
 {
 	vec3_t	target;
 	vec3_t	dir;
-	float	reaction_time;
+	vec_t	reaction_time;
 
 	self->nextthink = level.time + FRAMETIME;
 

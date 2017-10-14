@@ -234,4 +234,4 @@ enum
 	FRAME_duck08
 };
 
-const float MODEL_SCALE		= 1.150000;
+const vec_t MODEL_SCALE		= 1.150000;

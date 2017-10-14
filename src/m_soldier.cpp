@@ -406,9 +406,9 @@ mframe_t soldier_frames_pain4 [] =
 mmove_t soldier_move_pain4 = {FRAME_pain401, FRAME_pain417, soldier_frames_pain4, soldier_run};
 
 
-void soldier_pain (edict_t *self, edict_t *other, float kick, int damage)
+void soldier_pain (edict_t *self, edict_t *other, vec_t kick, int32_t damage)
 {
-	int		n;
+	int32_t		n;
 
 	if (self->health < (self->max_health / 2))
 			self->s.skinnum |= 1;
@@ -439,7 +439,7 @@ void soldier_pain (edict_t *self, edict_t *other, float kick, int damage)
 	if (skill->value == 3)
 		return;		// no pain anims in nightmare
 
-	int r = irandom(2);
+	int32_t r = irandom(2);
 
 	if (r == 0)
 		self->monsterinfo.currentmove = &soldier_move_pain1;
@@ -454,19 +454,19 @@ void soldier_pain (edict_t *self, edict_t *other, float kick, int damage)
 // ATTACK
 //
 
-static int blaster_flash [] = {MZ2_SOLDIER_BLASTER_1, MZ2_SOLDIER_BLASTER_2, MZ2_SOLDIER_BLASTER_3, MZ2_SOLDIER_BLASTER_4, MZ2_SOLDIER_BLASTER_5, MZ2_SOLDIER_BLASTER_6, MZ2_SOLDIER_BLASTER_7, MZ2_SOLDIER_BLASTER_8};
-static int shotgun_flash [] = {MZ2_SOLDIER_SHOTGUN_1, MZ2_SOLDIER_SHOTGUN_2, MZ2_SOLDIER_SHOTGUN_3, MZ2_SOLDIER_SHOTGUN_4, MZ2_SOLDIER_SHOTGUN_5, MZ2_SOLDIER_SHOTGUN_6, MZ2_SOLDIER_SHOTGUN_7, MZ2_SOLDIER_SHOTGUN_8};
-static int machinegun_flash [] = {MZ2_SOLDIER_MACHINEGUN_1, MZ2_SOLDIER_MACHINEGUN_2, MZ2_SOLDIER_MACHINEGUN_3, MZ2_SOLDIER_MACHINEGUN_4, MZ2_SOLDIER_MACHINEGUN_5, MZ2_SOLDIER_MACHINEGUN_6, MZ2_SOLDIER_MACHINEGUN_7, MZ2_SOLDIER_MACHINEGUN_8};
+static int32_t blaster_flash [] = {MZ2_SOLDIER_BLASTER_1, MZ2_SOLDIER_BLASTER_2, MZ2_SOLDIER_BLASTER_3, MZ2_SOLDIER_BLASTER_4, MZ2_SOLDIER_BLASTER_5, MZ2_SOLDIER_BLASTER_6, MZ2_SOLDIER_BLASTER_7, MZ2_SOLDIER_BLASTER_8};
+static int32_t shotgun_flash [] = {MZ2_SOLDIER_SHOTGUN_1, MZ2_SOLDIER_SHOTGUN_2, MZ2_SOLDIER_SHOTGUN_3, MZ2_SOLDIER_SHOTGUN_4, MZ2_SOLDIER_SHOTGUN_5, MZ2_SOLDIER_SHOTGUN_6, MZ2_SOLDIER_SHOTGUN_7, MZ2_SOLDIER_SHOTGUN_8};
+static int32_t machinegun_flash [] = {MZ2_SOLDIER_MACHINEGUN_1, MZ2_SOLDIER_MACHINEGUN_2, MZ2_SOLDIER_MACHINEGUN_3, MZ2_SOLDIER_MACHINEGUN_4, MZ2_SOLDIER_MACHINEGUN_5, MZ2_SOLDIER_MACHINEGUN_6, MZ2_SOLDIER_MACHINEGUN_7, MZ2_SOLDIER_MACHINEGUN_8};
 
-void soldier_fire (edict_t *self, int flash_number)
+void soldier_fire (edict_t *self, int32_t flash_number)
 {
 	vec3_t	start;
 	vec3_t	forward, right, up;
 	vec3_t	aim;
 	vec3_t	dir;
 	vec3_t	end;
-	float	r, u;
-	int		flash_index;
+	vec_t	r, u;
+	int32_t		flash_index;
 
 	if (self->s.skinnum < 2)
 		flash_index = blaster_flash[flash_number];
@@ -824,7 +824,7 @@ mframe_t soldier_frames_duck [] =
 };
 mmove_t soldier_move_duck = {FRAME_duck01, FRAME_duck05, soldier_frames_duck, soldier_run};
 
-void soldier_dodge (edict_t *self, edict_t *attacker, float eta)
+void soldier_dodge (edict_t *self, edict_t *attacker, vec_t eta)
 {
 	if (prandom(75))
 		return;
@@ -839,7 +839,7 @@ void soldier_dodge (edict_t *self, edict_t *attacker, float eta)
 	}
 
 	self->monsterinfo.pausetime = level.time + eta + 0.3;
-	int r = irandom(2);
+	int32_t r = irandom(2);
 
 	if (skill->value == 1)
 	{
@@ -1137,9 +1137,9 @@ mframe_t soldier_frames_death6 [] =
 };
 mmove_t soldier_move_death6 = {FRAME_death601, FRAME_death610, soldier_frames_death6, soldier_dead};
 
-void soldier_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
+void soldier_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int32_t damage, vec3_t point)
 {
-	int		n;
+	int32_t		n;
 
 // check for gib
 	if (self->health <= self->gib_health)

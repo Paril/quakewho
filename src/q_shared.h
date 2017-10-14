@@ -22,7 +22,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 // q_shared.h -- included first by ALL program modules
 
-// float stuff, just to silence for now
+// vec_t stuff, just to silence for now
 #pragma warning(disable : 4305)
 #pragma warning(disable : 4244)
 #pragma warning(disable : 4242)
@@ -45,8 +45,6 @@ typedef int32_t	qboolean;
 
 // this exists elsewhere
 struct edict_t;
-
-typedef uint8_t byte;
 
 // angle indexes
 enum
@@ -108,8 +106,14 @@ MATHLIB
 typedef float vec_t;
 typedef vec_t vec3_t[3];
 
+typedef double dvec_t;
+typedef dvec_t dvec3_t[3];
+
+template<typename T>
+constexpr T pi = 3.141592653589793238462643383279502884e+00;
+
 #ifndef M_PI
- constexpr float M_PI = 3.141592653589793238462643383279502884e+00;
+ constexpr vec_t M_PI = pi<float>;
 #endif
 
 struct cplane_t;
@@ -185,21 +189,21 @@ constexpr bool VectorCompare (const Ta *v1, const Tb *v2)
 }
 
 template<typename T>
-constexpr T VectorLengthSquared(const T *v)
+constexpr auto VectorLengthSquared(const T *v)
 {
 	return DotProduct(v, v);
 }
 
 template<typename T>
-constexpr T VectorLength(const T *v)
+constexpr auto VectorLength(const T *v)
 {
 	return sqrt(VectorLengthSquared(v));
 }
 
 template<typename Ta, typename Tb>
-inline Ta VectorNormalize (const Ta *v, Tb *o)
+inline auto VectorNormalize (const Ta *v, Tb *o)
 {
-	Ta length = VectorLength(v);
+	auto length = VectorLength(v);
 
 	if (length)
 		VectorScale(v, 1.0 / length, o);
@@ -210,7 +214,7 @@ inline Ta VectorNormalize (const Ta *v, Tb *o)
 }
 
 template<typename T>
-inline T VectorNormalize (T *v)
+inline auto VectorNormalize (T *v)
 {
 	return VectorNormalize(v, v);
 }
@@ -290,6 +294,9 @@ inline void AddPointToBounds (const Tv *v, Tm *mins, Tm *maxs)
 }
 
 template<typename T>
+constexpr T DEG2RAD(const T &a) { return (a * pi<T>) / 180.0; }
+
+template<typename T>
 constexpr T anglemod(const T &x)
 {
     T angle = fmod(x, 360);
@@ -301,7 +308,7 @@ constexpr T anglemod(const T &x)
 }
 
 template<typename T>
-constexpr T LerpAngle (const T &a2, const T &a1, const float &frac)
+constexpr auto LerpAngle (const T &a2, const T &a1, const vec_t &frac)
 {
 	if (a1 - a2 > 180)
 		a1 -= 360;
@@ -312,41 +319,13 @@ constexpr T LerpAngle (const T &a2, const T &a1, const float &frac)
 	return a2 + frac * (a1 - a2);
 }
 
-int BoxOnPlaneSide (vec3_t emins, vec3_t emaxs, cplane_t *plane);
-
-void ProjectPointOnPlane( vec3_t dst, const vec3_t p, const vec3_t normal );
-void PerpendicularVector( vec3_t dst, const vec3_t src );
-
 //=============================================
-
-char *COM_SkipPath (char *pathname);
-void COM_StripExtension (char *in, char *out);
-void COM_FileBase (char *in, char *out);
-void COM_FilePath (char *in, char *out);
-void COM_DefaultExtension (char *path, char *extension);
 
 char *COM_Parse (char **data_p);
 // data is an in/out parm, returns a parsed out token
 
-#define Com_sprintf snprintf
-
 //=============================================
 
-// portable case insensitive compare
-#define Q_stricmp stricmp
-#define Q_strcasecmp stricmp
-#define Q_strncasecmp strnicmp
-
-//=============================================
-
-short	BigShort(short l);
-short	LittleShort(short l);
-int		BigLong (int l);
-int		LittleLong (int l);
-float	BigFloat (float l);
-float	LittleFloat (float l);
-
-void	Swap_Init (void);
 char	*va(char *format, ...);
 
 //=============================================
@@ -408,7 +387,7 @@ struct cvar_t
 	char		*latched_string;	// for CVAR_LATCH vars
 	cvarflags_t	flags;
 	qboolean	modified;	// set each time the cvar is changed
-	float		value;
+	vec_t		value;
 	struct cvar_s *next;
 };
 #endif		// CVAR
@@ -499,30 +478,24 @@ enum areatype_t
 struct cplane_t
 {
 	vec3_t	normal;
-	float	dist;
-	byte	type;			// for fast side tests
-	byte	signbits;		// signx + (signy<<1) + (signz<<1)
-	byte	pad[2];
+	vec_t	dist;
+	uint8_t	type;			// for fast side tests
+	uint8_t	signbits;		// signx + (signy<<1) + (signz<<1)
+	uint8_t	pad[2];
 };
 
 struct cmodel_t
 {
 	vec3_t		mins, maxs;
 	vec3_t		origin;		// for sounds or lights
-	int			headnode;
+	int32_t		headnode;
 };
 
 struct csurface_t
 {
 	char		name[16];
 	surfflags_t	flags;
-	int			value;
-};
-
-struct mapsurface_t  // used internally due to name len probs //ZOID
-{
-	csurface_t	c;
-	char		rname[32];
+	int32_t		value;
 };
 
 // a trace is returned when a box is swept through the world
@@ -530,7 +503,7 @@ struct trace_t
 {
 	qboolean	allsolid;	// if true, plane is not valid
 	qboolean	startsolid;	// if true, the initial point was in a solid area
-	float		fraction;	// time completed, 1.0 = didn't hit anything
+	vec_t		fraction;	// time completed, 1.0 = didn't hit anything
 	vec3_t		endpos;		// final position
 	cplane_t	plane;		// surface normal at impact
 	csurface_t	*surface;	// surface hit
@@ -576,12 +549,12 @@ struct pmove_state_t
 {
 	pmtype_t	pm_type;
 
-	short		origin[3];		// 12.3
-	short		velocity[3];	// 12.3
+	int16_t		origin[3];		// 12.3
+	int16_t		velocity[3];	// 12.3
 	pmflags_t	pm_flags;		// ducked, jump_held, etc
-	byte		pm_time;		// each unit = 8 ms
-	short		gravity;
-	short		delta_angles[3];	// add to command angles to get view direction
+	uint8_t		pm_time;		// each unit = 8 ms
+	int16_t		gravity;
+	int16_t		delta_angles[3];	// add to command angles to get view direction
 									// changed by spawns, rotating objects, and teleporters
 };
 
@@ -602,12 +575,12 @@ MAKE_BITFLAGS(button_t);
 // usercmd_t is sent to the server each client frame
 struct usercmd_t
 {
-	byte		msec;
+	uint8_t		msec;
 	button_t	buttons;
-	short		angles[3];
-	short		forwardmove, sidemove, upmove;
-	byte		impulse;		// remove?
-	byte		lightlevel;		// light level the player is standing on
+	int16_t		angles[3];
+	int16_t		forwardmove, sidemove, upmove;
+	uint8_t		impulse;		// remove?
+	uint8_t		lightlevel;		// light level the player is standing on
 };
 
 enum waterlevel_t
@@ -630,20 +603,20 @@ struct pmove_t
 	qboolean		snapinitial;	// if s has been changed outside pmove
 
 	// results (out)
-	int			numtouch;
-	edict_t		*touchents[MAXTOUCH];
+	int32_t			numtouch;
+	edict_t			*touchents[MAXTOUCH];
 
-	vec3_t		viewangles;			// clamped
-	float		viewheight;
+	vec3_t			viewangles;			// clamped
+	vec_t			viewheight;
 
-	vec3_t		mins, maxs;			// bounding box size
+	vec3_t			mins, maxs;			// bounding box size
 
-	edict_t		*groundentity;
+	edict_t			*groundentity;
 	brushcontents_t	watertype;
-	waterlevel_t waterlevel;
+	waterlevel_t	 waterlevel;
 
 	// callbacks to test the world
-	trace_t		(*trace) (vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end);
+	trace_t			(*trace) (vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end);
 	brushcontents_t	(*pointcontents) (vec3_t point);
 };
 
@@ -1016,8 +989,7 @@ enum monstermuzzleflash_t : uint8_t
 // ROGUE
 };
 
-extern	vec3_t monster_flash_offset [];
-
+#include "m_flash.h"
 
 // temp entity events
 //
@@ -1182,7 +1154,7 @@ enum
 };
 
 // FIXME
-typedef int dmflags_t;
+typedef int32_t dmflags_t;
 
 // ROGUE
 /*
@@ -1193,8 +1165,8 @@ typedef int dmflags_t;
 ==========================================================
 */
 
-inline short ANGLE2SHORT(const float &x) { return ((int)(x * 65536 / 360) & 65535); }
-inline float SHORT2ANGLE(const short &x) { return x * (360.0 / 65536); }
+constexpr int16_t ANGLE2SHORT(const vec_t &x) { return ((int32_t)(x * 65536 / 360) & 65535); }
+constexpr vec_t SHORT2ANGLE(const int16_t &x) { return x * (360.0 / 65536); }
 
 
 //
@@ -1266,18 +1238,18 @@ enum imageindex_t
 // need to render in some way
 struct entity_state_t
 {
-	int		number;			// edict index
+	int32_t		number;			// edict index
 
 	vec3_t	origin;
 	vec3_t	angles;
 	vec3_t	old_origin;		// for lerping
 	modelindex_t modelindex;
 	modelindex_t modelindex2, modelindex3, modelindex4;	// weapons, CTF flags, etc
-	int		frame;
-	int		skinnum;
+	int32_t		frame;
+	int32_t		skinnum;
 	entity_effects_t		effects;		// PGM - we're filling it, so it needs to be unsigned
 	entity_renderfx_t		renderfx;
-	int		solid;			// for client side prediction, 8*(bits 0-4) is x/y radius
+	int32_t		solid;			// for client side prediction, 8*(bits 0-4) is x/y radius
 							// 8*(bits 5-9) is z down distance, 8(bits10-15) is z up
 							// gi.linkentity sets this properly
 	soundindex_t sound;			// for looping sounds, to guarantee shutoff
@@ -1307,15 +1279,15 @@ struct player_state_t
 	vec3_t		gunangles;
 	vec3_t		gunoffset;
 	modelindex_t gunindex;
-	int			gunframe;
+	int32_t			gunframe;
 
-	float		blend[4];		// rgba full screen effect
+	vec_t		blend[4];		// rgba full screen effect
 	
-	float		fov;			// horizontal field of view
+	vec_t		fov;			// horizontal field of view
 
 	refdef_flags_t	rdflags;		// refdef flags
 
-	short		stats[MAX_STATS];		// fast status bar updates
+	int16_t		stats[MAX_STATS];		// fast status bar updates
 };
 
 #include "g_local.h"

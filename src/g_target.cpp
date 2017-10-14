@@ -22,7 +22,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 /*QUAKED target_temp_entity (1 0 0) (-8 -8 -8) (8 8 8)
 Fire an origin based temp entity event to the clients.
-"style"		type byte
+"style"		type uint8_t
 */
 void Use_Target_Tent (edict_t *ent, edict_t *other, edict_t *activator)
 {
@@ -89,7 +89,7 @@ void SP_target_speaker (edict_t *ent)
 		return;
 	}
 	if (!strstr (st.noise, ".wav"))
-		Com_sprintf (buffer, sizeof(buffer), "%s.wav", st.noise);
+		snprintf (buffer, sizeof(buffer), "%s.wav", st.noise);
 	else
 		strncpy (buffer, st.noise, sizeof(buffer));
 	ent->noise_index = gi.soundindex (buffer);
@@ -177,7 +177,7 @@ void SP_target_secret (edict_t *ent)
 	ent->svflags = SVF_NOCLIENT;
 	level.total_secrets++;
 	// map bug hack
-	if (!Q_stricmp(level.mapname, "mine3") && ent->s.origin[0] == 280 && ent->s.origin[1] == -2048 && ent->s.origin[2] == -624)
+	if (!stricmp(level.mapname, "mine3") && ent->s.origin[0] == 280 && ent->s.origin[1] == -2048 && ent->s.origin[2] == -624)
 		ent->message = "You have found a secret area.";
 }
 
@@ -227,7 +227,7 @@ Spawns an explosion temporary entity when used.
 */
 void target_explosion_explode (edict_t *self)
 {
-	float		save;
+	vec_t		save;
 
 	gi.WriteByte (SVC_TEMP_ENTITY);
 	gi.WriteByte (TE_EXPLOSION1);
@@ -310,7 +310,7 @@ void SP_target_changelevel (edict_t *ent)
 	}
 
 	// ugly hack because *SOMEBODY* screwed up their map
-   if((Q_stricmp(level.mapname, "fact1") == 0) && (Q_stricmp(ent->map, "fact3") == 0))
+   if((stricmp(level.mapname, "fact1") == 0) && (stricmp(ent->map, "fact3") == 0))
 	   ent->map = "fact3$secret1";
 
 	ent->use = use_target_changelevel;
@@ -416,7 +416,7 @@ speed	default is 1000
 
 void use_target_blaster (edict_t *self, edict_t *other, edict_t *activator)
 {
-	int effect;
+	int32_t effect;
 
 	if (self->spawnflags & 2)
 		effect = 0;
@@ -501,7 +501,7 @@ void target_laser_think (edict_t *self)
 	trace_t	tr;
 	vec3_t	point;
 	vec3_t	last_movedir;
-	int		count;
+	int32_t		count;
 
 	if (self->spawnflags & 0x80000000)
 		count = 8;
@@ -755,7 +755,7 @@ All players and monsters are affected.
 
 void target_earthquake_think (edict_t *self)
 {
-	int		i;
+	int32_t		i;
 	edict_t	*e;
 
 	if (self->last_move_time < level.time)

@@ -500,4 +500,4 @@ enum
 	FRAME_death610
 };
 
-const float MODEL_SCALE		= 1.200000;
+const vec_t MODEL_SCALE		= 1.200000;

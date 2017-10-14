@@ -178,7 +178,7 @@ ClientEndServerFrames
 */
 void ClientEndServerFrames (void)
 {
-	int		i;
+	int32_t		i;
 	edict_t	*ent;
 
 	// calc the player views now that all pushing
@@ -206,7 +206,7 @@ edict_t *CreateTargetChangeLevel(char *map)
 
 	ent = G_Spawn ();
 	ent->classname = "target_changelevel";
-	Com_sprintf(level.nextmap, sizeof(level.nextmap), "%s", map);
+	snprintf(level.nextmap, sizeof(level.nextmap), "%s", map);
 	ent->map = level.nextmap;
 	return ent;
 }
@@ -237,7 +237,7 @@ void EndDMLevel (void)
 		f = nullptr;
 		t = strtok(s, seps);
 		while (t != nullptr) {
-			if (Q_stricmp(t, level.mapname) == 0) {
+			if (stricmp(t, level.mapname) == 0) {
 				// it's in the list, go to the next one
 				t = strtok(nullptr, seps);
 				if (t == nullptr) { // end of list, go to first one
@@ -279,7 +279,7 @@ CheckNeedPass
 */
 void CheckNeedPass (void)
 {
-	int need;
+	int32_t need;
 
 	// if password or spectator_password has changed, update needpass
 	// as needed
@@ -289,9 +289,9 @@ void CheckNeedPass (void)
 
 		need = 0;
 
-		if (*password->string && Q_stricmp(password->string, "none"))
+		if (*password->string && stricmp(password->string, "none"))
 			need |= 1;
-		if (*spectator_password->string && Q_stricmp(spectator_password->string, "none"))
+		if (*spectator_password->string && stricmp(spectator_password->string, "none"))
 			need |= 2;
 
 		gi.cvar_set("needpass", va("%d", need));
@@ -305,7 +305,7 @@ CheckDMRules
 */
 void CheckDMRules (void)
 {
-	int			i;
+	int32_t			i;
 	gclient_t	*cl;
 
 	if (level.intermissiontime)
@@ -350,11 +350,11 @@ ExitLevel
 */
 void ExitLevel (void)
 {
-	int		i;
+	int32_t		i;
 	edict_t	*ent;
 	char	command [256];
 
-	Com_sprintf (command, sizeof(command), "gamemap \"%s\"\n", level.changemap);
+	snprintf (command, sizeof(command), "gamemap \"%s\"\n", level.changemap);
 	gi.AddCommandString (command);
 	level.changemap = nullptr;
 	level.exitintermission = 0;
@@ -382,7 +382,7 @@ Advances the world by 0.1 seconds
 */
 void G_RunFrame (void)
 {
-	int		i;
+	int32_t		i;
 	edict_t	*ent;
 
 	level.framenum++;

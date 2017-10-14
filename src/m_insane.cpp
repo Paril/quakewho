@@ -474,9 +474,9 @@ void insane_run (edict_t *self)
 }
 
 
-void insane_pain (edict_t *self, edict_t *other, float kick, int damage)
+void insane_pain (edict_t *self, edict_t *other, vec_t kick, int32_t damage)
 {
-	int	l,r;
+	int32_t	l,r;
 
 //	if (self->health < (self->max_health / 2))
 //		self->s.skinnum = 1;
@@ -578,9 +578,9 @@ void insane_dead (edict_t *self)
 }
 
 
-void insane_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
+void insane_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int32_t damage, vec3_t point)
 {
-	int		n;
+	int32_t		n;
 
 	if (self->health <= self->gib_health)
 	{
@@ -620,7 +620,7 @@ void insane_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 */
 void SP_misc_insane (edict_t *self)
 {
-//	static int skin = 0;	//@@
+//	static int32_t skin = 0;	//@@
 
 	if (deathmatch->value)
 	{

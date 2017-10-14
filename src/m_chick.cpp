@@ -261,7 +261,7 @@ mframe_t chick_frames_pain3 [] =
 };
 mmove_t chick_move_pain3 = {FRAME_pain301, FRAME_pain321, chick_frames_pain3, chick_run};
 
-void chick_pain (edict_t *self, edict_t *other, float kick, int damage)
+void chick_pain (edict_t *self, edict_t *other, vec_t kick, int32_t damage)
 {
 	if (self->health < (self->max_health / 2))
 		self->s.skinnum = 1;
@@ -271,7 +271,7 @@ void chick_pain (edict_t *self, edict_t *other, float kick, int damage)
 
 	self->pain_debounce_time = level.time + 3;
 
-	int r = irandom(2);
+	int32_t r = irandom(2);
 	if (r == 0)
 		gi.sound (self, CHAN_VOICE, sound_pain1, 1, ATTN_NORM, 0);
 	else if (r == 1)
@@ -346,9 +346,9 @@ mframe_t chick_frames_death1 [] =
 };
 mmove_t chick_move_death1 = {FRAME_death101, FRAME_death112, chick_frames_death1, chick_dead};
 
-void chick_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
+void chick_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int32_t damage, vec3_t point)
 {
-	int		n;
+	int32_t		n;
 
 // check for gib
 	if (self->health <= self->gib_health)
@@ -423,7 +423,7 @@ mframe_t chick_frames_duck [] =
 };
 mmove_t chick_move_duck = {FRAME_duck01, FRAME_duck07, chick_frames_duck, chick_run};
 
-void chick_dodge (edict_t *self, edict_t *attacker, float eta)
+void chick_dodge (edict_t *self, edict_t *attacker, vec_t eta)
 {
 	if (prandom(75))
 		return;

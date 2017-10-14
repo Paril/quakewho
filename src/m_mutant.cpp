@@ -49,7 +49,7 @@ static soundindex_t	sound_thud;
 
 void mutant_step (edict_t *self)
 {
-	int		n;
+	int32_t		n;
 	n = irandom(2);
 	if (n == 0)
 		gi.sound (self, CHAN_VOICE, sound_step1, 1, ATTN_NORM, 0);		
@@ -319,7 +319,7 @@ void mutant_jump_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface
 		{
 			vec3_t	point;
 			vec3_t	normal;
-			int		damage;
+			int32_t		damage;
 
 			VectorCopy (self->velocity, normal);
 			VectorNormalize(normal);
@@ -406,7 +406,7 @@ bool mutant_check_melee (edict_t *self)
 bool mutant_check_jump (edict_t *self)
 {
 	vec3_t	v;
-	float	distance;
+	vec_t	distance;
 
 	if (self->absmin[2] > (self->enemy->absmin[2] + 0.75 * self->enemy->size[2]))
 		return false;
@@ -493,7 +493,7 @@ mframe_t mutant_frames_pain3 [] =
 };
 mmove_t mutant_move_pain3 = {FRAME_pain301, FRAME_pain311, mutant_frames_pain3, mutant_run};
 
-void mutant_pain (edict_t *self, edict_t *other, float kick, int damage)
+void mutant_pain (edict_t *self, edict_t *other, vec_t kick, int32_t damage)
 {
 	if (self->health < (self->max_health / 2))
 		self->s.skinnum = 1;
@@ -506,7 +506,7 @@ void mutant_pain (edict_t *self, edict_t *other, float kick, int damage)
 	if (skill->value == 3)
 		return;		// no pain anims in nightmare
 
-	int r = irandom(2);
+	int32_t r = irandom(2);
 	if (r == 0)
 	{
 		gi.sound (self, CHAN_VOICE, sound_pain1, 1, ATTN_NORM, 0);
@@ -569,9 +569,9 @@ mframe_t mutant_frames_death2 [] =
 };
 mmove_t mutant_move_death2 = {FRAME_death201, FRAME_death210, mutant_frames_death2, mutant_dead};
 
-void mutant_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
+void mutant_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int32_t damage, vec3_t point)
 {
-	int		n;
+	int32_t		n;
 
 	if (self->health <= self->gib_health)
 	{

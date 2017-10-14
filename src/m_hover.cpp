@@ -57,7 +57,7 @@ void hover_dead (edict_t *self);
 void hover_attack (edict_t *self);
 void hover_reattack (edict_t *self);
 void hover_fire_blaster (edict_t *self);
-void hover_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point);
+void hover_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int32_t damage, vec3_t point);
 
 mframe_t hover_frames_stand [] =
 {
@@ -481,7 +481,7 @@ void hover_attack(edict_t *self)
 }
 
 
-void hover_pain (edict_t *self, edict_t *other, float kick, int damage)
+void hover_pain (edict_t *self, edict_t *other, vec_t kick, int32_t damage)
 {
 	if (self->health < (self->max_health / 2))
 		self->s.skinnum = 1;
@@ -535,9 +535,9 @@ void hover_dead (edict_t *self)
 	gi.linkentity (self);
 }
 
-void hover_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
+void hover_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int32_t damage, vec3_t point)
 {
-	int		n;
+	int32_t		n;
 
 // check for gib
 	if (self->health <= self->gib_health)

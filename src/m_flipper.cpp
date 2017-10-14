@@ -53,7 +53,7 @@ void flipper_stand (edict_t *self)
 		self->monsterinfo.currentmove = &flipper_move_stand;
 }
 
-const float FLIPPER_RUN_SPEED	= 24;
+const vec_t FLIPPER_RUN_SPEED	= 24;
 
 mframe_t flipper_frames_run [] =
 {
@@ -220,9 +220,9 @@ void flipper_melee(edict_t *self)
 	self->monsterinfo.currentmove = &flipper_move_attack;
 }
 
-void flipper_pain (edict_t *self, edict_t *other, float kick, int damage)
+void flipper_pain (edict_t *self, edict_t *other, vec_t kick, int32_t damage)
 {
-	int		n;
+	int32_t		n;
 
 	if (self->health < (self->max_health / 2))
 		self->s.skinnum = 1;
@@ -329,9 +329,9 @@ void flipper_sight (edict_t *self, edict_t *other)
 	gi.sound (self, CHAN_VOICE, sound_sight, 1, ATTN_NORM, 0);
 }
 
-void flipper_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
+void flipper_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int32_t damage, vec3_t point)
 {
-	int		n;
+	int32_t		n;
 
 // check for gib
 	if (self->health <= self->gib_health)
