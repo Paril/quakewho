@@ -159,6 +159,9 @@
     <ClCompile Include="src\q_random.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\stdafx.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\g_local.h">

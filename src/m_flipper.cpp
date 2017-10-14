@@ -25,6 +25,7 @@ FLIPPER
 ==============================================================================
 */
 
+#include "q_shared.h"
 #include "g_local.h"
 #include "m_flipper.h"
 

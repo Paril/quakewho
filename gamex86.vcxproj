@@ -59,6 +59,8 @@
       <MinimalRebuild>false</MinimalRebuild>
       <DiagnosticsFormat>Caret</DiagnosticsFormat>
       <ErrorReporting>Send</ErrorReporting>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>q_shared.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <ModuleDefinitionFile>src\game.def</ModuleDefinitionFile>
@@ -77,6 +79,8 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <DiagnosticsFormat>Caret</DiagnosticsFormat>
       <ErrorReporting>Send</ErrorReporting>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>q_shared.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -137,6 +141,10 @@
     <ClCompile Include="src\p_weapon.cpp" />
     <ClCompile Include="src\q_random.cpp" />
     <ClCompile Include="src\q_shared.cpp" />
+    <ClCompile Include="src\stdafx.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\game.h" />

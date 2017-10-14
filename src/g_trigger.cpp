@@ -17,6 +17,8 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
+
+#include "q_shared.h"
 #include "g_local.h"
 
 
@@ -89,7 +91,8 @@ void Touch_Multi (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *su
 		vec3_t	forward;
 
 		AngleVectors(other->s.angles, forward, NULL, NULL);
-		if (_DotProduct(forward, self->movedir) < 0)
+
+		if (DotProduct(forward, self->movedir) < 0)
 			return;
 	}
 

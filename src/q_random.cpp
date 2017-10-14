@@ -1,6 +1,5 @@
+#include "q_shared.h"
 #include <random>
-
-#include "q_random.h"
 
 static std::mt19937 mt;
 static std::uniform_int_distribution<uint32_t> idistrib;

@@ -17,7 +17,9 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
-	
+
+#pragma once
+
 // q_shared.h -- included first by ALL program modules
 
 // float stuff, just to silence for now
@@ -25,6 +27,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #pragma warning(disable : 4244)
 #pragma warning(disable : 4242)
 
+#include <cstdio>
 #include <cstring>
 #include <cmath>
 #include <cstdint>
@@ -113,45 +116,206 @@ struct cplane_t;
 
 extern vec3_t vec3_origin;
 
-#define DotProduct(x,y)			(x[0]*y[0]+x[1]*y[1]+x[2]*y[2])
-#define VectorSubtract(a,b,c)	(c[0]=a[0]-b[0],c[1]=a[1]-b[1],c[2]=a[2]-b[2])
-#define VectorAdd(a,b,c)		(c[0]=a[0]+b[0],c[1]=a[1]+b[1],c[2]=a[2]+b[2])
-#define VectorCopy(a,b)			(b[0]=a[0],b[1]=a[1],b[2]=a[2])
-#define VectorClear(a)			(a[0]=a[1]=a[2]=0)
-#define VectorNegate(a,b)		(b[0]=-a[0],b[1]=-a[1],b[2]=-a[2])
-#define VectorSet(v, x, y, z)	(v[0]=(x), v[1]=(y), v[2]=(z))
+template<typename Ta, typename Tb>
+constexpr auto DotProduct(const Ta *x, const Tb *y)
+{
+	return x[0] * y[0] + x[1] * y[1] + x[2] * y[2];
+}
 
-void VectorMA (vec3_t veca, float scale, vec3_t vecb, vec3_t vecc);
+template<typename Ta, typename Tb, typename Tc>
+inline void VectorSubtract(const Ta *a, const Tb *b, Tc *c)
+{
+	for (int32_t i = 0; i < 3; i++)
+		c[i] = a[i] - b[i];
+}
 
-// just in case you do't want to use the macros
-vec_t _DotProduct (vec3_t v1, vec3_t v2);
-void _VectorSubtract (vec3_t veca, vec3_t vecb, vec3_t out);
-void _VectorAdd (vec3_t veca, vec3_t vecb, vec3_t out);
-void _VectorCopy (vec3_t in, vec3_t out);
+template<typename Ta, typename Tb, typename Tc>
+inline void VectorAdd(const Ta *a, const Tb *b, Tc *c)
+{
+	for (int32_t i = 0; i < 3; i++)
+		c[i] = a[i] + b[i];
+}
 
-void ClearBounds (vec3_t mins, vec3_t maxs);
-void AddPointToBounds (vec3_t v, vec3_t mins, vec3_t maxs);
-int VectorCompare (vec3_t v1, vec3_t v2);
-vec_t VectorLength (vec3_t v);
-void CrossProduct (vec3_t v1, vec3_t v2, vec3_t cross);
-vec_t VectorNormalize (vec3_t v);		// returns vector length
-vec_t VectorNormalize2 (vec3_t v, vec3_t out);
-void VectorInverse (vec3_t v);
-void VectorScale (vec3_t in, vec_t scale, vec3_t out);
-int Q_log2(int val);
+template<typename Ta, typename Tb>
+inline void VectorCopy(const Ta *a, Tb *b)
+{
+	for (int32_t i = 0; i < 3; i++)
+		b[i] = a[i];
+}
 
-void R_ConcatRotations (float in1[3][3], float in2[3][3], float out[3][3]);
-void R_ConcatTransforms (float in1[3][4], float in2[3][4], float out[3][4]);
+template<typename Ta, typename Tx, typename Ty, typename Tz>
+inline void VectorSet(Ta *a, const Tx &x, const Ty &y, const Tz &z)
+{
+	a[0] = x;
+	a[1] = y;
+	a[2] = z;
+}
 
-void AngleVectors (vec3_t angles, vec3_t forward, vec3_t right, vec3_t up);
+template<typename T>
+inline void VectorClear(T *a)
+{
+	VectorCopy(vec3_origin, a);
+}
+
+template<typename Ta, typename Tb>
+inline void VectorNegate(const Ta *a, Tb *b)
+{
+	for (int32_t i = 0; i < 3; i++)
+		b[i] = -a[i];
+}
+
+template<typename Ta, typename Ts, typename Tb>
+inline void VectorScale(const Ta *a, const Ts &s, Tb *b)
+{
+	for (int32_t i = 0; i < 3; i++)
+		b[i] = a[i] * s;
+}
+
+template<typename Ta, typename Ts, typename Tb, typename Tc>
+inline void VectorMA (const Ta *a, const Ts &s, const Tb *b, Tc *c)
+{
+	for (int32_t i = 0; i < 3; i++)
+		c[i] = a[i] + s * b[i];
+}
+
+template<typename Ta, typename Tb>
+constexpr bool VectorCompare (const Ta *v1, const Tb *v2)
+{
+	return (v1[0] == v2[0] && v1[1] == v2[1] && v1[2] == v2[2]);
+}
+
+template<typename T>
+constexpr T VectorLengthSquared(const T *v)
+{
+	return DotProduct(v, v);
+}
+
+template<typename T>
+constexpr T VectorLength(const T *v)
+{
+	return sqrt(VectorLengthSquared(v));
+}
+
+template<typename Ta, typename Tb>
+inline Ta VectorNormalize (const Ta *v, Tb *o)
+{
+	Ta length = VectorLength(v);
+
+	if (length)
+		VectorScale(v, 1.0 / length, o);
+	else
+		VectorClear(o);
+		
+	return length;
+}
+
+template<typename T>
+inline T VectorNormalize (T *v)
+{
+	return VectorNormalize(v, v);
+}
+
+template<typename Ta, typename Tb, typename Tc>
+inline void CrossProduct (const Ta *v1, const Tb *v2, Tc *cross)
+{
+	cross[0] = v1[1] * v2[2] - v1[2] * v2[1];
+	cross[1] = v1[2] * v2[0] - v1[0] * v2[2];
+	cross[2] = v1[0] * v2[1] - v1[1] * v2[0];
+}
+
+template<typename T>
+inline void VectorInverse (T *v)
+{
+	for (int32_t i = 0; i < 3; i++)
+		v[0] = -v[0];
+}
+
+template<typename T>
+inline void AngleVectors (const T *angles, vec_t *forward, vec_t *right, vec_t *up)
+{
+	T angle = angles[YAW] * (M_PI*2 / 360);
+	T sy = sin(angle);
+	T cy = cos(angle);
+
+	angle = angles[PITCH] * (M_PI*2 / 360);
+	T sp = sin(angle);
+	T cp = cos(angle);
+	
+	angle = angles[ROLL] * (M_PI*2 / 360);
+	T sr = sin(angle);
+	T cr = cos(angle);
+
+	if (forward)
+	{
+		forward[0] = cp * cy;
+		forward[1] = cp * sy;
+		forward[2] = -sp;
+	}
+	
+	if (right)
+	{
+		right[0] = (-1 * sr * sp * cy + -1 * cr * -sy);
+		right[1] = (-1 * sr * sp * sy + -1 * cr * cy);
+		right[2] = -1 * sr * cp;
+	}
+
+	if (up)
+	{
+		up[0] = (cr * sp * cy + -sr * -sy);
+		up[1] = (cr * sp * sy + -sr * cy);
+		up[2] = cr * cp;
+	}
+}
+
+template<typename T>
+inline void ClearBounds (T *mins, T *maxs)
+{
+	mins[0] = mins[1] = mins[2] = 99999;
+	maxs[0] = maxs[1] = maxs[2] = -99999;
+}
+
+template<typename Tv, typename Tm>
+inline void AddPointToBounds (const Tv *v, Tm *mins, Tm *maxs)
+{
+	for (int32_t i = 0; i < 3; i++)
+	{
+		const Tv &val = v[i];
+
+		if (val < mins[i])
+			mins[i] = val;
+		
+		if (val > maxs[i])
+			maxs[i] = val;
+	}
+}
+
+template<typename T>
+constexpr T anglemod(const T &x)
+{
+    T angle = fmod(x, 360);
+
+	if (angle < 0)
+        angle += 360;
+    
+	return angle;
+}
+
+template<typename T>
+constexpr T LerpAngle (const T &a2, const T &a1, const float &frac)
+{
+	if (a1 - a2 > 180)
+		a1 -= 360;
+
+	if (a1 - a2 < -180)
+		a1 += 360;
+
+	return a2 + frac * (a1 - a2);
+}
+
 int BoxOnPlaneSide (vec3_t emins, vec3_t emaxs, cplane_t *plane);
-float	anglemod(float a);
-float LerpAngle (float a1, float a2, float frac);
 
 void ProjectPointOnPlane( vec3_t dst, const vec3_t p, const vec3_t normal );
 void PerpendicularVector( vec3_t dst, const vec3_t src );
-void RotatePointAroundVector( vec3_t dst, const vec3_t dir, const vec3_t point, float degrees );
-
 
 //=============================================
 
@@ -164,16 +328,14 @@ void COM_DefaultExtension (char *path, char *extension);
 char *COM_Parse (char **data_p);
 // data is an in/out parm, returns a parsed out token
 
-void Com_sprintf (char *dest, size_t size, char *fmt, ...);
-
-void Com_PageInMemory (byte *buffer, int size);
+#define Com_sprintf snprintf
 
 //=============================================
 
 // portable case insensitive compare
-int Q_stricmp (char *s1, char *s2);
-int Q_strcasecmp (char *s1, char *s2);
-int Q_strncasecmp (char *s1, char *s2, int n);
+#define Q_stricmp stricmp
+#define Q_strcasecmp stricmp
+#define Q_strncasecmp strnicmp
 
 //=============================================
 
