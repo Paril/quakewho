@@ -20,6 +20,65 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "q_shared.h"
 
+void UpdateTargetCam(edict_t *ent)
+{
+	vec3_t o, ownerv, goal;
+	edict_t *targ;
+	vec3_t forward;
+	trace_t trace;
+	int32_t i;
+	vec3_t oldgoal;
+	vec3_t angles = { 0, 0, 0 };
+
+	targ = ent->control;
+
+	// is our chase target gone?
+	if (!targ->inuse)
+		gi.error("Controller went away!");
+
+	VectorCopy(targ->s.origin, ownerv);
+	VectorCopy(ent->s.origin, oldgoal);
+
+	ownerv[2] += targ->maxs[2];
+
+	angles[1] = ent->client->resp.cmd_angles[YAW] + SHORT2ANGLE(ent->client->ps.pmove.delta_angles[YAW]);
+
+	AngleVectors (angles, forward, nullptr, nullptr);
+	VectorNormalize(forward);
+	VectorMA(ownerv, -30, forward, o);
+
+	trace = gi.trace(ownerv, vec3_origin, vec3_origin, o, targ, MASK_SOLID);
+
+	VectorCopy(trace.endpos, goal);
+
+	VectorMA(goal, 2, forward, goal);
+
+	// pad for floors and ceilings
+	VectorCopy(goal, o);
+	o[2] += 6;
+	trace = gi.trace(goal, vec3_origin, vec3_origin, o, targ, MASK_SOLID);
+	if (trace.fraction < 1) {
+		VectorCopy(trace.endpos, goal);
+		goal[2] -= 6;
+	}
+
+	VectorCopy(goal, o);
+	o[2] -= 6;
+	trace = gi.trace(goal, vec3_origin, vec3_origin, o, targ, MASK_SOLID);
+	if (trace.fraction < 1) {
+		VectorCopy(trace.endpos, goal);
+		goal[2] += 6;
+	}
+
+	ent->client->ps.pmove.pm_type = PM_SPECTATOR;
+
+	VectorCopy(goal, ent->s.origin);
+
+	ent->viewheight = 0;
+	ent->client->ps.pmove.pm_flags |= PMF_NO_PREDICTION;
+	gi.linkentity(ent);
+}
+
 void UpdateChaseCam(edict_t *ent)
 {
 	vec3_t o, ownerv, goal;

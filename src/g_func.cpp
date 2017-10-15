@@ -434,7 +434,7 @@ void Use_Plat (edict_t *ent, edict_t *other, edict_t *activator)
 
 void Touch_Plat_Center (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf)
 {
-	if (!other->client)
+	if (!other->client && !(other->svflags & SVF_MONSTER))
 		return;
 		
 	if (other->health <= 0)
@@ -741,7 +741,7 @@ void button_use (edict_t *self, edict_t *other, edict_t *activator)
 
 void button_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf)
 {
-	if (!other->client)
+	if (!other->client && !(other->svflags & SVF_MONSTER))
 		return;
 
 	if (other->health <= 0)
@@ -1123,7 +1123,7 @@ void door_killed (edict_t *self, edict_t *inflictor, edict_t *attacker, int32_t 
 
 void door_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf)
 {
-	if (!other->client)
+	if (!other->client && !(other->svflags & SVF_MONSTER))
 		return;
 
 	if (level.time < self->touch_debounce_time)

@@ -673,7 +673,7 @@ void SP_misc_insane (edict_t *self)
 	}
 	else
 	{
-		walkmonster_start (self);
 		self->s.skinnum = irandom(2);
+		walkmonster_start (self);
 	}
 }

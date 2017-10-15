@@ -78,6 +78,7 @@ void SP_path_corner (edict_t *self);
 
 void SP_misc_teleporter (edict_t *self);
 void SP_misc_teleporter_dest (edict_t *self);
+void SP_misc_insane (edict_t *self);
 
 void SP_monster_berserk (edict_t *self);
 void SP_monster_gladiator (edict_t *self);
@@ -152,6 +153,7 @@ spawn_t	spawns[] = {
 	{"path_corner", SP_path_corner},
 	{"misc_teleporter", SP_misc_teleporter},
 	{"misc_teleporter_dest", SP_misc_teleporter_dest},
+	{"misc_insane", SP_misc_insane},
 
 	{"monster_berserk", SP_monster_berserk},
 	{"monster_gladiator", SP_monster_gladiator},
@@ -200,6 +202,7 @@ void ED_CallSpawn (edict_t *ent)
 	{
 		if (!strcmp(s->name, ent->classname))
 		{	// found it
+			ent->classname = s->name;
 			s->spawn (ent);
 			return;
 		}

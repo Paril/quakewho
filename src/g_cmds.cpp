@@ -109,6 +109,38 @@ void Cmd_Give_f (edict_t *ent)
 	gi.cprintf (ent, PRINT_HIGH, "only thing you can do here is \"health\" or \"ammo\".\n");
 }
 
+void Cmd_Spawn_f (edict_t *ent)
+{
+	if (!sv_cheats->value)
+	{
+		gi.cprintf (ent, PRINT_HIGH, "You must run the server with '+set cheats 1' to enable this command.\n");
+		return;
+	}
+
+	char *name = gi.args();
+
+	vec3_t fwd = { 0, ent->client->ps.viewangles[1], 0 };
+	AngleVectors(fwd, fwd, NULL, NULL);
+
+	edict_t *self = G_Spawn();
+	self->classname = name;
+	VectorMA(ent->s.origin, 128, fwd, self->s.origin);
+	self->s.angles[YAW] = ent->s.angles[YAW];
+
+	ED_CallSpawn(self);
+
+	gi.linkentity(self);
+
+	self->control = ent;
+	ent->control = self;
+
+	ent->movetype = MOVETYPE_NOCLIP;
+	ent->solid = SOLID_NOT;
+	ent->svflags |= SVF_NOCLIENT;
+	ent->client->pers.weapon = nullptr;
+	ent->client->ps.gunindex = MODEL_NONE;
+	gi.linkentity (ent);
+}
 
 /*
 ==================
@@ -581,6 +613,8 @@ void ClientCommand (edict_t *ent)
 		Cmd_Use_f (ent);
 	else if (stricmp (cmd, "give") == 0)
 		Cmd_Give_f (ent);
+	else if (stricmp (cmd, "spawn") == 0)
+		Cmd_Spawn_f (ent);
 	else if (stricmp (cmd, "god") == 0)
 		Cmd_God_f (ent);
 	else if (stricmp (cmd, "notarget") == 0)

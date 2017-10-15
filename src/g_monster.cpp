@@ -182,6 +182,9 @@ void M_CheckGround (edict_t *ent)
 
 void M_CatagorizePosition (edict_t *ent)
 {
+	if (ent->control && ent->control->client->control_pmove)
+		return;
+
 	vec3_t		point;
 	brushcontents_t	cont;
 
@@ -402,8 +405,16 @@ void M_MoveFrame (edict_t *self)
 
 void monster_think (edict_t *self)
 {
+	if (self->control)
+	{
+		if (self->control->client->cmd.upmove > 0)
+			self->control->client->control_pmove = true;
+		else if (self->control->client->cmd.upmove < 0)
+			self->control->client->control_pmove = false;
+	}
+
 	M_MoveFrame (self);
-	if (self->linkcount != self->monsterinfo.linkcount)
+	if ((!self->control || !self->control->client->control_pmove) && self->linkcount != self->monsterinfo.linkcount)
 	{
 		self->monsterinfo.linkcount = self->linkcount;
 		M_CheckGround (self);
@@ -411,6 +422,25 @@ void monster_think (edict_t *self)
 	M_CatagorizePosition (self);
 	M_WorldEffects (self);
 	M_SetEffects (self);
+
+	if (self->control)
+	{
+		if (self->control->client->cmd.forwardmove ||
+			self->control->client->cmd.sidemove)
+		{
+			vec_t len = sqrt((self->control->client->cmd.forwardmove * self->control->client->cmd.forwardmove) + (self->control->client->cmd.sidemove * self->control->client->cmd.sidemove));
+
+			if (len < 300)
+				self->monsterinfo.walk(self);
+			else
+				self->monsterinfo.run(self);
+		}
+		else
+			self->monsterinfo.stand(self);
+
+		if (self->control->client->control_pmove)
+			M_MoveToController(self, -1);
+	}
 }
 
 
@@ -520,14 +550,12 @@ bool monster_start (edict_t *self)
 
 	self->nextthink = level.time + FRAMETIME;
 	self->svflags |= SVF_MONSTER;
-	self->s.renderfx |= RF_FRAMELERP;
 	self->takedamage = DAMAGE_AIM;
 	self->air_finished = level.time + 12;
 	self->use = monster_use;
 	self->max_health = self->health;
 	self->clipmask = MASK_MONSTERSOLID;
 
-	self->s.skinnum = 0;
 	self->deadflag = DEAD_NO;
 	self->svflags &= ~SVF_DEADMONSTER;
 

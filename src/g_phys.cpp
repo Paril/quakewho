@@ -251,9 +251,8 @@ int32_t SV_FlyMove (edict_t *ent, vec_t time, brushcontents_t mask)
 		if (!ent->inuse)
 			break;		// removed by the impact function
 
-		
 		time_left -= time_left * trace.fraction;
-		
+
 	// cliped to another plane
 		if (numplanes >= MAX_CLIP_PLANES)
 		{	// this shouldn't really happen
@@ -815,6 +814,12 @@ void SV_AddRotationalFriction (edict_t *ent)
 
 void SV_Physics_Step (edict_t *ent)
 {
+	if (ent->control && ent->control->client->control_pmove)
+	{
+		SV_RunThink (ent);
+		return;
+	}
+
 	bool		wasonground;
 	bool		hitsound = false;
 	vec_t		*vel;

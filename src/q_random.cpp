@@ -1,7 +1,8 @@
 #include "q_shared.h"
+#include <ctime>
 #include <random>
 
-static std::mt19937 mt;
+static std::mt19937 mt(time(NULL));
 static std::uniform_int_distribution<uint32_t> idistrib;
 
 int32_t irandom()

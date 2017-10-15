@@ -42,6 +42,12 @@ This replaces the QC functions: ai_forward, ai_back, ai_pain, and ai_painforward
 */
 void ai_move (edict_t *self, vec_t dist)
 {
+	if (!self->control)
+	{
+		M_MoveToController (self, dist);
+		return;
+	}
+
 	M_walkmove (self, self->s.angles[YAW], dist);
 }
 
@@ -67,7 +73,7 @@ void ai_stand (edict_t *self, vec_t dist)
 		{
 			VectorSubtract (self->enemy->s.origin, self->s.origin, v);
 			self->ideal_yaw = vectoyaw(v);
-			if (self->s.angles[YAW] != self->ideal_yaw && self->monsterinfo.aiflags & AI_TEMP_STAND_GROUND)
+			if (self->s.angles[YAW] != self->ideal_yaw && (self->monsterinfo.aiflags & AI_TEMP_STAND_GROUND))
 			{
 				self->monsterinfo.aiflags &= ~(AI_STAND_GROUND | AI_TEMP_STAND_GROUND);
 				self->monsterinfo.run (self);
@@ -113,6 +119,12 @@ The monster is walking it's beat
 */
 void ai_walk (edict_t *self, vec_t dist)
 {
+	if (self->control)
+	{
+		M_MoveToController (self, dist);
+		return;
+	}
+
 	M_MoveToGoal (self, dist);
 
 	// check for noticing a player
@@ -144,6 +156,12 @@ Use this call with a distnace of 0 to replace ai_face
 */
 void ai_charge (edict_t *self, vec_t dist)
 {
+	if (self->control)
+	{
+		M_MoveToController (self, dist);
+		return;
+	}
+
 	vec3_t	v;
 
 	VectorSubtract (self->enemy->s.origin, self->s.origin, v);
@@ -165,6 +183,12 @@ Distance is for slight position adjustments needed by the animations
 */
 void ai_turn (edict_t *self, vec_t dist)
 {
+	if (self->control)
+	{
+		M_MoveToController (self, dist);
+		return;
+	}
+
 	if (dist)
 		M_walkmove (self, self->s.angles[YAW], dist);
 
@@ -774,6 +798,12 @@ The monster has an enemy it is trying to kill
 */
 void ai_run (edict_t *self, vec_t dist)
 {
+	if (self->control)
+	{
+		M_MoveToController (self, dist);
+		return;
+	}
+
 	vec3_t		v;
 	edict_t		*tempgoal;
 	edict_t		*save;

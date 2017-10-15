@@ -129,6 +129,7 @@
     <ClCompile Include="src\m_move.cpp" />
     <ClCompile Include="src\m_mutant.cpp" />
     <ClCompile Include="src\m_parasite.cpp" />
+    <ClCompile Include="src\m_pmove.cpp" />
     <ClCompile Include="src\m_soldier.cpp" />
     <ClCompile Include="src\m_supertank.cpp" />
     <ClCompile Include="src\m_tank.cpp" />

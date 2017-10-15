@@ -109,7 +109,7 @@ pr_global_struct->trace_normal is set to the normal of the blocking wall
 */
 //FIXME since we need to test end position contents here, can we avoid doing
 //it again later in catagorize position?
-bool SV_movestep (edict_t *ent, vec3_t move, bool relink)
+bool SV_movestep (edict_t *ent, const vec3_t move, bool relink)
 {
 	vec_t		dz;
 	vec3_t		oldorg, neworg, end;
@@ -157,7 +157,7 @@ bool SV_movestep (edict_t *ent, vec3_t move, bool relink)
 			}
 			trace = gi.trace (ent->s.origin, ent->mins, ent->maxs, neworg, ent, MASK_MONSTERSOLID);
 	
-			// fly monsters don't enter water voluntarily
+			/*// fly monsters don't enter water voluntarily
 			if (ent->flags & FL_FLY)
 			{
 				if (!ent->waterlevel)
@@ -183,7 +183,7 @@ bool SV_movestep (edict_t *ent, vec3_t move, bool relink)
 					if (!(contents & MASK_WATER))
 						return false;
 				}
-			}
+			}*/
 
 			if (trace.fraction == 1)
 			{
@@ -228,7 +228,7 @@ bool SV_movestep (edict_t *ent, vec3_t move, bool relink)
 
 
 	// don't go in to water
-	if (ent->waterlevel == WATER_NONE)
+	/*if (ent->waterlevel == WATER_NONE)
 	{
 		test[0] = trace.endpos[0];
 		test[1] = trace.endpos[1];
@@ -237,9 +237,9 @@ bool SV_movestep (edict_t *ent, vec3_t move, bool relink)
 
 		if (contents & MASK_WATER)
 			return false;
-	}
+	}*/
 
-	if (trace.fraction == 1)
+	/*if (trace.fraction == 1)
 	{
 	// if monster had the ground pulled out, go ahead and fall
 		if ( ent->flags & FL_PARTIALGROUND )
@@ -255,12 +255,12 @@ bool SV_movestep (edict_t *ent, vec3_t move, bool relink)
 		}
 	
 		return false;		// walked off an edge
-	}
+	}*/
 
 // check point traces down for dangling corners
 	VectorCopy (trace.endpos, ent->s.origin);
 	
-	if (!M_CheckBottom (ent))
+	/*if (!M_CheckBottom (ent))
 	{
 		if ( ent->flags & FL_PARTIALGROUND )
 		{	// entity had floor mostly pulled out from underneath it
@@ -279,7 +279,7 @@ bool SV_movestep (edict_t *ent, vec3_t move, bool relink)
 	if ( ent->flags & FL_PARTIALGROUND )
 	{
 		ent->flags &= ~FL_PARTIALGROUND;
-	}
+	}*/
 	ent->groundentity = trace.ent;
 	ent->groundentity_linkcount = trace.ent->linkcount;
 
@@ -535,6 +535,156 @@ void M_MoveToGoal (edict_t *ent, vec_t dist)
 	}
 }
 
+void Pmove (m_pmove_t *pmove);
+
+edict_t	*pm_m_passent;
+
+// pmove doesn't need to know about passent and contentmask
+trace_t	PM_m_trace (vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end)
+{
+	if (pm_m_passent->health > 0)
+		return gi.trace (start, mins, maxs, end, pm_m_passent, MASK_MONSTERSOLID);
+	else
+		return gi.trace (start, mins, maxs, end, pm_m_passent, MASK_DEADSOLID);
+}
+
+void M_MoveToController (edict_t *self, vec_t dist)
+{
+	edict_t *ent = self->control;
+
+	const vec3_t view_angles = {
+		0, ent->client->resp.cmd_angles[YAW] + SHORT2ANGLE(ent->client->ps.pmove.delta_angles[YAW]), 0
+	};
+
+	if (dist >= 0)
+	{
+		self->control_dist = dist;
+		self->ideal_yaw = view_angles[YAW];
+		M_ChangeYaw (self);
+	}
+
+	if (dist == -1 && ent->client->control_pmove)
+	{
+		pm_m_passent = self;
+
+		m_pmove_t pm;
+
+		// set up for pmove
+		memset (&pm, 0, sizeof(pm));
+
+		ent->pmove_state.pm_type = PM_NORMAL;
+		ent->pmove_state.gravity = sv_gravity->value;
+
+		pm.s = ent->pmove_state;
+		
+		VectorCopy(self->s.origin, pm.origin_f);
+		VectorCopy(self->velocity, pm.velocity_f);
+		
+		//pm.snapinitial = true;
+
+		VectorCopy(self->mins, pm.mins);
+		VectorCopy(self->maxs, pm.maxs);
+
+		//if (memcmp(&self->old_pmove_state, &pm.s, sizeof(pm.s)))
+		//{
+		//	pm.snapinitial = true;
+			//gi.dprintf ("pmove changed!\n");
+		//}
+
+		pm.cmd = ent->client->cmd;
+		pm.cmd.msec = 100;
+
+		vec_t len = max(abs(pm.cmd.forwardmove), abs(pm.cmd.sidemove));
+
+		if (len)
+		{
+			if (pm.cmd.forwardmove)
+				pm.forwardmove_f = self->control_dist * (pm.cmd.forwardmove / len);
+			if (pm.cmd.sidemove)
+				pm.sidemove_f = self->control_dist * (pm.cmd.sidemove / len);
+		}
+		
+		for (int32_t i = 0; i < 3; i++)
+			pm.cmd.angles[i] = ANGLE2SHORT(view_angles[i]);
+
+		VectorClear(pm.s.delta_angles);
+
+		pm.trace = PM_m_trace;	// adds default parms
+		pm.pointcontents = gi.pointcontents;
+
+		// perform a pmove
+		Pmove (&pm);
+
+		// save results of pmove
+		self->pmove_state = pm.s;
+		self->old_pmove_state = pm.s;
+		
+		VectorCopy(pm.origin_f, self->s.origin);
+		VectorCopy(pm.velocity_f, self->velocity);
+
+		self->viewheight = pm.viewheight;
+		self->waterlevel = pm.waterlevel;
+		self->watertype = pm.watertype;
+		self->groundentity = pm.groundentity;
+		if (pm.groundentity)
+			self->groundentity_linkcount = pm.groundentity->linkcount;
+
+		gi.linkentity (self);
+
+		G_TouchTriggers (self);
+
+		// touch other objects
+		for (int32_t i = 0; i < pm.numtouch; i++)
+		{
+			int32_t j = 0;
+			edict_t *other = pm.touchents[i];
+			
+			for (j = 0; j < i; j++)
+			{
+				if (pm.touchents[j] == other)
+					break;
+			}
+
+			if (j != i)
+				continue;	// duplicated
+
+			if (!other->touch)
+				continue;
+
+			other->touch (other, self, nullptr, nullptr);
+		}
+
+		return;
+	}
+
+	if (dist < 0 || ent->client->control_pmove)
+		return;
+
+	pm_m_passent = self;
+
+	vec3_t forward, right;
+
+	AngleVectors(view_angles, forward, right, NULL);
+
+	vec3_t wanted = { ent->client->cmd.forwardmove, ent->client->cmd.sidemove, 0 };
+	vec_t wanted_len = VectorNormalize(wanted);
+
+	if (wanted_len)
+	{
+		vec3_t move;
+
+		for (int32_t i = 0; i < 3; i++)
+			move[i] = forward[i] * wanted[0] * dist + right[i] * wanted[1] * dist;
+	
+		vec3_t oldorigin;
+		VectorCopy (self->s.origin, oldorigin);
+
+		SV_movestep (self, move, false);
+
+		gi.linkentity (self);
+		G_TouchTriggers (self);
+	}
+}
 
 /*
 ===============

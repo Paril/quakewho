@@ -571,6 +571,11 @@ vec_t vectoyaw (vec3_t vec);
 void vectoangles (vec3_t vec, vec3_t angles);
 
 //
+// g_spawn.c
+//
+void ED_CallSpawn (edict_t *ent);
+
+//
 // g_combat.c
 //
 
@@ -697,7 +702,6 @@ void MoveClientToIntermission (edict_t *client);
 void G_SetStats (edict_t *ent);
 void G_SetSpectatorStats (edict_t *ent);
 void G_CheckChaseStats (edict_t *ent);
-void ValidateSelectedItem (edict_t *ent);
 void DeathmatchScoreboardMessage (edict_t *client, edict_t *killer);
 
 //
@@ -706,6 +710,7 @@ void DeathmatchScoreboardMessage (edict_t *client, edict_t *killer);
 bool M_CheckBottom (edict_t *ent);
 bool M_walkmove (edict_t *ent, vec_t yaw, vec_t dist);
 void M_MoveToGoal (edict_t *ent, vec_t dist);
+void M_MoveToController (edict_t *ent, vec_t dist);
 void M_ChangeYaw (edict_t *ent);
 
 //
@@ -723,6 +728,7 @@ void FetchClientEntData (edict_t *ent);
 // g_chase.c
 //
 void UpdateChaseCam(edict_t *ent);
+void UpdateTargetCam(edict_t *ent);
 void ChaseNext(edict_t *ent);
 void ChasePrev(edict_t *ent);
 void GetChaseTarget(edict_t *ent);
@@ -841,8 +847,16 @@ struct gclient_t
 
 	edict_t		*chase_target;		// player we are chasing
 	bool		update_chase;		// need to update chase info?
+
+	bool		control_pmove;
+	usercmd_t	cmd;
 };
 
+struct m_pmove_t : pmove_t
+{
+	vec_t forwardmove_f, sidemove_f;
+	vec3_t origin_f, velocity_f;
+};
 
 struct edict_t
 {
@@ -986,4 +1000,8 @@ struct edict_t
 	// common data blocks
 	moveinfo_t		moveinfo;
 	monsterinfo_t	monsterinfo;
+
+	edict_t		*control;
+	vec_t		control_dist;
+	pmove_state_t pmove_state, old_pmove_state;
 };

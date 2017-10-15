@@ -37,7 +37,6 @@ potential spawning position for deathmatch games
 */
 void SP_info_player_deathmatch(edict_t *self)
 {
-	SP_misc_teleporter_dest (self);
 }
 
 /*QUAKED info_player_coop (1 0 1) (-16 -16 -24) (16 16 32)
@@ -59,13 +58,6 @@ void SP_info_player_intermission(edict_t *ent)
 
 
 //=======================================================================
-
-
-void player_pain (edict_t *self, edict_t *other, vec_t kick, int32_t damage)
-{
-	// player pain is handled at the end of the frame in P_DamageFeedback
-}
-
 
 bool IsFemale (edict_t *ent)
 {
@@ -881,7 +873,6 @@ void PutClientInServer (edict_t *ent)
 	ent->air_finished = level.time + 12;
 	ent->clipmask = MASK_PLAYERSOLID;
 	ent->model = "players/male/tris.md2";
-	ent->pain = player_pain;
 	ent->die = player_die;
 	ent->waterlevel = WATER_NONE;
 	ent->watertype = CONTENTS_NONE;
@@ -1227,7 +1218,7 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 
 	pm_passent = ent;
 
-	if (ent->client->chase_target) {
+	if (ent->client->chase_target || ent->control) {
 
 		client->resp.cmd_angles[0] = SHORT2ANGLE(ucmd->angles[0]);
 		client->resp.cmd_angles[1] = SHORT2ANGLE(ucmd->angles[1]);
@@ -1341,15 +1332,18 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 	// fire weapon from final position if needed
 	if (client->latched_buttons & BUTTON_ATTACK)
 	{
-		if (client->resp.spectator) {
+		if (client->resp.spectator || ent->control) {
 
 			client->latched_buttons = BUTTON_NONE;
 
-			if (client->chase_target) {
-				client->chase_target = nullptr;
-				client->ps.pmove.pm_flags &= ~PMF_NO_PREDICTION;
-			} else
-				GetChaseTarget(ent);
+			if (client->resp.spectator)
+			{			
+				if (client->chase_target) {
+					client->chase_target = nullptr;
+					client->ps.pmove.pm_flags &= ~PMF_NO_PREDICTION;
+				} else
+					GetChaseTarget(ent);
+			}
 
 		} else if (!client->weapon_thunk) {
 			client->weapon_thunk = true;
@@ -1357,14 +1351,18 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 		}
 	}
 
-	if (client->resp.spectator) {
+	if (client->resp.spectator || ent->control) {
 		if (ucmd->upmove >= 10) {
 			if (!(client->ps.pmove.pm_flags & PMF_JUMP_HELD)) {
 				client->ps.pmove.pm_flags |= PMF_JUMP_HELD;
-				if (client->chase_target)
-					ChaseNext(ent);
-				else
-					GetChaseTarget(ent);
+
+				if (client->resp.spectator)
+				{
+					if (client->chase_target)
+						ChaseNext(ent);
+					else
+						GetChaseTarget(ent);
+				}
 			}
 		} else
 			client->ps.pmove.pm_flags &= ~PMF_JUMP_HELD;
@@ -1375,6 +1373,12 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 		other = g_edicts + i;
 		if (other->inuse && other->client->chase_target == ent)
 			UpdateChaseCam(other);
+	}
+
+	if (ent->control)
+	{
+		UpdateTargetCam(ent);
+		ent->client->cmd = *ucmd;
 	}
 }
 

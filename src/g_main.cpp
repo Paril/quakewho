@@ -449,7 +449,7 @@ void G_RunFrame ()
 		if ((ent->groundentity) && (ent->groundentity->linkcount != ent->groundentity_linkcount))
 		{
 			ent->groundentity = nullptr;
-			if ( !(ent->flags & (FL_SWIM|FL_FLY)) && (ent->svflags & SVF_MONSTER) )
+			if ( !(ent->flags & (FL_SWIM|FL_FLY)) && (ent->svflags & SVF_MONSTER) && (!ent->control || !ent->control->client->control_pmove))
 			{
 				M_CheckGround (ent);
 			}

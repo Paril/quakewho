@@ -817,6 +817,7 @@ void SP_monster_tank (edict_t *self)
 	{
 		self->health = 1000;
 		self->gib_health = -225;
+		self->s.skinnum = 2;
 	}
 	else
 	{
@@ -843,7 +844,4 @@ void SP_monster_tank (edict_t *self)
 	self->monsterinfo.scale = MODEL_SCALE;
 
 	walkmonster_start(self);
-
-	if (strcmp(self->classname, "monster_tank_commander") == 0)
-		self->s.skinnum = 2;
 }

@@ -330,11 +330,6 @@ void T_Damage (edict_t *targ, edict_t *inflictor, edict_t *attacker, const vec3_
 				targ->pain_debounce_time = level.time + 5;
 		}
 	}
-	else if (client)
-	{
-		if (!(targ->flags & FL_GODMODE) && (take))
-			targ->pain (targ, attacker, knockback, take);
-	}
 	else if (take)
 	{
 		if (targ->pain)

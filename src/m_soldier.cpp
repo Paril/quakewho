@@ -411,7 +411,7 @@ void soldier_pain (edict_t *self, edict_t *other, vec_t kick, int32_t damage)
 	int32_t		n;
 
 	if (self->health < (self->max_health / 2))
-			self->s.skinnum |= 1;
+		self->s.skinnum |= 1;
 
 	if (level.time < self->pain_debounce_time)
 	{
@@ -1233,8 +1233,6 @@ void SP_monster_soldier_x (edict_t *self)
 */
 void SP_monster_soldier_light (edict_t *self)
 {
-	SP_monster_soldier_x (self);
-
 	sound_pain_light = gi.soundindex ("soldier/solpain2.wav");
 	sound_death_light =	gi.soundindex ("soldier/soldeth2.wav");
 	gi.modelindex ("models/objects/laser/tris.md2");
@@ -1244,14 +1242,14 @@ void SP_monster_soldier_light (edict_t *self)
 	self->s.skinnum = 0;
 	self->health = 20;
 	self->gib_health = -30;
+
+	SP_monster_soldier_x (self);
 }
 
 /*QUAKED monster_soldier (1 .5 0) (-16 -16 -24) (16 16 32) Ambush Trigger_Spawn Sight
 */
 void SP_monster_soldier (edict_t *self)
 {
-	SP_monster_soldier_x (self);
-
 	sound_pain = gi.soundindex ("soldier/solpain1.wav");
 	sound_death = gi.soundindex ("soldier/soldeth1.wav");
 	gi.soundindex ("soldier/solatck1.wav");
@@ -1259,14 +1257,14 @@ void SP_monster_soldier (edict_t *self)
 	self->s.skinnum = 2;
 	self->health = 30;
 	self->gib_health = -30;
+
+	SP_monster_soldier_x (self);
 }
 
 /*QUAKED monster_soldier_ss (1 .5 0) (-16 -16 -24) (16 16 32) Ambush Trigger_Spawn Sight
 */
 void SP_monster_soldier_ss (edict_t *self)
 {
-	SP_monster_soldier_x (self);
-
 	sound_pain_ss = gi.soundindex ("soldier/solpain3.wav");
 	sound_death_ss = gi.soundindex ("soldier/soldeth3.wav");
 	gi.soundindex ("soldier/solatck3.wav");
@@ -1274,4 +1272,6 @@ void SP_monster_soldier_ss (edict_t *self)
 	self->s.skinnum = 4;
 	self->health = 40;
 	self->gib_health = -30;
+
+	SP_monster_soldier_x (self);
 }
