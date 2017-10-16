@@ -42,9 +42,9 @@ This replaces the QC functions: ai_forward, ai_back, ai_pain, and ai_painforward
 */
 void ai_move (edict_t *self, vec_t dist)
 {
-	if (!self->control)
+	if (self->control)
 	{
-		M_MoveToController (self, dist);
+		M_MoveToController (self, dist, true);
 		return;
 	}
 
@@ -62,6 +62,12 @@ Distance is for slight position adjustments needed by the animations
 */
 void ai_stand (edict_t *self, vec_t dist)
 {
+	if (self->control)
+	{
+		M_MoveToController (self, dist, false);
+		return;
+	}
+
 	vec3_t	v;
 
 	if (dist)
@@ -121,7 +127,7 @@ void ai_walk (edict_t *self, vec_t dist)
 {
 	if (self->control)
 	{
-		M_MoveToController (self, dist);
+		M_MoveToController (self, dist, true);
 		return;
 	}
 
@@ -158,7 +164,7 @@ void ai_charge (edict_t *self, vec_t dist)
 {
 	if (self->control)
 	{
-		M_MoveToController (self, dist);
+		M_MoveToController (self, dist, true);
 		return;
 	}
 
@@ -185,7 +191,7 @@ void ai_turn (edict_t *self, vec_t dist)
 {
 	if (self->control)
 	{
-		M_MoveToController (self, dist);
+		M_MoveToController (self, dist, true);
 		return;
 	}
 
@@ -800,7 +806,7 @@ void ai_run (edict_t *self, vec_t dist)
 {
 	if (self->control)
 	{
-		M_MoveToController (self, dist);
+		M_MoveToController (self, dist, true);
 		return;
 	}
 

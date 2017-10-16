@@ -405,12 +405,14 @@ void M_MoveFrame (edict_t *self)
 
 void monster_think (edict_t *self)
 {
-	if (self->control)
+	if (self->control && self->control->client->cmd.upmove > 0)
 	{
-		if (self->control->client->cmd.upmove > 0)
-			self->control->client->control_pmove = true;
-		else if (self->control->client->cmd.upmove < 0)
-			self->control->client->control_pmove = false;
+		if (self->groundentity)
+		{
+			self->groundentity = nullptr;
+			if (self->velocity[2] < 270)
+				self->velocity[2] = 270;
+		}
 	}
 
 	M_MoveFrame (self);
@@ -439,7 +441,7 @@ void monster_think (edict_t *self)
 			self->monsterinfo.stand(self);
 
 		if (self->control->client->control_pmove)
-			M_MoveToController(self, -1);
+			M_MoveToController(self, -1, true);
 	}
 }
 

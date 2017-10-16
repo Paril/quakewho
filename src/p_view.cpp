@@ -858,80 +858,94 @@ void ClientEndServerFrame (edict_t *ent)
 	// burn from lava, etc
 	P_WorldEffects ();
 
-	//
-	// set model angles from view angles so other things in
-	// the world can tell which direction you are looking
-	//
-	if (ent->client->v_angle[PITCH] > 180)
-		ent->s.angles[PITCH] = (-360 + ent->client->v_angle[PITCH])/3;
-	else
-		ent->s.angles[PITCH] = ent->client->v_angle[PITCH]/3;
-	ent->s.angles[YAW] = ent->client->v_angle[YAW];
-	ent->s.angles[ROLL] = 0;
-	ent->s.angles[ROLL] = SV_CalcRoll (ent->s.angles, ent->velocity)*4;
-
-	//
-	// calculate speed and cycle to be used for
-	// all cyclic walking effects
-	//
-	xyspeed = sqrt(ent->velocity[0]*ent->velocity[0] + ent->velocity[1]*ent->velocity[1]);
-
-	if (xyspeed < 5)
+	if (ent->control)
 	{
-		bobmove = 0;
-		current_client->bobtime = 0;	// start at beginning of cycle again
-	}
-	else if (ent->groundentity)
-	{	// so bobbing only cycles when on ground
-		if (xyspeed > 210)
-			bobmove = 0.25;
-		else if (xyspeed > 100)
-			bobmove = 0.125;
-		else
-			bobmove = 0.0625;
-	}
-	
-	bobtime = (current_client->bobtime += bobmove);
-
-	if (current_client->ps.pmove.pm_flags & PMF_DUCKED)
-		bobtime *= 4;
-
-	bobcycle = (int32_t)bobtime;
-	bobfracsin = fabs(sin(bobtime*M_PI));
-
-	// detect hitting the floor
-	P_FallingDamage (ent);
-
-	// apply all the damage taken this frame
-	P_DamageFeedback (ent);
-
-	// determine the view offsets
-	SV_CalcViewOffset (ent);
-
-	// determine the gun offsets
-	SV_CalcGunOffset (ent);
-
-	// determine the full screen color blend
-	// must be after viewoffset, so eye contents can be
-	// accurately determined
-	// FIXME: with client prediction, the contents
-	// should be determined by the client
-	SV_CalcBlend (ent);
-
-	// chase cam stuff
-	if (ent->client->resp.spectator)
-		G_SetSpectatorStats(ent);
-	else
+		ent->s.sound = SOUND_NONE;
+		VectorClear(ent->client->ps.blend);
+		ent->client->ps.blend[3] = 0.0;
+		VectorClear(ent->client->ps.kick_angles);
+		VectorClear(ent->client->ps.viewoffset);
+		VectorClear(ent->client->ps.viewangles);
 		G_SetStats (ent);
-	G_CheckChaseStats(ent);
+	}
+	else
+	{
+		//
+		// set model angles from view angles so other things in
+		// the world can tell which direction you are looking
+		//
+		if (ent->client->v_angle[PITCH] > 180)
+			ent->s.angles[PITCH] = (-360 + ent->client->v_angle[PITCH])/3;
+		else
+			ent->s.angles[PITCH] = ent->client->v_angle[PITCH]/3;
+		ent->s.angles[YAW] = ent->client->v_angle[YAW];
+		ent->s.angles[ROLL] = 0;
+		ent->s.angles[ROLL] = SV_CalcRoll (ent->s.angles, ent->velocity)*4;
 
-	G_SetClientEvent (ent);
+		//
+		// calculate speed and cycle to be used for
+		// all cyclic walking effects
+		//
+		xyspeed = sqrt(ent->velocity[0]*ent->velocity[0] + ent->velocity[1]*ent->velocity[1]);
 
-	G_SetClientEffects (ent);
+		if (xyspeed < 5)
+		{
+			bobmove = 0;
+			current_client->bobtime = 0;	// start at beginning of cycle again
+		}
+		else if (ent->groundentity)
+		{	// so bobbing only cycles when on ground
+			if (xyspeed > 210)
+				bobmove = 0.25;
+			else if (xyspeed > 100)
+				bobmove = 0.125;
+			else
+				bobmove = 0.0625;
+		}
+	
+		bobtime = (current_client->bobtime += bobmove);
 
-	G_SetClientSound (ent);
+		if (current_client->ps.pmove.pm_flags & PMF_DUCKED)
+			bobtime *= 4;
 
-	G_SetClientFrame (ent);
+		bobcycle = (int32_t)bobtime;
+		bobfracsin = fabs(sin(bobtime*M_PI));
+
+		// detect hitting the floor
+		P_FallingDamage (ent);
+
+		// apply all the damage taken this frame
+		P_DamageFeedback (ent);
+
+		// determine the view offsets
+		SV_CalcViewOffset (ent);
+
+		// determine the gun offsets
+		SV_CalcGunOffset (ent);
+
+		// determine the full screen color blend
+		// must be after viewoffset, so eye contents can be
+		// accurately determined
+		// FIXME: with client prediction, the contents
+		// should be determined by the client
+		SV_CalcBlend (ent);
+
+		// chase cam stuff
+		if (ent->client->resp.spectator)
+			G_SetSpectatorStats(ent);
+		else
+			G_SetStats (ent);
+
+		G_CheckChaseStats(ent);
+
+		G_SetClientEvent (ent);
+
+		G_SetClientEffects (ent);
+
+		G_SetClientSound (ent);
+
+		G_SetClientFrame (ent);
+	}
 
 	VectorCopy (ent->velocity, ent->client->oldvelocity);
 	VectorCopy (ent->client->ps.viewangles, ent->client->oldviewangles);

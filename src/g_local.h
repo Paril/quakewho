@@ -710,7 +710,7 @@ void DeathmatchScoreboardMessage (edict_t *client, edict_t *killer);
 bool M_CheckBottom (edict_t *ent);
 bool M_walkmove (edict_t *ent, vec_t yaw, vec_t dist);
 void M_MoveToGoal (edict_t *ent, vec_t dist);
-void M_MoveToController (edict_t *ent, vec_t dist);
+void M_MoveToController (edict_t *ent, vec_t dist, bool turn);
 void M_ChangeYaw (edict_t *ent);
 
 //
@@ -848,7 +848,7 @@ struct gclient_t
 	edict_t		*chase_target;		// player we are chasing
 	bool		update_chase;		// need to update chase info?
 
-	bool		control_pmove;
+	bool		control_pmove, control_waitjump;
 	usercmd_t	cmd;
 };
 

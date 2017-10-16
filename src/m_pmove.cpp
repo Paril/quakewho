@@ -332,7 +332,7 @@ Handles user intended acceleration
 */
 static void PM_Accelerate (const vec3_t wishdir, vec_t wishspeed, vec_t accel)
 {
-	/*vec_t		addspeed, accelspeed, currentspeed;
+	vec_t		addspeed, accelspeed, currentspeed;
 
 	currentspeed = DotProduct (pml.velocity, wishdir);
 	addspeed = wishspeed - currentspeed;
@@ -345,12 +345,7 @@ static void PM_Accelerate (const vec3_t wishdir, vec_t wishspeed, vec_t accel)
 	
 	pml.velocity[0] += accelspeed*wishdir[0];
 	pml.velocity[1] += accelspeed*wishdir[1];
-	pml.velocity[2] += accelspeed*wishdir[2];*/
-
-	if (!wishspeed)
-		return;
-
-	VectorMA(pml.velocity, wishspeed * accel, wishdir, pml.velocity);
+	pml.velocity[2] += accelspeed*wishdir[2];
 }
 
 static void PM_AirAccelerate (const vec3_t wishdir, vec_t wishspeed, vec_t accel)

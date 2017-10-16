@@ -197,12 +197,7 @@ constexpr T DEG2RAD(const T &a) { return (a * pi<T>) / 180.0; }
 template<typename T>
 constexpr T anglemod(const T &x)
 {
-    T angle = fmod(x, 360);
-
-	if (angle < 0)
-        angle += 360;
-    
-	return angle;
+	return (360.0 / 65536) * ((int32_t)(x * (65536 / 360.0)) & 65535);
 }
 
 template<typename T>

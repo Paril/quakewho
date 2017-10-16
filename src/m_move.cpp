@@ -96,6 +96,211 @@ realcheck:
 	return true;
 }
 
+/*
+==================
+PM_ClipVelocity
+
+Slide off of the impacting object
+returns the blocked flags (1 = floor, 2 = step / wall)
+==================
+*/
+#define	STOP_EPSILON	0.1f
+
+static void M_ClipVelocity (const vec3_t in, const vec3_t normal, vec3_t out, vec_t overbounce)
+{
+	vec_t	backoff, change;
+	int32_t		i;
+	
+	backoff = DotProduct (in, normal) * overbounce;
+
+	for (i = 0; i < 3; i++)
+	{
+		change = normal[i]*backoff;
+		out[i] = in[i] - change;
+		if (out[i] > -STOP_EPSILON && out[i] < STOP_EPSILON)
+			out[i] = 0;
+	}
+}
+
+/*
+==================
+PM_StepSlideMove
+
+Each intersection will try to step over the obstruction instead of
+sliding along it.
+
+Returns a new origin, velocity, and contact entity
+Does not modify any world state?
+==================
+*/
+const vec_t	MIN_STEP_NORMAL	= 0.7f;		// can't step up onto very steep slopes
+const size_t MAX_CLIP_PLANES	= 5;
+static void M_StepSlideMove_ (edict_t *ent, vec3_t velocity)
+{
+	int32_t			bumpcount, numbumps = 4;
+	vec3_t		dir;
+	vec_t		d;
+	int32_t			numplanes = 0;
+	vec3_t		planes[MAX_CLIP_PLANES];
+	vec3_t		primal_velocity;
+	int32_t			i, j;
+	trace_t	trace;
+	vec3_t		end;
+	vec_t		time_left;
+	
+	
+	VectorCopy (velocity, primal_velocity);
+	time_left = 1.0;
+
+	for (bumpcount = 0; bumpcount < numbumps; bumpcount++)
+	{
+		end[0] = ent->s.origin[0] + time_left * velocity[0];
+		end[1] = ent->s.origin[1] + time_left * velocity[1];
+		end[2] = ent->s.origin[2] + time_left * velocity[2];
+
+		trace = gi.trace (ent->s.origin, ent->mins, ent->maxs, end, ent, MASK_MONSTERSOLID);
+
+		if (trace.allsolid)
+		{	// entity is trapped in another solid
+			velocity[2] = 0;	// don't build up falling damage
+			return;
+		}
+
+		if (trace.fraction > 0)
+		{	// actually covered some distance
+			VectorCopy (trace.endpos, ent->s.origin);
+			numplanes = 0;
+		}
+
+		if (trace.fraction == 1)
+			 break;		// moved the entire distance
+
+		// save entity for contact
+		/*if (pm->numtouch < MAXTOUCH && trace.ent)
+		{
+			pm->touchents[pm->numtouch] = trace.ent;
+			pm->numtouch++;
+		}*/
+		
+		time_left -= time_left * trace.fraction;
+
+		// slide along this plane
+		if (numplanes >= MAX_CLIP_PLANES)
+		{	// this shouldn't really happen
+			VectorClear(velocity);
+			break;
+		}
+
+		VectorCopy (trace.plane.normal, planes[numplanes]);
+		numplanes++;
+
+
+//
+// modify original_velocity so it parallels all of the clip planes
+//
+		for (i = 0; i < numplanes; i++)
+		{
+			M_ClipVelocity (velocity, planes[i], velocity, 1.01f);
+			for (j=0 ; j<numplanes ; j++) {
+				if (j != i) {
+					if (DotProduct(velocity, planes[j]) < 0)
+						break;	// not ok
+				}
+			}
+			if (j == numplanes)
+				break;
+		}
+		
+		if (i != numplanes)
+		{	// go along this plane
+		}
+		else
+		{	// go along the crease
+			if (numplanes != 2)
+			{
+//				Con_Printf ("clip velocity, numplanes == %i\n",numplanes);
+				VectorClear(velocity);
+				break;
+			}
+			CrossProduct (planes[0], planes[1], dir);
+			d = DotProduct (dir, velocity);
+			VectorScale (dir, d, velocity);
+		}
+
+		// if velocity is against the original velocity, stop dead
+		// to avoid tiny occilations in sloping corners
+		//
+		if (DotProduct (velocity, primal_velocity) <= 0)
+		{
+			VectorClear(velocity);
+			break;
+		}
+	}
+
+	VectorCopy (primal_velocity, velocity);
+}
+
+/*
+==================
+PM_StepSlideMove
+
+==================
+*/
+static bool M_StepSlideMove (edict_t *ent, vec3_t velocity)
+{
+	vec3_t		start_o, start_v;
+	vec3_t		down_o, down_v;
+	trace_t		trace;
+	vec_t		down_dist, up_dist;
+	vec3_t		up, down;
+
+	VectorCopy (ent->s.origin, start_o);
+	VectorCopy (velocity, start_v);
+
+	M_StepSlideMove_ (ent, velocity);
+
+	VectorCopy (ent->s.origin, down_o);
+	VectorCopy (velocity, down_v);
+
+	VectorCopy (start_o, up);
+	up[2] += STEPSIZE;
+
+	trace = gi.trace (up, ent->mins, ent->maxs, up, ent, MASK_MONSTERSOLID);
+	if (trace.allsolid)
+		return false;		// can't step up
+
+	// try sliding above
+	VectorCopy (up, ent->s.origin);
+	VectorCopy (start_v, velocity);
+
+	M_StepSlideMove_ (ent, velocity);
+
+	// push down the final amount
+	VectorCopy (ent->s.origin, down);
+	down[2] -= STEPSIZE;
+	trace = gi.trace (ent->s.origin, ent->mins, ent->maxs, down, ent, MASK_MONSTERSOLID);
+	if (!trace.allsolid)
+	{
+		VectorCopy (trace.endpos, ent->s.origin);
+	}
+
+	VectorCopy(ent->s.origin, up);
+
+	// decide which one went farther
+    down_dist = (down_o[0] - start_o[0])*(down_o[0] - start_o[0]) + (down_o[1] - start_o[1])*(down_o[1] - start_o[1]);
+    up_dist = (up[0] - start_o[0])*(up[0] - start_o[0]) + (up[1] - start_o[1])*(up[1] - start_o[1]);
+
+	if (down_dist > up_dist || trace.plane.normal[2] < MIN_STEP_NORMAL)
+	{
+		VectorCopy (down_o, ent->s.origin);
+		VectorCopy (down_v, velocity);
+		return true;
+	}
+	//!! Special case
+	// if we were walking along a plane, then we need to copy the Z over
+	velocity[2] = down_v[2];
+	return true;
+}
 
 /*
 =============
@@ -111,184 +316,14 @@ pr_global_struct->trace_normal is set to the normal of the blocking wall
 //it again later in catagorize position?
 bool SV_movestep (edict_t *ent, const vec3_t move, bool relink)
 {
-	vec_t		dz;
-	vec3_t		oldorg, neworg, end;
-	trace_t		trace;
-	int32_t			i;
-	vec_t		stepsize;
-	vec3_t		test;
-	brushcontents_t contents;
+	vec3_t move_vel = { move[0], move[1], ent->velocity[2] };
 
-// try the move	
-	VectorCopy (ent->s.origin, oldorg);
-	VectorAdd (ent->s.origin, move, neworg);
-
-// flying monsters don't step up
-	if ( ent->flags & (FL_SWIM | FL_FLY) )
-	{
-	// try one move with vertical motion, then one without
-		for (i=0 ; i<2 ; i++)
-		{
-			VectorAdd (ent->s.origin, move, neworg);
-			if (i == 0 && ent->enemy)
-			{
-				if (!ent->goalentity)
-					ent->goalentity = ent->enemy;
-				dz = ent->s.origin[2] - ent->goalentity->s.origin[2];
-				if (ent->goalentity->client)
-				{
-					if (dz > 40)
-						neworg[2] -= 8;
-					if (!((ent->flags & FL_SWIM) && (ent->waterlevel < WATER_WAIST)))
-						if (dz < 30)
-							neworg[2] += 8;
-				}
-				else
-				{
-					if (dz > 8)
-						neworg[2] -= 8;
-					else if (dz > 0)
-						neworg[2] -= dz;
-					else if (dz < -8)
-						neworg[2] += 8;
-					else
-						neworg[2] += dz;
-				}
-			}
-			trace = gi.trace (ent->s.origin, ent->mins, ent->maxs, neworg, ent, MASK_MONSTERSOLID);
-	
-			/*// fly monsters don't enter water voluntarily
-			if (ent->flags & FL_FLY)
-			{
-				if (!ent->waterlevel)
-				{
-					test[0] = trace.endpos[0];
-					test[1] = trace.endpos[1];
-					test[2] = trace.endpos[2] + ent->mins[2] + 1;
-					contents = gi.pointcontents(test);
-					if (contents & MASK_WATER)
-						return false;
-				}
-			}
-
-			// swim monsters don't exit water voluntarily
-			if (ent->flags & FL_SWIM)
-			{
-				if (ent->waterlevel < WATER_WAIST)
-				{
-					test[0] = trace.endpos[0];
-					test[1] = trace.endpos[1];
-					test[2] = trace.endpos[2] + ent->mins[2] + 1;
-					contents = gi.pointcontents(test);
-					if (!(contents & MASK_WATER))
-						return false;
-				}
-			}*/
-
-			if (trace.fraction == 1)
-			{
-				VectorCopy (trace.endpos, ent->s.origin);
-				if (relink)
-				{
-					gi.linkentity (ent);
-					G_TouchTriggers (ent);
-				}
-				return true;
-			}
-			
-			if (!ent->enemy)
-				break;
-		}
-		
-		return false;
-	}
-
-// push down from a step height above the wished position
-	if (!(ent->monsterinfo.aiflags & AI_NOSTEP))
-		stepsize = STEPSIZE;
-	else
-		stepsize = 1;
-
-	neworg[2] += stepsize;
-	VectorCopy (neworg, end);
-	end[2] -= stepsize*2;
-
-	trace = gi.trace (neworg, ent->mins, ent->maxs, end, ent, MASK_MONSTERSOLID);
-
-	if (trace.allsolid)
-		return false;
-
-	if (trace.startsolid)
-	{
-		neworg[2] -= stepsize;
-		trace = gi.trace (neworg, ent->mins, ent->maxs, end, ent, MASK_MONSTERSOLID);
-		if (trace.allsolid || trace.startsolid)
-			return false;
-	}
-
-
-	// don't go in to water
-	/*if (ent->waterlevel == WATER_NONE)
-	{
-		test[0] = trace.endpos[0];
-		test[1] = trace.endpos[1];
-		test[2] = trace.endpos[2] + ent->mins[2] + 1;	
-		contents = gi.pointcontents(test);
-
-		if (contents & MASK_WATER)
-			return false;
-	}*/
-
-	/*if (trace.fraction == 1)
-	{
-	// if monster had the ground pulled out, go ahead and fall
-		if ( ent->flags & FL_PARTIALGROUND )
-		{
-			VectorAdd (ent->s.origin, move, ent->s.origin);
-			if (relink)
-			{
-				gi.linkentity (ent);
-				G_TouchTriggers (ent);
-			}
-			ent->groundentity = nullptr;
-			return true;
-		}
-	
-		return false;		// walked off an edge
-	}*/
-
-// check point traces down for dangling corners
-	VectorCopy (trace.endpos, ent->s.origin);
-	
-	/*if (!M_CheckBottom (ent))
-	{
-		if ( ent->flags & FL_PARTIALGROUND )
-		{	// entity had floor mostly pulled out from underneath it
-			// and is trying to correct
-			if (relink)
-			{
-				gi.linkentity (ent);
-				G_TouchTriggers (ent);
-			}
-			return true;
-		}
-		VectorCopy (oldorg, ent->s.origin);
-		return false;
-	}
-
-	if ( ent->flags & FL_PARTIALGROUND )
-	{
-		ent->flags &= ~FL_PARTIALGROUND;
-	}*/
-	ent->groundentity = trace.ent;
-	ent->groundentity_linkcount = trace.ent->linkcount;
-
-// the move is ok
-	if (relink)
+	if (M_StepSlideMove(ent, move_vel))
 	{
 		gi.linkentity (ent);
 		G_TouchTriggers (ent);
 	}
+
 	return true;
 }
 
@@ -548,15 +583,18 @@ trace_t	PM_m_trace (vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end)
 		return gi.trace (start, mins, maxs, end, pm_m_passent, MASK_DEADSOLID);
 }
 
-void M_MoveToController (edict_t *self, vec_t dist)
+void M_MoveToController (edict_t *self, vec_t dist, bool turn)
 {
 	edict_t *ent = self->control;
+
+	if (!ent)
+		return;
 
 	const vec3_t view_angles = {
 		0, ent->client->resp.cmd_angles[YAW] + SHORT2ANGLE(ent->client->ps.pmove.delta_angles[YAW]), 0
 	};
 
-	if (dist >= 0)
+	if (turn && dist >= 0)
 	{
 		self->control_dist = dist;
 		self->ideal_yaw = view_angles[YAW];
@@ -594,16 +632,12 @@ void M_MoveToController (edict_t *self, vec_t dist)
 		pm.cmd = ent->client->cmd;
 		pm.cmd.msec = 100;
 
-		vec_t len = max(abs(pm.cmd.forwardmove), abs(pm.cmd.sidemove));
+		if (ent->client->control_waitjump)
+			pm.cmd.upmove = 0;
 
-		if (len)
-		{
-			if (pm.cmd.forwardmove)
-				pm.forwardmove_f = self->control_dist * (pm.cmd.forwardmove / len);
-			if (pm.cmd.sidemove)
-				pm.sidemove_f = self->control_dist * (pm.cmd.sidemove / len);
-		}
-		
+		pm.forwardmove_f = pm.cmd.forwardmove;
+		pm.sidemove_f = pm.cmd.sidemove;
+
 		for (int32_t i = 0; i < 3; i++)
 			pm.cmd.angles[i] = ANGLE2SHORT(view_angles[i]);
 
@@ -657,32 +691,33 @@ void M_MoveToController (edict_t *self, vec_t dist)
 		return;
 	}
 
-	if (dist < 0 || ent->client->control_pmove)
+	if (ent->client->control_pmove)
 		return;
 
-	pm_m_passent = self;
-
-	vec3_t forward, right;
-
-	AngleVectors(view_angles, forward, right, NULL);
-
-	vec3_t wanted = { ent->client->cmd.forwardmove, ent->client->cmd.sidemove, 0 };
-	vec_t wanted_len = VectorNormalize(wanted);
-
-	if (wanted_len)
+	if (dist > 0)
 	{
-		vec3_t move;
+		vec3_t forward, right;
 
-		for (int32_t i = 0; i < 3; i++)
-			move[i] = forward[i] * wanted[0] * dist + right[i] * wanted[1] * dist;
+		AngleVectors(view_angles, forward, right, NULL);
+
+		vec3_t wanted = { ent->client->cmd.forwardmove, ent->client->cmd.sidemove, 0 };
+		vec_t wanted_len = VectorNormalize(wanted);
+
+		if (wanted_len)
+		{
+			vec3_t move;
+
+			for (int32_t i = 0; i < 3; i++)
+				move[i] = forward[i] * wanted[0] * dist + right[i] * wanted[1] * dist;
 	
-		vec3_t oldorigin;
-		VectorCopy (self->s.origin, oldorigin);
+			vec3_t oldorigin;
+			VectorCopy (self->s.origin, oldorigin);
 
-		SV_movestep (self, move, false);
+			SV_movestep (self, move, false);
 
-		gi.linkentity (self);
-		G_TouchTriggers (self);
+			gi.linkentity (self);
+			G_TouchTriggers (self);
+		}
 	}
 }
 

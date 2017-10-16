@@ -565,6 +565,16 @@ void Cmd_PlayerList_f(edict_t *ent)
 	gi.cprintf(ent, PRINT_HIGH, "%s", text);
 }
 
+void Cmd_ControlToggle_f(edict_t *ent)
+{
+	if (!ent->control)
+	{
+		gi.cprintf(ent, PRINT_HIGH, "You ain't no monster\n");
+		return;
+	}
+
+	ent->client->control_pmove = !ent->client->control_pmove;
+}
 
 /*
 =================
@@ -643,6 +653,8 @@ void ClientCommand (edict_t *ent)
 		Cmd_Wave_f (ent);
 	else if (stricmp(cmd, "playerlist") == 0)
 		Cmd_PlayerList_f(ent);
+	else if (stricmp(cmd, "control_toggle") == 0)
+		Cmd_ControlToggle_f(ent);
 	else	// anything that doesn't match a command will be a chat
 		Cmd_Say_f (ent, false, true);
 }
