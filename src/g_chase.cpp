@@ -26,7 +26,6 @@ void UpdateTargetCam(edict_t *ent)
 	edict_t *targ;
 	vec3_t forward;
 	trace_t trace;
-	int32_t i;
 	vec3_t oldgoal;
 	vec3_t angles = { 0, 0, 0 };
 
@@ -39,7 +38,7 @@ void UpdateTargetCam(edict_t *ent)
 	VectorCopy(targ->s.origin, ownerv);
 	VectorCopy(ent->s.origin, oldgoal);
 
-	ownerv[2] += targ->maxs[2];
+	ownerv[2] += targ->maxs[2] + targ->viewheight;
 
 	angles[1] = ent->client->resp.cmd_angles[YAW] + SHORT2ANGLE(ent->client->ps.pmove.delta_angles[YAW]);
 
@@ -69,8 +68,6 @@ void UpdateTargetCam(edict_t *ent)
 		VectorCopy(trace.endpos, goal);
 		goal[2] += 6;
 	}
-
-	ent->client->ps.pmove.pm_type = PM_SPECTATOR;
 
 	VectorCopy(goal, ent->s.origin);
 

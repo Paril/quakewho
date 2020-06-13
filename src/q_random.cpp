@@ -3,7 +3,6 @@
 #include <random>
 
 static std::mt19937 mt(time(NULL));
-static std::uniform_int_distribution<uint32_t> idistrib;
 
 int32_t irandom()
 {
@@ -17,7 +16,7 @@ int32_t irandom(const int32_t &min, const int32_t &max)
 
 vec_t random()
 {
-	return (vec_t) irandom() / mt.max();
+	return std::uniform_real_distribution<float>(0.f, 1.f)(mt);
 }
 
 vec_t random(const vec_t &min, const vec_t &max)

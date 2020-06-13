@@ -29,26 +29,14 @@ brain
 #include "m_brain.h"
 
 
-static soundindex_t	sound_chest_open;
-static soundindex_t	sound_tentacles_extend;
-static soundindex_t	sound_tentacles_retract;
 static soundindex_t	sound_death;
 static soundindex_t	sound_idle1;
 static soundindex_t	sound_idle2;
 static soundindex_t	sound_idle3;
 static soundindex_t	sound_pain1;
 static soundindex_t	sound_pain2;
-static soundindex_t	sound_sight;
 static soundindex_t	sound_search;
-static soundindex_t	sound_melee1;
-static soundindex_t	sound_melee2;
-static soundindex_t	sound_melee3;
 
-
-void brain_sight (edict_t *self, edict_t *other)
-{
-	gi.sound (self, CHAN_VOICE, sound_sight, 1, ATTN_NORM, 0);
-}
 
 void brain_search (edict_t *self)
 {
@@ -239,129 +227,6 @@ void brain_walk (edict_t *self)
 //		self->monsterinfo.currentmove = &brain_move_walk2;
 }
 
-
-
-mframe_t brain_frames_defense [] =
-{
-	ai_move,	0,	nullptr,
-	ai_move,	0,	nullptr,
-	ai_move,	0,	nullptr,
-	ai_move,	0,	nullptr,
-	ai_move,	0,	nullptr,
-	ai_move,	0,	nullptr,
-	ai_move,	0,	nullptr,
-	ai_move,	0,	nullptr,
-	ai_move,	0,	nullptr
-};
-mmove_t brain_move_defense = {FRAME_defens01, FRAME_defens08, brain_frames_defense, nullptr};
-
-mframe_t brain_frames_pain3 [] =
-{
-	ai_move,	-2,	nullptr,
-	ai_move,	2,	nullptr,
-	ai_move,	1,	nullptr,
-	ai_move,	3,	nullptr,
-	ai_move,	0,	nullptr,
-	ai_move,	-4,	nullptr
-};
-mmove_t brain_move_pain3 = {FRAME_pain301, FRAME_pain306, brain_frames_pain3, brain_run};
-
-mframe_t brain_frames_pain2 [] =
-{
-	ai_move,	-2,	nullptr,
-	ai_move,	0,	nullptr,
-	ai_move,	0,	nullptr,
-	ai_move,	0,	nullptr,
-	ai_move,	0,	nullptr,
-	ai_move,	3,	nullptr,
-	ai_move,	1,	nullptr,
-	ai_move,	-2,	nullptr
-};
-mmove_t brain_move_pain2 = {FRAME_pain201, FRAME_pain208, brain_frames_pain2, brain_run};
-
-mframe_t brain_frames_pain1 [] =
-{
-	ai_move,	-6,	nullptr,
-	ai_move,	-2,	nullptr,
-	ai_move,	-6,	nullptr,
-	ai_move,	0,	nullptr,
-	ai_move,	0,	nullptr,
-	ai_move,	0,	nullptr,
-	ai_move,	0,	nullptr,
-	ai_move,	0,	nullptr,
-	ai_move,	0,	nullptr,
-	ai_move,	0,	nullptr,
-	ai_move,	0,	nullptr,
-	ai_move,	0,	nullptr,
-	ai_move,	0,	nullptr,
-	ai_move,	2,	nullptr,
-	ai_move,	0,	nullptr,
-	ai_move,	2,	nullptr,
-	ai_move,	1,	nullptr,
-	ai_move,	7,	nullptr,
-	ai_move,	0,	nullptr,
-	ai_move,	3,	nullptr,
-	ai_move,	-1,	nullptr
-};
-mmove_t brain_move_pain1 = {FRAME_pain101, FRAME_pain121, brain_frames_pain1, brain_run};
-
-
-//
-// DUCK
-//
-
-void brain_duck_down (edict_t *self)
-{
-	if (self->monsterinfo.aiflags & AI_DUCKED)
-		return;
-	self->monsterinfo.aiflags |= AI_DUCKED;
-	self->maxs[2] -= 32;
-	self->takedamage = DAMAGE_YES;
-	gi.linkentity (self);
-}
-
-void brain_duck_hold (edict_t *self)
-{
-	if (level.time >= self->monsterinfo.pausetime)
-		self->monsterinfo.aiflags &= ~AI_HOLD_FRAME;
-	else
-		self->monsterinfo.aiflags |= AI_HOLD_FRAME;
-}
-
-void brain_duck_up (edict_t *self)
-{
-	self->monsterinfo.aiflags &= ~AI_DUCKED;
-	self->maxs[2] += 32;
-	self->takedamage = DAMAGE_AIM;
-	gi.linkentity (self);
-}
-
-mframe_t brain_frames_duck [] =
-{
-	ai_move,	0,	nullptr,
-	ai_move,	-2,	brain_duck_down,
-	ai_move,	17,	brain_duck_hold,
-	ai_move,	-3,	nullptr,
-	ai_move,	-1,	brain_duck_up,
-	ai_move,	-5,	nullptr,
-	ai_move,	-6,	nullptr,
-	ai_move,	-6,	nullptr
-};
-mmove_t brain_move_duck = {FRAME_duck01, FRAME_duck08, brain_frames_duck, brain_run};
-
-void brain_dodge (edict_t *self, edict_t *attacker, vec_t eta)
-{
-	if (prandom(75))
-		return;
-
-	if (!self->enemy)
-		self->enemy = attacker;
-
-	self->monsterinfo.pausetime = level.time + eta + 0.5;
-	self->monsterinfo.currentmove = &brain_move_duck;
-}
-
-
 mframe_t brain_frames_death2 [] =
 {
 	ai_move,	0,	nullptr,
@@ -395,118 +260,6 @@ mframe_t brain_frames_death1 [] =
 };
 mmove_t brain_move_death1 = {FRAME_death101, FRAME_death118, brain_frames_death1, brain_dead};
 
-
-//
-// MELEE
-//
-
-void brain_swing_right (edict_t *self)
-{
-	gi.sound (self, CHAN_BODY, sound_melee1, 1, ATTN_NORM, 0);
-}
-
-void brain_hit_right (edict_t *self)
-{
-	vec3_t	aim;
-
-	VectorSet (aim, MELEE_DISTANCE, self->maxs[0], 8);
-	if (fire_hit (self, aim, irandom(15, 19), 40))
-		gi.sound (self, CHAN_WEAPON, sound_melee3, 1, ATTN_NORM, 0);
-}
-
-void brain_swing_left (edict_t *self)
-{
-	gi.sound (self, CHAN_BODY, sound_melee2, 1, ATTN_NORM, 0);
-}
-
-void brain_hit_left (edict_t *self)
-{
-	vec3_t	aim;
-
-	VectorSet (aim, MELEE_DISTANCE, self->mins[0], 8);
-	if (fire_hit (self, aim, irandom(15, 19), 40))
-		gi.sound (self, CHAN_WEAPON, sound_melee3, 1, ATTN_NORM, 0);
-}
-
-mframe_t brain_frames_attack1 [] =
-{
-	ai_charge,	8,	nullptr,
-	ai_charge,	3,	nullptr,
-	ai_charge,	5,	nullptr,
-	ai_charge,	0,	nullptr,
-	ai_charge,	-3,	brain_swing_right,
-	ai_charge,	0,	nullptr,
-	ai_charge,	-5,	nullptr,
-	ai_charge,	-7,	brain_hit_right,
-	ai_charge,	0,	nullptr,
-	ai_charge,	6,	brain_swing_left,
-	ai_charge,	1,	nullptr,
-	ai_charge,	2,	brain_hit_left,
-	ai_charge,	-3,	nullptr,
-	ai_charge,	6,	nullptr,
-	ai_charge,	-1,	nullptr,
-	ai_charge,	-3,	nullptr,
-	ai_charge,	2,	nullptr,
-	ai_charge,	-11,nullptr
-};
-mmove_t brain_move_attack1 = {FRAME_attak101, FRAME_attak118, brain_frames_attack1, brain_run};
-
-void brain_chest_open (edict_t *self)
-{
-	self->spawnflags &= ~65536;
-	gi.sound (self, CHAN_BODY, sound_chest_open, 1, ATTN_NORM, 0);
-}
-
-void brain_tentacle_attack (edict_t *self)
-{
-	vec3_t	aim;
-
-	VectorSet (aim, MELEE_DISTANCE, 0, 8);
-	if (fire_hit (self, aim, irandom(10, 14), -600) && skill->value > 0)
-		self->spawnflags |= 65536;
-	gi.sound (self, CHAN_WEAPON, sound_tentacles_retract, 1, ATTN_NORM, 0);
-}
-
-void brain_chest_closed (edict_t *self)
-{
-	if (self->spawnflags & 65536)
-	{
-		self->spawnflags &= ~65536;
-		self->monsterinfo.currentmove = &brain_move_attack1;
-	}
-}
-
-mframe_t brain_frames_attack2 [] =
-{
-	ai_charge,	5,	nullptr,
-	ai_charge,	-4,	nullptr,
-	ai_charge,	-4,	nullptr,
-	ai_charge,	-3,	nullptr,
-	ai_charge,	0,	brain_chest_open,
-	ai_charge,	0,	nullptr,
-	ai_charge,	13,	brain_tentacle_attack,
-	ai_charge,	0,	nullptr,
-	ai_charge,	2,	nullptr,
-	ai_charge,	0,	nullptr,
-	ai_charge,	-9,	brain_chest_closed,
-	ai_charge,	0,	nullptr,
-	ai_charge,	4,	nullptr,
-	ai_charge,	3,	nullptr,
-	ai_charge,	2,	nullptr,
-	ai_charge,	-3,	nullptr,
-	ai_charge,	-6,	nullptr
-};
-mmove_t brain_move_attack2 = {FRAME_attak201, FRAME_attak217, brain_frames_attack2, brain_run};
-
-void brain_melee(edict_t *self)
-{
-	if (prandom(50))
-		self->monsterinfo.currentmove = &brain_move_attack1;
-	else
-		self->monsterinfo.currentmove = &brain_move_attack2;
-}
-
-
 //
 // RUN
 //
@@ -529,41 +282,24 @@ mmove_t brain_move_run = {FRAME_walk101, FRAME_walk111, brain_frames_run, nullpt
 
 void brain_run (edict_t *self)
 {
-	if (self->monsterinfo.aiflags & AI_STAND_GROUND)
-		self->monsterinfo.currentmove = &brain_move_stand;
-	else
-		self->monsterinfo.currentmove = &brain_move_run;
+	self->monsterinfo.currentmove = &brain_move_run;
 }
 
 
 void brain_pain (edict_t *self, edict_t *other, vec_t kick, int32_t damage)
 {
-	if (self->health < (self->max_health / 2))
-		self->s.skinnum = 1;
-
 	if (level.time < self->pain_debounce_time)
 		return;
 
 	self->pain_debounce_time = level.time + 3;
-	if (skill->value == 3)
-		return;		// no pain anims in nightmare
 
 	int32_t r = irandom(2);
 	if (r == 0)
-	{
 		gi.sound (self, CHAN_VOICE, sound_pain1, 1, ATTN_NORM, 0);
-		self->monsterinfo.currentmove = &brain_move_pain1;
-	}
 	else if (r == 1)
-	{
 		gi.sound (self, CHAN_VOICE, sound_pain2, 1, ATTN_NORM, 0);
-		self->monsterinfo.currentmove = &brain_move_pain2;
-	}
 	else
-	{
 		gi.sound (self, CHAN_VOICE, sound_pain1, 1, ATTN_NORM, 0);
-		self->monsterinfo.currentmove = &brain_move_pain3;
-	}
 }
 
 void brain_dead (edict_t *self)
@@ -614,20 +350,13 @@ void brain_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int32_t da
 */
 void SP_monster_brain (edict_t *self)
 {
-	sound_chest_open = gi.soundindex ("brain/brnatck1.wav");
-	sound_tentacles_extend = gi.soundindex ("brain/brnatck2.wav");
-	sound_tentacles_retract = gi.soundindex ("brain/brnatck3.wav");
 	sound_death = gi.soundindex ("brain/brndeth1.wav");
 	sound_idle1 = gi.soundindex ("brain/brnidle1.wav");
 	sound_idle2 = gi.soundindex ("brain/brnidle2.wav");
 	sound_idle3 = gi.soundindex ("brain/brnlens1.wav");
 	sound_pain1 = gi.soundindex ("brain/brnpain1.wav");
 	sound_pain2 = gi.soundindex ("brain/brnpain2.wav");
-	sound_sight = gi.soundindex ("brain/brnsght1.wav");
 	sound_search = gi.soundindex ("brain/brnsrch1.wav");
-	sound_melee1 = gi.soundindex ("brain/melee1.wav");
-	sound_melee2 = gi.soundindex ("brain/melee2.wav");
-	sound_melee3 = gi.soundindex ("brain/melee3.wav");
 
 	self->movetype = MOVETYPE_STEP;
 	self->solid = SOLID_BBOX;
@@ -645,10 +374,6 @@ void SP_monster_brain (edict_t *self)
 	self->monsterinfo.stand = brain_stand;
 	self->monsterinfo.walk = brain_walk;
 	self->monsterinfo.run = brain_run;
-	self->monsterinfo.dodge = brain_dodge;
-//	self->monsterinfo.attack = brain_attack;
-	self->monsterinfo.melee = brain_melee;
-	self->monsterinfo.sight = brain_sight;
 	self->monsterinfo.search = brain_search;
 	self->monsterinfo.idle = brain_idle;
 
@@ -656,6 +381,7 @@ void SP_monster_brain (edict_t *self)
 
 	self->monsterinfo.currentmove = &brain_move_stand;	
 	self->monsterinfo.scale = MODEL_SCALE;
+	self->monsterinfo.damaged_skin = 1;
 
 	walkmonster_start (self);
 }

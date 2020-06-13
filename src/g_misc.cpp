@@ -704,7 +704,7 @@ void SP_misc_explobox (edict_t *self)
 
 	self->die = barrel_delay;
 	self->takedamage = DAMAGE_YES;
-	self->monsterinfo.aiflags = AI_NOSTEP;
+	//self->monsterinfo.aiflags = AI_NOSTEP;
 
 	self->touch = barrel_touch;
 

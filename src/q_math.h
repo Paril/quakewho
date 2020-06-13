@@ -98,6 +98,20 @@ constexpr auto VectorLength(const T *v)
 	return sqrt(VectorLengthSquared(v));
 }
 
+template<typename T>
+constexpr auto VectorDistanceSquared(const T *a, const T *b)
+{
+	T sub[3];
+	VectorSubtract(a, b, sub);
+	return VectorLengthSquared(sub);
+}
+
+template<typename T>
+constexpr auto VectorDistance(const T *a, const T *b)
+{
+	return sqrt(VectorDistanceSquared(a, b));
+}
+
 template<typename Ta, typename Tb>
 inline auto VectorNormalize (const Ta *v, Tb *o)
 {

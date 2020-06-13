@@ -36,7 +36,6 @@ meansofdeath_t meansOfDeath;
 edict_t		*g_edicts;
 
 cvar_t	*dmflags;
-cvar_t	*skill;
 cvar_t	*fraglimit;
 cvar_t	*timelimit;
 cvar_t	*password;
@@ -115,7 +114,6 @@ void InitGame ()
 
 	maxclients = gi.cvar ("maxclients", "4", CVAR_SERVERINFO | CVAR_LATCH);
 	maxspectators = gi.cvar ("maxspectators", "4", CVAR_SERVERINFO);
-	skill = gi.cvar ("skill", "1", CVAR_LATCH);
 	maxentities = gi.cvar ("maxentities", "1024", CVAR_LATCH);
 
 	// change anytime vars
@@ -415,10 +413,14 @@ G_RunFrame
 Advances the world by 0.1 seconds
 ================
 */
+void DrawPoints();
+
 void G_RunFrame ()
 {
 	int32_t		i;
 	edict_t	*ent;
+
+	DrawPoints();
 
 	level.framenum++;
 	level.time = level.framenum*FRAMETIME;
@@ -449,7 +451,7 @@ void G_RunFrame ()
 		if ((ent->groundentity) && (ent->groundentity->linkcount != ent->groundentity_linkcount))
 		{
 			ent->groundentity = nullptr;
-			if ( !(ent->flags & (FL_SWIM|FL_FLY)) && (ent->svflags & SVF_MONSTER) && (!ent->control || !ent->control->client->control_pmove))
+			if ( !(ent->flags & (FL_SWIM|FL_FLY)) && (ent->svflags & SVF_MONSTER))
 			{
 				M_CheckGround (ent);
 			}

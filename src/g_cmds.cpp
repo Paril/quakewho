@@ -130,16 +130,6 @@ void Cmd_Spawn_f (edict_t *ent)
 	ED_CallSpawn(self);
 
 	gi.linkentity(self);
-
-	self->control = ent;
-	ent->control = self;
-
-	ent->movetype = MOVETYPE_NOCLIP;
-	ent->solid = SOLID_NOT;
-	ent->svflags |= SVF_NOCLIENT;
-	ent->client->pers.weapon = nullptr;
-	ent->client->ps.gunindex = MODEL_NONE;
-	gi.linkentity (ent);
 }
 
 /*
@@ -565,16 +555,21 @@ void Cmd_PlayerList_f(edict_t *ent)
 	gi.cprintf(ent, PRINT_HIGH, "%s", text);
 }
 
-void Cmd_ControlToggle_f(edict_t *ent)
+static void Cmd_Team_f(edict_t *ent)
 {
-	if (!ent->control)
-	{
-		gi.cprintf(ent, PRINT_HIGH, "You ain't no monster\n");
-		return;
-	}
+	char *team = gi.argv(1);
 
-	ent->client->control_pmove = !ent->client->control_pmove;
+	if (stricmp(team, "hiders") == 0)
+		ent->client->resp.team = TEAM_HIDERS;
+	if (stricmp(team, "hunters") == 0)
+		ent->client->resp.team = TEAM_HUNTERS;
+
+	ent->client->resp.spectator = false;
+
+	respawn(ent);
 }
+
+void Cmd_Pos_f(edict_t *ent);
 
 /*
 =================
@@ -653,8 +648,10 @@ void ClientCommand (edict_t *ent)
 		Cmd_Wave_f (ent);
 	else if (stricmp(cmd, "playerlist") == 0)
 		Cmd_PlayerList_f(ent);
-	else if (stricmp(cmd, "control_toggle") == 0)
-		Cmd_ControlToggle_f(ent);
+	else if (stricmp(cmd, "team") == 0)
+		Cmd_Team_f(ent);
+	else if (strcmp(cmd, "pos") == 0)
+		Cmd_Pos_f(ent);
 	else	// anything that doesn't match a command will be a chat
 		Cmd_Say_f (ent, false, true);
 }

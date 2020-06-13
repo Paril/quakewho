@@ -100,7 +100,82 @@ void NoAmmoWeaponChange (edict_t *ent)
 		ent->client->newweapon = &g_weapons[WEAP_SHOTGUN];
 	else if (ent->client->pers.ammo[AMMO_GRENADES])
 		ent->client->newweapon = &g_weapons[WEAP_GRENADELAUNCHER];
+}
 
+void EnsureGoodPosition(edict_t *whomst)
+{
+	trace_t tr = gi.trace(whomst->s.origin, whomst->mins, whomst->maxs, whomst->s.origin, whomst, MASK_PLAYERSOLID);
+
+	// all good!
+	if (!tr.allsolid && !tr.startsolid && tr.fraction == 1.0f)
+		return;
+	
+	for (int32_t x = -64; x <= 64; x += 8)
+	for (int32_t y = -64; y <= 64; y += 8)
+	{
+		vec3_t spot = { whomst->s.origin[0] + x, whomst->s.origin[1] + y, whomst->s.origin[2] };
+		tr = gi.trace(spot, whomst->mins, whomst->maxs, spot, whomst, MASK_PLAYERSOLID);
+
+		// all good!
+		if (!tr.allsolid && !tr.startsolid && tr.fraction == 1.0f)
+		{
+			VectorCopy(tr.endpos, whomst->s.origin);
+			return;
+		}
+	}
+}
+
+void Possess(edict_t *player, edict_t *monster)
+{
+	player->movetype = MOVETYPE_NOCLIP;
+	player->solid = SOLID_NOT;
+	player->svflags |= SVF_NOCLIENT;
+	gi.linkentity (player);
+
+	edict_t *copy = G_Spawn();
+
+	int32_t number = copy->s.number;
+	*copy = *monster;
+	copy->s.number = number;
+	copy->area = link_t();
+	copy->monsterinfo.idle_time = 0;
+	copy->health = player->health;
+
+	VectorCopy(player->s.origin, copy->s.origin);
+	copy->s.origin[2] += player->mins[2];
+	copy->s.origin[2] -= copy->mins[2];
+	EnsureGoodPosition(copy);
+	gi.linkentity(copy);
+
+	copy->control = player;
+	player->control = copy;
+
+	player->client->cmd.upmove = 0;
+}
+
+static void Think_HidersWeapon(edict_t *ent)
+{
+	if (ent->control)
+		return;
+
+	if ((ent->client->buttons | ent->client->latched_buttons) & BUTTON_ATTACK)
+	{
+		vec3_t forward, start, end;
+
+		VectorCopy(ent->s.origin, start);
+		start[2] += ent->viewheight;
+
+		AngleVectors(ent->client->ps.viewangles, forward, NULL, NULL);
+
+		VectorMA(start, 64, forward, end);
+
+		trace_t tr = gi.trace(start, vec3_origin, vec3_origin, end, ent, CONTENTS_MONSTER | MASK_SOLID);
+
+		if (tr.fraction == 1.0f || !(tr.ent->svflags & SVF_MONSTER))
+			return;
+
+		Possess(ent, tr.ent);
+	}
 }
 
 /*
@@ -112,6 +187,13 @@ Called by ClientBeginServerFrame and ClientThink
 */
 void Think_Weapon (edict_t *ent)
 {
+	// hiders have no weapons
+	if (ent->client->resp.team == TEAM_HIDERS)
+	{
+		Think_HidersWeapon(ent);
+		return;
+	}
+
 	// if just died, put the weapon away
 	if (ent->health < 1)
 	{

@@ -96,7 +96,7 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 	//if (coop->value && attacker->client)
 	//	meansOfDeath |= MOD_FRIENDLY_FIRE;
 
-	ff = meansOfDeath & MOD_FRIENDLY_FIRE;
+	ff = !!(meansOfDeath & MOD_FRIENDLY_FIRE);
 	mod = meansOfDeath & ~MOD_FRIENDLY_FIRE;
 	message = nullptr;
 	message2 = "";
@@ -423,8 +423,8 @@ void InitClientPersistant (gclient_t *client)
 
 	client->pers.weapon = &g_weapons[WEAP_BLASTER];
 
-	client->pers.health			= 100;
-	client->pers.max_health		= 100;
+	client->pers.health			= 200;
+	client->pers.max_health		= 200;
 
 	client->pers.ammo[AMMO_BULLETS]		= 100;
 	client->pers.ammo[AMMO_SHELLS]		= 20;
@@ -903,7 +903,8 @@ void PutClientInServer (edict_t *ent)
 			client->ps.fov = 160;
 	}
 
-	client->ps.gunindex = gi.modelindex(client->pers.weapon->view_model);
+	if (client->pers.weapon)
+		client->ps.gunindex = gi.modelindex(client->pers.weapon->view_model);
 
 	// clear entity state values
 	ent->s.effects = EF_NONE;
@@ -931,7 +932,7 @@ void PutClientInServer (edict_t *ent)
 	VectorCopy (ent->s.angles, client->v_angle);
 
 	// spawn a spectator
-	if (client->pers.spectator) {
+	if (client->pers.spectator || client->resp.team == TEAM_NONE) {
 		client->chase_target = nullptr;
 
 		client->resp.spectator = true;
@@ -942,7 +943,8 @@ void PutClientInServer (edict_t *ent)
 		ent->client->ps.gunindex = MODEL_NONE;
 		gi.linkentity (ent);
 		return;
-	} else
+	}
+	else
 		client->resp.spectator = false;
 
 	if (!KillBox (ent))
@@ -1278,7 +1280,7 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 		client->resp.cmd_angles[1] = SHORT2ANGLE(ucmd->angles[1]);
 		client->resp.cmd_angles[2] = SHORT2ANGLE(ucmd->angles[2]);
 
-		if (ent->groundentity && !pm.groundentity && (pm.cmd.upmove >= 10) && (pm.waterlevel == WATER_NONE))
+		if (ent->groundentity && !pm.groundentity && (pm.cmd.upmove >= 10) && (pm.waterlevel == WATER_NONE) && level.time > ent->client->jump_sound_debounce)
 			gi.sound(ent, CHAN_VOICE, gi.soundindex("*jump1.wav"), 1, ATTN_NORM, 0);
 
 		ent->viewheight = pm.viewheight;
@@ -1344,7 +1346,6 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 				} else
 					GetChaseTarget(ent);
 			}
-
 		} else if (!client->weapon_thunk) {
 			client->weapon_thunk = true;
 			Think_Weapon (ent);
@@ -1401,7 +1402,7 @@ void ClientBeginServerFrame (edict_t *ent)
 
 	client = ent->client;
 
-	if (client->pers.spectator != client->resp.spectator &&
+	if (client->resp.team && client->pers.spectator != client->resp.spectator &&
 		(level.time - client->respawn_time) >= 5) {
 		spectator_respawn(ent);
 		return;

@@ -63,25 +63,10 @@
     <ClCompile Include="src\m_berserk.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="src\m_boss2.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="src\m_boss3.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="src\m_boss31.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="src\m_boss32.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
     <ClCompile Include="src\m_brain.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\m_chick.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="src\m_flipper.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\m_float.cpp">
@@ -102,9 +87,6 @@
     <ClCompile Include="src\m_infantry.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="src\m_insane.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
     <ClCompile Include="src\m_medic.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -118,9 +100,6 @@
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\m_soldier.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="src\m_supertank.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\m_tank.cpp">
@@ -147,9 +126,6 @@
     <ClCompile Include="src\stdafx.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="src\m_pmove.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\g_local.h">
@@ -161,22 +137,10 @@
     <ClInclude Include="src\m_berserk.h">
       <Filter>inc</Filter>
     </ClInclude>
-    <ClInclude Include="src\m_boss2.h">
-      <Filter>inc</Filter>
-    </ClInclude>
-    <ClInclude Include="src\m_boss31.h">
-      <Filter>inc</Filter>
-    </ClInclude>
-    <ClInclude Include="src\m_boss32.h">
-      <Filter>inc</Filter>
-    </ClInclude>
     <ClInclude Include="src\m_brain.h">
       <Filter>inc</Filter>
     </ClInclude>
     <ClInclude Include="src\m_chick.h">
-      <Filter>inc</Filter>
-    </ClInclude>
-    <ClInclude Include="src\m_flipper.h">
       <Filter>inc</Filter>
     </ClInclude>
     <ClInclude Include="src\m_float.h">
@@ -197,9 +161,6 @@
     <ClInclude Include="src\m_infantry.h">
       <Filter>inc</Filter>
     </ClInclude>
-    <ClInclude Include="src\m_insane.h">
-      <Filter>inc</Filter>
-    </ClInclude>
     <ClInclude Include="src\m_medic.h">
       <Filter>inc</Filter>
     </ClInclude>
@@ -216,9 +177,6 @@
       <Filter>inc</Filter>
     </ClInclude>
     <ClInclude Include="src\m_soldier.h">
-      <Filter>inc</Filter>
-    </ClInclude>
-    <ClInclude Include="src\m_supertank.h">
       <Filter>inc</Filter>
     </ClInclude>
     <ClInclude Include="src\m_tank.h">

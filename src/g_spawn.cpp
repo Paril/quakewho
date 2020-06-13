@@ -78,7 +78,6 @@ void SP_path_corner (edict_t *self);
 
 void SP_misc_teleporter (edict_t *self);
 void SP_misc_teleporter_dest (edict_t *self);
-void SP_misc_insane (edict_t *self);
 
 void SP_monster_berserk (edict_t *self);
 void SP_monster_gladiator (edict_t *self);
@@ -89,7 +88,6 @@ void SP_monster_soldier (edict_t *self);
 void SP_monster_soldier_ss (edict_t *self);
 void SP_monster_tank (edict_t *self);
 void SP_monster_medic (edict_t *self);
-void SP_monster_flipper (edict_t *self);
 void SP_monster_chick (edict_t *self);
 void SP_monster_parasite (edict_t *self);
 void SP_monster_flyer (edict_t *self);
@@ -97,9 +95,6 @@ void SP_monster_brain (edict_t *self);
 void SP_monster_floater (edict_t *self);
 void SP_monster_hover (edict_t *self);
 void SP_monster_mutant (edict_t *self);
-void SP_monster_supertank (edict_t *self);
-void SP_monster_boss2 (edict_t *self);
-void SP_monster_jorg (edict_t *self);
 
 spawn_t	spawns[] = {
 	{"info_player_start", SP_info_player_start},
@@ -153,9 +148,8 @@ spawn_t	spawns[] = {
 	{"path_corner", SP_path_corner},
 	{"misc_teleporter", SP_misc_teleporter},
 	{"misc_teleporter_dest", SP_misc_teleporter_dest},
-	{"misc_insane", SP_misc_insane},
 
-	{"monster_berserk", SP_monster_berserk},
+	/*{"monster_berserk", SP_monster_berserk},
 	{"monster_gladiator", SP_monster_gladiator},
 	{"monster_gunner", SP_monster_gunner},
 	{"monster_infantry", SP_monster_infantry},
@@ -165,17 +159,13 @@ spawn_t	spawns[] = {
 	{"monster_tank", SP_monster_tank},
 	{"monster_tank_commander", SP_monster_tank},
 	{"monster_medic", SP_monster_medic},
-	{"monster_flipper", SP_monster_flipper},
 	{"monster_chick", SP_monster_chick},
 	{"monster_parasite", SP_monster_parasite},
 	{"monster_flyer", SP_monster_flyer},
 	{"monster_brain", SP_monster_brain},
 	{"monster_floater", SP_monster_floater},
 	{"monster_hover", SP_monster_hover},
-	{"monster_mutant", SP_monster_mutant},
-	{"monster_supertank", SP_monster_supertank},
-	{"monster_boss2", SP_monster_boss2},
-	{"monster_jorg", SP_monster_jorg},
+	{"monster_mutant", SP_monster_mutant},*/
 
 	{nullptr, nullptr}
 };
@@ -412,6 +402,697 @@ void G_FindTeams ()
 	gi.dprintf ("%i teams with %i entities\n", c, c2);
 }
 
+#include <array>
+#include <vector>
+#include <set>
+#include <unordered_set>
+#include <unordered_map>
+
+using vec3_array = std::array<vec_t, 3>;
+using grid_array = std::array<uint8_t, 3>;
+
+const uint32_t spawn_grid_size = 64;
+const uint32_t grid_max = 8192 / spawn_grid_size;
+
+template<>
+struct std::hash<grid_array>
+{
+	size_t operator()(const grid_array& _Keyval) const
+	{
+		union {
+			size_t p;
+			struct {
+				uint8_t x, y, z;
+			} xyz;
+		};
+		
+		xyz.x = _Keyval[0];
+		xyz.y = _Keyval[1];
+		xyz.z = _Keyval[2];
+
+		return p;
+	}
+};
+
+struct nav_grid_node
+{
+	grid_array grid_position;
+	vec3_array position;
+	std::unordered_set<grid_array> connections;
+};
+
+std::unordered_map<grid_array, nav_grid_node> grid;
+
+constexpr vec_t grid_to_vec(const uint8_t &val)
+{
+	return (val * spawn_grid_size) - 4096.f;
+}
+
+constexpr uint8_t vec_to_grid(const vec_t &vec)
+{
+	return (uint8_t)((vec + 4096) / spawn_grid_size);
+}
+
+constexpr vec3_array grid_to_vec_array(const grid_array &val)
+{
+	return { grid_to_vec(val[0]), grid_to_vec(val[1]), grid_to_vec(val[2]) };
+}
+
+constexpr grid_array vec_to_grid_array(const vec3_array &val)
+{
+	return { vec_to_grid(val[0]), vec_to_grid(val[1]), vec_to_grid(val[2]) };
+}
+
+constexpr vec3_t small_monster_mins = { -16, -16, 0 };
+constexpr vec3_t small_monster_maxs = { 16, 16, 56 };
+
+static trace_t TraceWrap(const vec3_t start, const vec3_t mins, const vec3_t maxs, const vec3_t end, edict_t *passent, brushcontents_t contentmask)
+{
+	trace_t tr = gi.trace(start, mins, maxs, end, passent, contentmask);
+
+	if (tr.startsolid || tr.allsolid || tr.contents || tr.ent != &g_edicts[0] || tr.fraction < 1.0f || tr.surface || !VectorCompare(tr.endpos, end))
+		return tr;
+
+	// might be a runaway trace
+	return gi.trace(start, mins, maxs, end, passent, contentmask);
+}
+
+static brushcontents_t PointContents(vec3_t pos)
+{
+	brushcontents_t contents = gi.pointcontents(pos);
+
+	if (contents & (CONTENTS_PLAYERCLIP | CONTENTS_MONSTERCLIP))
+		return TraceWrap(pos, vec3_origin, vec3_origin, pos, nullptr, MASK_ALL & ~(CONTENTS_DEADMONSTER | CONTENTS_MONSTER)).contents;
+
+	return contents;
+}
+
+constexpr auto MASK_CLIP = MASK_SOLID | CONTENTS_PLAYERCLIP | CONTENTS_MONSTERCLIP;
+
+static bool CheckGoodOffsettedPoint(vec3_array &point, trace_t &tr)
+{
+	static int8_t offsets[] { 0, 8, 16, -8, -16 };
+
+	for (int8_t offset : offsets)
+	{
+		vec3_array offsetted { point[0], point[1], point[2] + offset };
+
+		brushcontents_t c = PointContents(offsetted.data()) & ~CONTENTS_WATER;
+
+		if (c == CONTENTS_NONE)
+		{
+			tr = TraceWrap(offsetted.data(), vec3_origin, vec3_origin, vec3_t { offsetted[0], offsetted[1], offsetted[2] - 1024 }, nullptr, MASK_CLIP);
+			point = offsetted;
+			return true;
+		}
+	}
+
+	return false;
+}
+
+static void AttemptPositioningFix(const vec3_t dir, vec3_t end)
+{
+	vec3_t negative, positive;
+
+	VectorMA(end, -16, dir, negative);
+	VectorMA(end, 16, dir, positive);
+
+	// no fit; let's shift the x/y around. first, check X.
+	trace_t x_trace = TraceWrap(negative, vec3_origin, vec3_origin, positive, nullptr, MASK_CLIP);
+
+	// -16 to 16 is inside a wall *or* in a good spot already, try the opposite
+	if (x_trace.startsolid || x_trace.allsolid || x_trace.fraction == 1.0)
+		x_trace = TraceWrap(positive, vec3_origin, vec3_origin, negative, nullptr, MASK_CLIP);
+		
+	// we hit a wall; project outwards from this wall piece
+	if (!x_trace.startsolid && !x_trace.allsolid && x_trace.fraction < 1.0)
+		VectorMA(x_trace.endpos, 16, x_trace.plane.normal, end);
+}
+
+static bool PointIsGood(vec3_array &point)
+{
+	trace_t tr;
+
+	if (!CheckGoodOffsettedPoint(point, tr))
+		return false;
+
+	vec3_t end { tr.endpos[0], tr.endpos[1], tr.endpos[2] + 0.125f };
+
+	if (/*tr.startsolid || */tr.allsolid || tr.fraction >= 1.0f || tr.plane.normal[2] < 0.7)
+		return false;
+
+	if ((tr.surface->flags & (SURF_SKY | SURF_NODRAW)) || PointContents(end) != CONTENTS_NONE)
+		return false;
+
+	VectorMA(end, 16.f, tr.plane.normal, end);
+
+	// test monster positioning
+	trace_t fit_trace = TraceWrap(end, small_monster_mins, small_monster_maxs, end, nullptr, MASK_CLIP);
+
+	if (fit_trace.startsolid || fit_trace.allsolid)
+	{
+		AttemptPositioningFix(vec3_t { 1, 0, 0 }, end);
+
+		fit_trace = TraceWrap(end, small_monster_mins, small_monster_maxs, end, nullptr, MASK_CLIP);
+
+		if (fit_trace.startsolid || fit_trace.allsolid)
+		{
+			AttemptPositioningFix(vec3_t { 0, 1, 0 }, end);
+
+			fit_trace = TraceWrap(end, small_monster_mins, small_monster_maxs, end, nullptr, MASK_CLIP);
+		}
+	}
+
+	if (fit_trace.startsolid || fit_trace.allsolid)
+		return false;
+
+	for (int16_t z = vec_to_grid(point[2]); z >= 0; z--)
+	{
+		const grid_array g { vec_to_grid(point[0]), vec_to_grid(point[1]), z };
+		
+		if (!grid.contains(g))
+			continue;
+
+		auto &p = grid[g];
+
+		if (VectorDistance(p.position.data(), end) < 1)
+			return false;
+	}
+
+	VectorCopy(end, point.data());
+	return true;
+}
+
+template<>
+struct std::hash<std::array<float, 3>>
+{
+	size_t operator()(const std::array<float, 3>& _Keyval) const
+	{
+		union {
+			size_t p;
+			struct {
+				uint8_t x, y, z;
+			} xyz;
+		};
+		
+		xyz.x = (_Keyval[0] - -4096) / spawn_grid_size;
+		xyz.y = (_Keyval[1] - -4096) / spawn_grid_size;
+		xyz.z = (_Keyval[2] - -4096) / spawn_grid_size;
+
+		return p;
+	}
+};
+
+std::vector<std::pair<grid_array, nav_grid_node*>> points;
+
+void SP_monster_berserk (edict_t *self);
+void SP_monster_gladiator (edict_t *self);
+void SP_monster_gunner (edict_t *self);
+void SP_monster_infantry (edict_t *self);
+void SP_monster_soldier_light (edict_t *self);
+void SP_monster_soldier (edict_t *self);
+void SP_monster_soldier_ss (edict_t *self);
+void SP_monster_tank (edict_t *self);
+void SP_monster_medic (edict_t *self);
+void SP_monster_chick (edict_t *self);
+void SP_monster_parasite (edict_t *self);
+void SP_monster_flyer (edict_t *self);
+void SP_monster_brain (edict_t *self);
+void SP_monster_floater (edict_t *self);
+void SP_monster_hover (edict_t *self);
+void SP_monster_mutant (edict_t *self);
+
+typedef void (*SP_SpawnFunc)(edict_t *);
+
+SP_SpawnFunc monster_funcs[] = {
+	SP_monster_berserk,
+	SP_monster_gladiator,
+	SP_monster_gunner,
+	SP_monster_infantry,
+	SP_monster_soldier_light,
+	SP_monster_soldier,
+	SP_monster_soldier_ss,
+	SP_monster_tank,
+	SP_monster_medic,
+	SP_monster_chick,
+	SP_monster_parasite,
+	SP_monster_brain,
+	//SP_monster_flyer,
+	//SP_monster_floater,
+	//SP_monster_hover,
+	SP_monster_mutant
+};
+
+/*
+================
+EntitiesRangeFromSpot
+
+Returns the distance to the nearest player from the given spot
+================
+*/
+static vec_t EntitiesRangeFromSpot (nav_grid_node *spot)
+{
+	vec_t	bestdistance = 9999999;
+
+	for (int32_t n = 1; n <= globals.num_edicts; n++)
+	{
+		edict_t *e = &g_edicts[n];
+
+		if (!e->inuse || (!e->client && !(e->svflags & SVF_MONSTER)) || (e->svflags & SVF_NOCLIENT) || e->health <= 0)
+			continue;
+
+		vec_t playerdistance = VectorDistance (spot->position.data(), e->s.origin);
+
+		if (playerdistance < bestdistance)
+			bestdistance = playerdistance;
+	}
+
+	return bestdistance;
+}
+
+/*
+================
+SelectFarthestMonsterSpawnPoint
+================
+*/
+static nav_grid_node *SelectFarthestMonsterSpawnPoint(std::unordered_set<nav_grid_node*> &skip_points)
+{
+	nav_grid_node *bestspot = nullptr;
+	vec_t bestdistance = 0;
+
+	for (auto &pt : points)
+	{
+		if (skip_points.count(pt.second))
+			continue;
+
+		vec_t bestplayerdistance = EntitiesRangeFromSpot (pt.second);
+
+		if (bestplayerdistance > bestdistance)
+		{
+			bestspot = pt.second;
+			bestdistance = bestplayerdistance;
+		}
+	}
+
+	if (bestspot)
+		return bestspot;
+
+	return points[irandom(points.size() - 1)].second;
+}
+
+template<typename T>
+struct std::hash<std::tuple<T, T>>
+{
+	size_t operator()(const std::tuple<T, T>& _Keyval) const
+	{
+		std::hash<T> ga;
+		return ga(std::get<0>(_Keyval)) ^ ga(std::get<1>(_Keyval));
+	}
+};
+
+nav_grid_node *ClosestNode(const vec3_t position)
+{
+	nav_grid_node *best = nullptr;
+	float best_dist = -1;
+
+	for (auto &pt : grid)
+	{
+		float len = VectorDistance(position, pt.second.position.data());
+
+		if (!best || len < best_dist)
+		{
+			best = &pt.second;
+			best_dist = len;
+		}
+	}
+
+	return best;
+}
+
+typedef float (*AStar_EstimateCost)(nav_grid_node *node, nav_grid_node *goal);
+
+struct nav_grid_astar
+{
+	nav_grid_node *node;
+	float fScore;
+};
+
+template<>
+struct std::less<nav_grid_astar>
+{
+	constexpr bool operator()(const nav_grid_astar &lhs, const nav_grid_astar &rhs) const 
+	{
+		return lhs.fScore < rhs.fScore;
+	}
+};
+
+static std::vector<nav_grid_node *> AStarReconstruct(std::unordered_map<nav_grid_node *, nav_grid_node *> &cameFrom, nav_grid_node *current)
+{
+    std::vector<nav_grid_node *> total_path { current };
+
+    while (cameFrom.contains(current))
+	{
+        current = cameFrom[current];
+        total_path.push_back(current);
+	}
+	
+	std::reverse(total_path.begin(), total_path.end());
+    return total_path;
+}
+
+std::vector<nav_grid_node *> AStar(nav_grid_node *start, nav_grid_node *goal, AStar_EstimateCost h, AStar_EstimateCost d)
+{
+	std::set<nav_grid_astar> openSet;
+	openSet.emplace(nav_grid_astar { .node = start, .fScore = h(start, goal) });
+
+	std::unordered_set<nav_grid_node*> openSetNodes;
+	openSetNodes.emplace(start);
+
+	std::unordered_map<nav_grid_node *, nav_grid_node *> cameFrom;
+	
+	std::unordered_map<nav_grid_node *, float> gScore;
+	gScore[start] = 0;
+
+	while (!openSet.empty())
+	{
+		auto current = openSet.begin();
+		auto currentNode = (*current).node;
+
+        if (currentNode == goal)
+            return AStarReconstruct(cameFrom, (*current).node);
+
+		openSet.erase(current);
+		openSetNodes.erase(currentNode);
+
+        for (auto &neighbor_id : currentNode->connections)
+		{
+			auto neighbor = &grid[neighbor_id];
+            auto tentative_gScore = gScore[currentNode] + d(currentNode, neighbor);
+
+            if (tentative_gScore < (gScore.contains(neighbor) ? gScore[neighbor] : INFINITY))
+			{
+                cameFrom[neighbor] = currentNode;
+                gScore[neighbor] = tentative_gScore;
+
+				float score = gScore[neighbor] + h(neighbor, goal);
+
+                if (!openSetNodes.contains(neighbor))
+				{
+					openSet.emplace(nav_grid_astar { .node = neighbor, .fScore = score });
+					openSetNodes.emplace(neighbor);
+				}
+				else for (auto it = openSet.begin(); it != openSet.end(); it++)
+				{
+					if ((*it).node != neighbor)
+						continue;
+
+					openSet.erase(it);
+					openSet.emplace(nav_grid_astar { .node = neighbor, .fScore = score });
+					break;
+				}
+			}
+		}
+	}
+
+	return std::vector<nav_grid_node *>();
+}
+
+std::vector<nav_grid_node*> the_path;
+std::vector<nav_grid_node*>::iterator path_iterator;
+
+float Estimate(nav_grid_node *current, nav_grid_node *goal)
+{
+	return VectorDistance(current->position.data(), goal->position.data());
+}
+
+void Cmd_Pos_f(edict_t *ent)
+{
+	return;
+	/*auto v = grid_to_vec_array(vec_to_grid_array({ ent->s.origin[0], ent->s.origin[1], ent->s.origin[2] }));
+	PointIsGood(v);
+	gi.WriteByte(SVC_TEMP_ENTITY);
+	gi.WriteByte(TE_FLECHETTE);
+	gi.WritePosition(v.data());
+	gi.WriteDir(vec3_t { 0, 0, 1 });
+	gi.multicast(v.data(), MULTICAST_ALL);
+	return;*/
+
+	nav_grid_node *goal = ClosestNode(G_Find(NULL, FOFS(classname), "info_player_deathmatch")->s.origin);
+	nav_grid_node *current = ClosestNode(ent->s.origin);
+
+	the_path = AStar(current, goal, Estimate, Estimate);
+	path_iterator = the_path.begin();
+
+	gi.cprintf(ent, PRINT_HIGH, "path: %u len\n", the_path.size());
+}
+
+void DrawPoints()
+{
+#if NODRAW
+	int draw_count = 0;
+
+	nav_grid_node *prev = nullptr;
+
+	if (the_path.size())
+	for (; ; path_iterator++)
+	{
+		if (path_iterator == the_path.end())
+		{
+			path_iterator = the_path.begin();
+			prev = nullptr;
+		}
+		
+		auto cur = *path_iterator;
+
+		if (prev)
+		{
+			gi.WriteByte(SVC_TEMP_ENTITY);
+			gi.WriteByte(TE_BFG_LASER);
+			gi.WritePosition(prev->position.data());
+			gi.WritePosition(cur->position.data());
+			gi.multicast(cur->position.data(), MULTICAST_ALL);
+
+			if (++draw_count > 8)
+				break;
+		}
+
+		prev = cur;
+	}
+
+	auto closest = ClosestNode(g_edicts[1].s.origin);
+
+	if (closest)
+	{
+		/*gi.WriteByte(SVC_TEMP_ENTITY);
+		gi.WriteByte(TE_BFG_LASER);
+		gi.WritePosition(vec3_t { closest->position[0] - 16, closest->position[1], closest->position[2] });
+		gi.WritePosition(vec3_t { closest->position[0] + 16, closest->position[1], closest->position[2] });
+		gi.multicast(closest->position.data(), MULTICAST_ALL);
+		
+		gi.WriteByte(SVC_TEMP_ENTITY);
+		gi.WriteByte(TE_BFG_LASER);
+		gi.WritePosition(vec3_t { closest->position[0], closest->position[1] - 16, closest->position[2] });
+		gi.WritePosition(vec3_t { closest->position[0], closest->position[1] + 16, closest->position[2] });
+		gi.multicast(closest->position.data(), MULTICAST_ALL);*/
+
+		for (auto &connection : closest->connections)
+		{
+			auto connected_node = &grid[connection];
+
+			gi.WriteByte(SVC_TEMP_ENTITY);
+			gi.WriteByte(TE_BFG_LASER);
+			gi.WritePosition(closest->position.data());
+			gi.WritePosition(connected_node->position.data());
+			gi.multicast(closest->position.data(), MULTICAST_ALL);
+		}
+	}
+#endif
+	static int num_monsters = 0;
+	
+	if (num_monsters < 64)
+	{
+		edict_t *ent = G_Spawn();
+		monster_funcs[irandom(lengthof(monster_funcs) - 1)](ent);
+
+		gi.unlinkentity(ent);
+
+		std::unordered_set<nav_grid_node*> skip_points;
+
+		while (true)
+		{
+			auto pt = SelectFarthestMonsterSpawnPoint(skip_points);
+			VectorCopy(pt->position.data(), ent->s.origin);
+			ent->s.origin[2] -= ent->mins[2];
+
+			trace_t tr = TraceWrap(ent->s.origin, ent->mins, ent->maxs, ent->s.origin, nullptr, MASK_CLIP);
+
+			if (tr.allsolid || tr.startsolid || tr.fraction != 1.0)
+			{
+				skip_points.emplace(pt);
+				continue;
+			}
+
+			break;
+		}
+
+		gi.linkentity(ent);
+		ent->s.angles[1] = random(360);
+		ent->flags |= FL_PARTIALGROUND;
+
+		gi.linkentity(ent);
+		num_monsters++;
+	}
+}
+
+static void PrecacheMonsters()
+{
+	edict_t *ent = G_Spawn();
+
+	for (auto func : monster_funcs)
+		func(ent);
+
+	G_FreeEdict(ent);
+}
+
+static void FindGridConnections(std::pair<const grid_array, nav_grid_node> &node)
+{
+	for (int8_t x = -1; x <= 1; x++)
+	for (int8_t y = -1; y <= 1; y++)
+	for (int8_t z = 0; z <= node.first[2] + 1; z++)
+	{
+		if (x == 0 && y == 0 && z == node.first[2])
+			continue;
+
+		const grid_array grid_val { node.first[0] + x,  node.first[1] + y, z };
+
+		if (!grid.contains(grid_val))
+			continue;
+
+		const auto &n = grid[grid_val];
+
+		trace_t tr = TraceWrap(node.second.position.data(), vec3_origin, vec3_origin, n.position.data(), nullptr, MASK_CLIP);
+
+		if (tr.fraction != 1.0f)
+		{
+			// try a step up; trace from cur to up, then up to node
+			if (n.position.data()[2] > node.second.position[2])
+			{
+				vec3_array step_up = node.second.position;
+
+				while (fabs(step_up[2] - n.position.data()[2]))
+				{
+					// go upwards
+					vec3_array moved_up = { step_up[0], step_up[1], min(n.position.data()[2], step_up[2] + 18) };
+					tr = TraceWrap(step_up.data(), vec3_origin, vec3_origin, moved_up.data(), nullptr, MASK_CLIP);
+
+					step_up = moved_up;
+
+					// must be clear
+					if (tr.fraction == 1.0f)
+					{
+						// go towards the node
+						tr = TraceWrap(step_up.data(), vec3_origin, vec3_origin, n.position.data(), nullptr, MASK_CLIP);
+
+						// we potentially hit a stair; copy endpos, try again on next loop
+						if (tr.fraction < 1.0f)
+							step_up = { tr.endpos[0], tr.endpos[1], tr.endpos[2] };
+					}
+
+					if (tr.fraction == 1.0f)
+						break;
+				}
+			}
+
+			if (tr.fraction != 1.0f && n.position.data()[2] < node.second.position[2])
+			{
+				// try a step down; trace from cur to node.xy, then node.xy to node
+				tr = TraceWrap(node.second.position.data(), vec3_origin, vec3_origin, vec3_t { n.position[0], n.position[1], node.second.position[2] }, nullptr, MASK_CLIP);
+
+				// missed straight trace, try a step up first
+				if (tr.fraction != 1.0f)
+				{
+					trace_t step_up = TraceWrap(node.second.position.data(), vec3_origin, vec3_origin, vec3_t { node.second.position[0], node.second.position[1], node.second.position[2] + 18 }, nullptr, MASK_CLIP);
+
+					if (step_up.fraction == 1.0f)
+						tr = TraceWrap(vec3_t { node.second.position[0], node.second.position[1], node.second.position[2] + 18 }, vec3_origin, vec3_origin, vec3_t { n.position[0], n.position[1], node.second.position[2] + 18 }, nullptr, MASK_CLIP);
+				}
+
+				if (tr.fraction == 1.0f)
+					tr = TraceWrap(vec3_t { n.position[0], n.position[1], node.second.position[2] }, vec3_origin, vec3_origin, n.position.data(), nullptr, MASK_CLIP);
+			}
+		}
+
+		if (tr.fraction != 1.0f || tr.startsolid || tr.allsolid)
+			continue;
+	
+		node.second.connections.emplace(grid_val);
+	}
+}
+
+static void FloodFillMark(nav_grid_node *node, std::unordered_set<grid_array> &visited_nodes)
+{
+	if (!node || visited_nodes.contains(node->grid_position))
+		return;
+
+	visited_nodes.emplace(node->grid_position);
+
+	for (auto connection : node->connections)
+		FloodFillMark(&grid[connection], visited_nodes);
+}
+
+static void FindSpawnPoints()
+{
+	std::unordered_set<std::array<float, 3>> hashed_points;
+
+	for (uint8_t z = 0; z < grid_max; z++)
+	for (uint8_t y = 0; y < grid_max; y++)
+	for (uint8_t x = 0; x < grid_max; x++)
+	{
+		const grid_array grid_val { x, y, z };
+		vec3_array point = grid_to_vec_array(grid_val);
+
+		if (!PointIsGood(point))
+			continue;
+
+		hashed_points.emplace(point);
+		grid[grid_val] = nav_grid_node { .grid_position = grid_val, .position = point };
+	}
+
+	for (auto &p : grid)
+		FindGridConnections(p);
+
+	std::unordered_set<grid_array> visited_nodes;
+	edict_t *point = nullptr;
+
+	while (point = G_Find(point, FOFS(classname), "info_player_deathmatch"))
+		FloodFillMark(ClosestNode(point->s.origin), visited_nodes);
+	
+	for (auto it = grid.begin(); it != grid.end(); )
+	{
+		if (!visited_nodes.contains((*it).first))
+			it = grid.erase(it);
+		else
+			it++;
+	}
+
+	for (auto &p : grid)
+		points.push_back(std::make_pair(p.first, &p.second));
+
+	std::sort(points.begin(), points.end(), [] (auto &x, auto &y) {
+		if (x.second->position[2] == y.second->position[2])
+		{
+			if (x.second->position[1] == y.second->position[1])
+				return x.second->position[0] > y.second->position[0];
+
+			return x.second->position[1] > y.second->position[1];
+		}
+
+		return x.second->position[2] > y.second->position[2];
+	});
+
+	gi.dprintf("Found %u spawn points\n", grid.size());
+}
+
 /*
 ==============
 SpawnEntities
@@ -438,15 +1119,6 @@ void SpawnEntities (char *mapname, char *entities, char *spawnpoint)
 	int32_t			inhibit;
 	char		*com_token;
 	int32_t			i;
-	vec_t		skill_level;
-
-	skill_level = floor (skill->value);
-	if (skill_level < 0)
-		skill_level = 0;
-	if (skill_level > 3)
-		skill_level = 3;
-	if (skill->value != skill_level)
-		gi.cvar_forceset("skill", va("%f", skill_level));
 
 	SaveClientData ();
 
@@ -501,6 +1173,8 @@ void SpawnEntities (char *mapname, char *entities, char *spawnpoint)
 	}	
 
 	gi.dprintf ("%i entities inhibited\n", inhibit);
+
+	FindSpawnPoints();
 
 #if defined(DEBUG)
 	i = 1;
@@ -583,13 +1257,13 @@ char *dm_statusbar =
 "xr -28 "
 
 "yt 64 "
-"picn a_bullets "
+"picn w_machinegun "
 
 "yt 92 "
-"picn a_shells "
+"picn w_shotgun "
 
 "yt 120 "
-"picn a_grenades "
+"picn w_glauncher "
 
 "xr -80 "
 
@@ -715,8 +1389,6 @@ void SP_worldspawn (edict_t *ent)
 
 	gi.soundindex ("weapons/noammo.wav");
 
-	gi.soundindex ("infantry/inflies1.wav");
-
 	sm_meat_index = gi.modelindex ("models/objects/gibs/sm_meat/tris.md2");
 	gi.modelindex ("models/objects/gibs/arm/tris.md2");
 	gi.modelindex ("models/objects/gibs/bone/tris.md2");
@@ -769,5 +1441,7 @@ void SP_worldspawn (edict_t *ent)
 
 	// 63 testing
 	gi.configstring(CS_LIGHTS+63, "a");
+
+	PrecacheMonsters();
 }
 

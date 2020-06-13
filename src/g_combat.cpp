@@ -96,19 +96,6 @@ void Killed (edict_t *targ, edict_t *inflictor, edict_t *attacker, int32_t damag
 
 	targ->enemy = attacker;
 
-	if ((targ->svflags & SVF_MONSTER) && (targ->deadflag != DEAD_DEAD))
-	{
-//		targ->svflags |= SVF_DEADMONSTER;	// now treat as a different content type
-		if (!(targ->monsterinfo.aiflags & AI_GOOD_GUY))
-		{
-			//if (coop->value && attacker->client)
-			//	attacker->client->resp.score++;
-			// medics won't heal monsters that they kill themselves
-			if (strcmp(attacker->classname, "monster_medic") == 0)
-				targ->owner = attacker;
-		}
-	}
-
 	if (targ->movetype == MOVETYPE_PUSH || targ->movetype == MOVETYPE_STOP || targ->movetype == MOVETYPE_NONE)
 	{	// doors, triggers, etc
 		targ->die (targ, inflictor, attacker, damage, point);
@@ -140,81 +127,6 @@ void SpawnDamage (int32_t type, const vec3_t origin, const vec3_t normal, int32_
 	gi.WritePosition (origin);
 	gi.WriteDir (normal);
 	gi.multicast (origin, MULTICAST_PVS);
-}
-
-void M_ReactToDamage (edict_t *targ, edict_t *attacker)
-{
-	if (!(attacker->client) && !(attacker->svflags & SVF_MONSTER))
-		return;
-
-	if (attacker == targ || attacker == targ->enemy)
-		return;
-
-	// if we are a good guy monster and our attacker is a player
-	// or another good guy, do not get mad at them
-	if (targ->monsterinfo.aiflags & AI_GOOD_GUY)
-	{
-		if (attacker->client || (attacker->monsterinfo.aiflags & AI_GOOD_GUY))
-			return;
-	}
-
-	// we now know that we are not both good guys
-
-	// if attacker is a client, get mad at them because he's good and we're not
-	if (attacker->client)
-	{
-		targ->monsterinfo.aiflags &= ~AI_SOUND_TARGET;
-
-		// this can only happen in coop (both new and old enemies are clients)
-		// only switch if can't see the current enemy
-		if (targ->enemy && targ->enemy->client)
-		{
-			if (visible(targ, targ->enemy))
-			{
-				targ->oldenemy = attacker;
-				return;
-			}
-			targ->oldenemy = targ->enemy;
-		}
-		targ->enemy = attacker;
-		if (!(targ->monsterinfo.aiflags & AI_DUCKED))
-			FoundTarget (targ);
-		return;
-	}
-
-	// it's the same base (walk/swim/fly) type and a different classname and it's not a tank
-	// (they spray too much), get mad at them
-	if (((targ->flags & (FL_FLY|FL_SWIM)) == (attacker->flags & (FL_FLY|FL_SWIM))) &&
-		 (strcmp (targ->classname, attacker->classname) != 0) &&
-		 (strcmp(attacker->classname, "monster_tank") != 0) &&
-		 (strcmp(attacker->classname, "monster_supertank") != 0) &&
-		 (strcmp(attacker->classname, "monster_makron") != 0) &&
-		 (strcmp(attacker->classname, "monster_jorg") != 0) )
-	{
-		if (targ->enemy && targ->enemy->client)
-			targ->oldenemy = targ->enemy;
-		targ->enemy = attacker;
-		if (!(targ->monsterinfo.aiflags & AI_DUCKED))
-			FoundTarget (targ);
-	}
-	// if they *meant* to shoot us, then shoot back
-	else if (attacker->enemy == targ)
-	{
-		if (targ->enemy && targ->enemy->client)
-			targ->oldenemy = targ->enemy;
-		targ->enemy = attacker;
-		if (!(targ->monsterinfo.aiflags & AI_DUCKED))
-			FoundTarget (targ);
-	}
-	// otherwise get mad at whoever they are mad at (help our buddy) unless it is us!
-	else if (attacker->enemy && attacker->enemy != targ)
-	{
-		if (targ->enemy && targ->enemy->client)
-			targ->oldenemy = targ->enemy;
-		targ->enemy = attacker->enemy;
-		if (!(targ->monsterinfo.aiflags & AI_DUCKED))
-			FoundTarget (targ);
-	}
 }
 
 bool CheckTeamDamage (edict_t *targ, edict_t *attacker)
@@ -319,21 +231,23 @@ void T_Damage (edict_t *targ, edict_t *inflictor, edict_t *attacker, const vec3_
 		}
 	}
 
-	if (targ->svflags & SVF_MONSTER)
+	if (take && targ->pain)
 	{
-		M_ReactToDamage (targ, attacker);
-		if (!(targ->monsterinfo.aiflags & AI_DUCKED) && (take))
+		if (targ->svflags & SVF_MONSTER)
 		{
-			targ->pain (targ, attacker, knockback, take);
-			// nightmare mode monsters don't go into pain frames often
-			if (skill->value == 3)
-				targ->pain_debounce_time = level.time + 5;
+			if (targ->health < targ->max_health * 0.5f)
+				targ->s.skinnum = targ->monsterinfo.damaged_skin;
+			else
+				targ->s.skinnum = targ->monsterinfo.undamaged_skin;
+			
+			if (prandom(15))
+				targ->monsterinfo.next_runwalk_check -= irandom(1, 16);
+			if (prandom(15))
+				targ->monsterinfo.should_stand_check -= irandom(1, 16);
+			if (prandom(5))
+				targ->ideal_yaw = random(360);
 		}
-	}
-	else if (take)
-	{
-		if (targ->pain)
-			targ->pain (targ, attacker, knockback, take);
+		targ->pain (targ, attacker, knockback, take);
 	}
 
 	// add to the damage inflicted on a player this frame

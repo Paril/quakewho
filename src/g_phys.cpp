@@ -103,9 +103,8 @@ bool SV_RunThink (edict_t *ent)
 		return true;
 	
 	ent->nextthink = 0;
-	if (!ent->think)
-		gi.error ("nullptr ent->think");
-	ent->think (ent);
+	if (ent->think)
+		ent->think (ent);
 
 	return false;
 }
@@ -814,12 +813,6 @@ void SV_AddRotationalFriction (edict_t *ent)
 
 void SV_Physics_Step (edict_t *ent)
 {
-	if (ent->control && ent->control->client->control_pmove)
-	{
-		SV_RunThink (ent);
-		return;
-	}
-
 	bool		wasonground;
 	bool		hitsound = false;
 	vec_t		*vel;
@@ -875,7 +868,7 @@ void SV_Physics_Step (edict_t *ent)
 	{
 		speed = fabs(ent->velocity[2]);
 		control = speed < sv_stopspeed ? sv_stopspeed : speed;
-		newspeed = speed - (FRAMETIME * control * sv_waterfriction * ent->waterlevel);
+		newspeed = speed - (FRAMETIME * control * sv_waterfriction * (float)ent->waterlevel);
 		if (newspeed < 0)
 			newspeed = 0;
 		newspeed /= speed;
@@ -942,6 +935,8 @@ void G_RunEntity (edict_t *ent)
 
 	switch ( (int32_t)ent->movetype)
 	{
+	case MOVETYPE_WALK:
+		break;
 	case MOVETYPE_PUSH:
 	case MOVETYPE_STOP:
 		SV_Physics_Pusher (ent);

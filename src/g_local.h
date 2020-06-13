@@ -148,38 +148,6 @@ enum gibtype_t : bool
 	GIB_METALLIC
 };
 
-//monster ai flags
-enum aiflags_t : uint32_t
-{
-	AI_NONE					= 0,
-	AI_STAND_GROUND			= bit(0),
-	AI_TEMP_STAND_GROUND	= bit(1),
-	AI_SOUND_TARGET			= bit(2),
-	AI_LOST_SIGHT			= bit(3),
-	AI_PURSUIT_LAST_SEEN	= bit(4),
-	AI_PURSUE_NEXT			= bit(5),
-	AI_PURSUE_TEMP			= bit(6),
-	AI_HOLD_FRAME			= bit(7),
-	AI_GOOD_GUY				= bit(8),
-	AI_BRUTAL				= bit(9),
-	AI_NOSTEP				= bit(10),
-	AI_DUCKED				= bit(11),
-	AI_COMBAT_POINT			= bit(12),
-	AI_MEDIC				= bit(13),
-	AI_RESURRECTING			= bit(14)
-};
-
-MAKE_BITFLAGS(aiflags_t);
-
-//monster attack state
-enum aistate_t : uint8_t
-{
-	AS_STRAIGHT,
-	AS_SLIDING,
-	AS_MELEE,
-	AS_MISSILE
-};
-
 // handedness values
 enum handedness_t : uint8_t
 {
@@ -354,7 +322,6 @@ struct mmove_t
 struct monsterinfo_t
 {
 	mmove_t		*currentmove;
-	aiflags_t	aiflags;
 	int32_t		nextframe;
 	vec_t		scale;
 
@@ -363,23 +330,17 @@ struct monsterinfo_t
 	void		(*search)(edict_t *self);
 	void		(*walk)(edict_t *self);
 	void		(*run)(edict_t *self);
-	void		(*dodge)(edict_t *self, edict_t *other, vec_t eta);
-	void		(*attack)(edict_t *self);
-	void		(*melee)(edict_t *self);
-	void		(*sight)(edict_t *self, edict_t *other);
-	bool		(*checkattack)(edict_t *self);
 
 	vec_t		pausetime;
-	vec_t		attack_finished;
 
 	vec3_t		saved_goal;
 	vec_t		search_time;
 	vec_t		trail_time;
-	vec3_t		last_sighting;
-	aistate_t	attack_state;
-	bool		lefty;
 	vec_t		idle_time;
 	int32_t		linkcount;
+
+	vec_t		next_runwalk_check, should_stand_check;
+	int32_t		undamaged_skin, damaged_skin;
 };
 
 extern	game_locals_t	game;
@@ -448,7 +409,6 @@ extern	edict_t			*g_edicts;
 
 extern	cvar_t	*maxentities;
 extern	cvar_t	*dmflags;
-extern	cvar_t	*skill;
 extern	cvar_t	*fraglimit;
 extern	cvar_t	*timelimit;
 extern	cvar_t	*password;
@@ -609,24 +569,15 @@ const int32_t DEFAULT_SSHOTGUN_COUNT	= 20;
 //
 // g_monster.c
 //
-void monster_fire_bullet (edict_t *self, vec3_t start, vec3_t dir, int32_t damage, int32_t kick, int32_t hspread, int32_t vspread, int32_t flashtype);
-void monster_fire_shotgun (edict_t *self, vec3_t start, vec3_t aimdir, int32_t damage, int32_t kick, int32_t hspread, int32_t vspread, int32_t count, int32_t flashtype);
-void monster_fire_blaster (edict_t *self, vec3_t start, vec3_t dir, int32_t damage, int32_t speed, int32_t flashtype, entity_effects_t effect);
-void monster_fire_grenade (edict_t *self, vec3_t start, vec3_t aimdir, int32_t damage, int32_t speed, int32_t flashtype);
-void monster_fire_rocket (edict_t *self, vec3_t start, vec3_t dir, int32_t damage, int32_t speed, int32_t flashtype);
-void monster_fire_railgun (edict_t *self, vec3_t start, vec3_t aimdir, int32_t damage, int32_t kick, int32_t flashtype);
-void monster_fire_bfg (edict_t *self, vec3_t start, vec3_t aimdir, int32_t damage, int32_t speed, int32_t kick, vec_t damage_radius, int32_t flashtype);
 void M_droptofloor (edict_t *ent);
 void monster_think (edict_t *self);
 void walkmonster_start (edict_t *self);
 void swimmonster_start (edict_t *self);
 void flymonster_start (edict_t *self);
-void AttackFinished (edict_t *self, vec_t time);
 void monster_death_use (edict_t *self);
 void M_CatagorizePosition (edict_t *ent);
-bool M_CheckAttack (edict_t *self);
-void M_FlyCheck (edict_t *self);
 void M_CheckGround (edict_t *ent);
+bool M_FidgetCheck (edict_t *ent, int percent);
 
 //
 // g_misc.c
@@ -642,16 +593,13 @@ void BecomeExplosion1(edict_t *self);
 void ai_stand (edict_t *self, vec_t dist);
 void ai_move (edict_t *self, vec_t dist);
 void ai_walk (edict_t *self, vec_t dist);
-void ai_turn (edict_t *self, vec_t dist);
 void ai_run (edict_t *self, vec_t dist);
 void ai_charge (edict_t *self, vec_t dist);
 range_t range (edict_t *self, edict_t *other);
 
-void FoundTarget (edict_t *self);
 bool infront (edict_t *self, edict_t *other);
 bool visible (edict_t *self, edict_t *other);
 bool FacingIdeal(edict_t *self);
-bool FindTarget (edict_t *self);
 
 //
 // g_weapon.c
@@ -681,7 +629,6 @@ void ClientBeginServerFrame (edict_t *ent);
 //
 // g_player.c
 //
-void player_pain (edict_t *self, edict_t *other, vec_t kick, int32_t damage);
 void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int32_t damage, const vec3_t point);
 
 //
@@ -747,6 +694,14 @@ enum animpriority_t : uint8_t
 	ANIM_REVERSE
 };
 
+enum playerteam_t : uint8_t
+{
+	TEAM_NONE,
+
+	TEAM_HIDERS,
+	TEAM_HUNTERS
+};
+
 // client data that stays across multiple level loads
 struct client_persistant_t
 {
@@ -780,6 +735,7 @@ struct client_respawn_t
 	vec3_t			cmd_angles;			// angles sent over in the last command
 
 	bool			spectator;			// client is a spectator
+	playerteam_t	team;
 };
 
 // this structure is cleared on each PutClientInServer(),
@@ -848,14 +804,9 @@ struct gclient_t
 	edict_t		*chase_target;		// player we are chasing
 	bool		update_chase;		// need to update chase info?
 
-	bool		control_pmove, control_waitjump;
+	bool		control_waitjump;
 	usercmd_t	cmd;
-};
-
-struct m_pmove_t : pmove_t
-{
-	vec_t forwardmove_f, sidemove_f;
-	vec3_t origin_f, velocity_f;
+	vec_t		jump_sound_debounce;
 };
 
 struct edict_t

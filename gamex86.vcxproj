@@ -14,19 +14,19 @@
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{D86BA707-9BEF-408E-90A1-2985B50FB996}</ProjectGuid>
     <RootNamespace>gamex86</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.14393.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
@@ -43,14 +43,16 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <OutDir>E:\SteamLibrary\steamapps\common\Quake 2\quakewho\</OutDir>
+    <OutDir>G:\Quake 2\quakewho\</OutDir>
+    <CodeAnalysisRuleSet>MixedMinimumRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <OutDir>E:\SteamLibrary\steamapps\common\Quake 2\quakewho\</OutDir>
+    <OutDir>G:\Quake 2\quakewho\</OutDir>
+    <CodeAnalysisRuleSet>MixedMinimumRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
-      <WarningLevel>EnableAllWarnings</WarningLevel>
+      <WarningLevel>Level4</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -61,6 +63,7 @@
       <ErrorReporting>Send</ErrorReporting>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>q_shared.h</PrecompiledHeaderFile>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
       <ModuleDefinitionFile>src\game.def</ModuleDefinitionFile>
@@ -69,7 +72,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <WarningLevel>EnableAllWarnings</WarningLevel>
+      <WarningLevel>Level4</WarningLevel>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
@@ -81,6 +84,7 @@
       <ErrorReporting>Send</ErrorReporting>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>q_shared.h</PrecompiledHeaderFile>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -109,29 +113,21 @@
     <ClCompile Include="src\g_utils.cpp" />
     <ClCompile Include="src\g_weapon.cpp" />
     <ClCompile Include="src\m_berserk.cpp" />
-    <ClCompile Include="src\m_boss2.cpp" />
-    <ClCompile Include="src\m_boss3.cpp" />
-    <ClCompile Include="src\m_boss31.cpp" />
-    <ClCompile Include="src\m_boss32.cpp" />
     <ClCompile Include="src\m_brain.cpp" />
     <ClCompile Include="src\m_chick.cpp" />
     <ClInclude Include="src\g_fields.h" />
     <ClInclude Include="src\m_flash.h" />
-    <ClCompile Include="src\m_flipper.cpp" />
     <ClCompile Include="src\m_float.cpp" />
     <ClCompile Include="src\m_flyer.cpp" />
     <ClCompile Include="src\m_gladiator.cpp" />
     <ClCompile Include="src\m_gunner.cpp" />
     <ClCompile Include="src\m_hover.cpp" />
     <ClCompile Include="src\m_infantry.cpp" />
-    <ClCompile Include="src\m_insane.cpp" />
     <ClCompile Include="src\m_medic.cpp" />
     <ClCompile Include="src\m_move.cpp" />
     <ClCompile Include="src\m_mutant.cpp" />
     <ClCompile Include="src\m_parasite.cpp" />
-    <ClCompile Include="src\m_pmove.cpp" />
     <ClCompile Include="src\m_soldier.cpp" />
-    <ClCompile Include="src\m_supertank.cpp" />
     <ClCompile Include="src\m_tank.cpp" />
     <ClCompile Include="src\p_client.cpp" />
     <ClCompile Include="src\p_hud.cpp" />
@@ -148,26 +144,20 @@
     <ClInclude Include="src\game.h" />
     <ClInclude Include="src\g_local.h" />
     <ClInclude Include="src\m_berserk.h" />
-    <ClInclude Include="src\m_boss2.h" />
-    <ClInclude Include="src\m_boss31.h" />
-    <ClInclude Include="src\m_boss32.h" />
     <ClInclude Include="src\m_brain.h" />
     <ClInclude Include="src\m_chick.h" />
-    <ClInclude Include="src\m_flipper.h" />
     <ClInclude Include="src\m_float.h" />
     <ClInclude Include="src\m_flyer.h" />
     <ClInclude Include="src\m_gladiator.h" />
     <ClInclude Include="src\m_gunner.h" />
     <ClInclude Include="src\m_hover.h" />
     <ClInclude Include="src\m_infantry.h" />
-    <ClInclude Include="src\m_insane.h" />
     <ClInclude Include="src\m_medic.h" />
     <ClInclude Include="src\m_mutant.h" />
     <ClInclude Include="src\m_parasite.h" />
     <ClInclude Include="src\m_player.h" />
     <ClInclude Include="src\m_rider.h" />
     <ClInclude Include="src\m_soldier.h" />
-    <ClInclude Include="src\m_supertank.h" />
     <ClInclude Include="src\m_tank.h" />
     <ClInclude Include="src\q_bitflags.h" />
     <ClInclude Include="src\q_math.h" />

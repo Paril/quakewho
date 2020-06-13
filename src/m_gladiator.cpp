@@ -32,13 +32,8 @@ GLADIATOR
 static soundindex_t	sound_pain1;
 static soundindex_t	sound_pain2;
 static soundindex_t	sound_die;
-static soundindex_t	sound_gun;
-static soundindex_t	sound_cleaver_swing;
-static soundindex_t	sound_cleaver_hit;
-static soundindex_t	sound_cleaver_miss;
 static soundindex_t	sound_idle;
 static soundindex_t	sound_search;
-static soundindex_t	sound_sight;
 
 
 void gladiator_idle (edict_t *self)
@@ -46,19 +41,9 @@ void gladiator_idle (edict_t *self)
 	gi.sound (self, CHAN_VOICE, sound_idle, 1, ATTN_IDLE, 0);
 }
 
-void gladiator_sight (edict_t *self, edict_t *other)
-{
-	gi.sound (self, CHAN_VOICE, sound_sight, 1, ATTN_NORM, 0);
-}
-
 void gladiator_search (edict_t *self)
 {
 	gi.sound (self, CHAN_VOICE, sound_search, 1, ATTN_NORM, 0);
-}
-
-void gladiator_cleaver_swing (edict_t *self)
-{
-	gi.sound (self, CHAN_WEAPON, sound_cleaver_swing, 1, ATTN_NORM, 0);
 }
 
 mframe_t gladiator_frames_stand [] =
@@ -119,136 +104,13 @@ mmove_t gladiator_move_run = {FRAME_run1, FRAME_run6, gladiator_frames_run, null
 
 void gladiator_run (edict_t *self)
 {
-	if (self->monsterinfo.aiflags & AI_STAND_GROUND)
-		self->monsterinfo.currentmove = &gladiator_move_stand;
-	else
-		self->monsterinfo.currentmove = &gladiator_move_run;
+	self->monsterinfo.currentmove = &gladiator_move_run;
 }
-
-
-void GaldiatorMelee (edict_t *self)
-{
-	vec3_t	aim;
-
-	VectorSet (aim, MELEE_DISTANCE, self->mins[0], -4);
-	if (fire_hit (self, aim, irandom(20, 24), 300))
-		gi.sound (self, CHAN_AUTO, sound_cleaver_hit, 1, ATTN_NORM, 0);
-	else
-		gi.sound (self, CHAN_AUTO, sound_cleaver_miss, 1, ATTN_NORM, 0);
-}
-
-mframe_t gladiator_frames_attack_melee [] =
-{
-	ai_charge, 0, nullptr,
-	ai_charge, 0, nullptr,
-	ai_charge, 0, nullptr,
-	ai_charge, 0, nullptr,
-	ai_charge, 0, gladiator_cleaver_swing,
-	ai_charge, 0, nullptr,
-	ai_charge, 0, GaldiatorMelee,
-	ai_charge, 0, nullptr,
-	ai_charge, 0, nullptr,
-	ai_charge, 0, nullptr,
-	ai_charge, 0, gladiator_cleaver_swing,
-	ai_charge, 0, nullptr,
-	ai_charge, 0, nullptr,
-	ai_charge, 0, GaldiatorMelee,
-	ai_charge, 0, nullptr,
-	ai_charge, 0, nullptr,
-	ai_charge, 0, nullptr
-};
-mmove_t gladiator_move_attack_melee = {FRAME_melee1, FRAME_melee17, gladiator_frames_attack_melee, gladiator_run};
-
-void gladiator_melee(edict_t *self)
-{
-	self->monsterinfo.currentmove = &gladiator_move_attack_melee;
-}
-
-
-void GladiatorGun (edict_t *self)
-{
-	vec3_t	start;
-	vec3_t	dir;
-	vec3_t	forward, right;
-
-	AngleVectors (self->s.angles, forward, right, nullptr);
-	G_ProjectSource (self->s.origin, monster_flash_offset[MZ2_GLADIATOR_RAILGUN_1], forward, right, start);
-
-	// calc direction to where we targted
-	VectorSubtract (self->pos1, start, dir);
-	VectorNormalize (dir);
-
-	monster_fire_railgun (self, start, dir, 50, 100, MZ2_GLADIATOR_RAILGUN_1);
-}
-
-mframe_t gladiator_frames_attack_gun [] =
-{
-	ai_charge, 0, nullptr,
-	ai_charge, 0, nullptr,
-	ai_charge, 0, nullptr,
-	ai_charge, 0, GladiatorGun,
-	ai_charge, 0, nullptr,
-	ai_charge, 0, nullptr,
-	ai_charge, 0, nullptr,
-	ai_charge, 0, nullptr,
-	ai_charge, 0, nullptr
-};
-mmove_t gladiator_move_attack_gun = {FRAME_attack1, FRAME_attack9, gladiator_frames_attack_gun, gladiator_run};
-
-void gladiator_attack(edict_t *self)
-{
-	vec_t	range;
-	vec3_t	v;
-
-	// a small safe zone
-	VectorSubtract (self->s.origin, self->enemy->s.origin, v);
-	range = VectorLength(v);
-	if (range <= (MELEE_DISTANCE + 32))
-		return;
-
-	// charge up the railgun
-	gi.sound (self, CHAN_WEAPON, sound_gun, 1, ATTN_NORM, 0);
-	VectorCopy (self->enemy->s.origin, self->pos1);	//save for aiming the shot
-	self->pos1[2] += self->enemy->viewheight;
-	self->monsterinfo.currentmove = &gladiator_move_attack_gun;
-}
-
-
-mframe_t gladiator_frames_pain [] =
-{
-	ai_move, 0, nullptr,
-	ai_move, 0, nullptr,
-	ai_move, 0, nullptr,
-	ai_move, 0, nullptr,
-	ai_move, 0, nullptr,
-	ai_move, 0, nullptr
-};
-mmove_t gladiator_move_pain = {FRAME_pain1, FRAME_pain6, gladiator_frames_pain, gladiator_run};
-
-mframe_t gladiator_frames_pain_air [] =
-{
-	ai_move, 0, nullptr,
-	ai_move, 0, nullptr,
-	ai_move, 0, nullptr,
-	ai_move, 0, nullptr,
-	ai_move, 0, nullptr,
-	ai_move, 0, nullptr,
-	ai_move, 0, nullptr
-};
-mmove_t gladiator_move_pain_air = {FRAME_painup1, FRAME_painup7, gladiator_frames_pain_air, gladiator_run};
 
 void gladiator_pain (edict_t *self, edict_t *other, vec_t kick, int32_t damage)
 {
-
-	if (self->health < (self->max_health / 2))
-		self->s.skinnum = 1;
-
 	if (level.time < self->pain_debounce_time)
-	{
-		if ((self->velocity[2] > 100) && (self->monsterinfo.currentmove == &gladiator_move_pain))
-			self->monsterinfo.currentmove = &gladiator_move_pain_air;
 		return;
-	}
 
 	self->pain_debounce_time = level.time + 3;
 
@@ -256,15 +118,6 @@ void gladiator_pain (edict_t *self, edict_t *other, vec_t kick, int32_t damage)
 		gi.sound (self, CHAN_VOICE, sound_pain1, 1, ATTN_NORM, 0);
 	else
 		gi.sound (self, CHAN_VOICE, sound_pain2, 1, ATTN_NORM, 0);
-
-	if (skill->value == 3)
-		return;		// no pain anims in nightmare
-
-	if (self->velocity[2] > 100)
-		self->monsterinfo.currentmove = &gladiator_move_pain_air;
-	else
-		self->monsterinfo.currentmove = &gladiator_move_pain;
-	
 }
 
 
@@ -340,14 +193,9 @@ void SP_monster_gladiator (edict_t *self)
 {
 	sound_pain1 = gi.soundindex ("gladiator/pain.wav");	
 	sound_pain2 = gi.soundindex ("gladiator/gldpain2.wav");	
-	sound_die = gi.soundindex ("gladiator/glddeth2.wav");	
-	sound_gun = gi.soundindex ("gladiator/railgun.wav");
-	sound_cleaver_swing = gi.soundindex ("gladiator/melee1.wav");
-	sound_cleaver_hit = gi.soundindex ("gladiator/melee2.wav");
-	sound_cleaver_miss = gi.soundindex ("gladiator/melee3.wav");
+	sound_die = gi.soundindex ("gladiator/glddeth2.wav");
 	sound_idle = gi.soundindex ("gladiator/gldidle1.wav");
 	sound_search = gi.soundindex ("gladiator/gldsrch1.wav");
-	sound_sight = gi.soundindex ("gladiator/sight.wav");
 
 	self->movetype = MOVETYPE_STEP;
 	self->solid = SOLID_BBOX;
@@ -365,16 +213,13 @@ void SP_monster_gladiator (edict_t *self)
 	self->monsterinfo.stand = gladiator_stand;
 	self->monsterinfo.walk = gladiator_walk;
 	self->monsterinfo.run = gladiator_run;
-	self->monsterinfo.dodge = nullptr;
-	self->monsterinfo.attack = gladiator_attack;
-	self->monsterinfo.melee = gladiator_melee;
-	self->monsterinfo.sight = gladiator_sight;
 	self->monsterinfo.idle = gladiator_idle;
 	self->monsterinfo.search = gladiator_search;
 
 	gi.linkentity (self);
 	self->monsterinfo.currentmove = &gladiator_move_stand;
 	self->monsterinfo.scale = MODEL_SCALE;
+	self->monsterinfo.damaged_skin = 1;
 
 	walkmonster_start (self);
 }
