@@ -69,19 +69,10 @@
     <ClCompile Include="src\m_chick.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="src\m_float.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="src\m_flyer.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
     <ClCompile Include="src\m_gladiator.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\m_gunner.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="src\m_hover.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\m_infantry.cpp">
@@ -143,19 +134,10 @@
     <ClInclude Include="src\m_chick.h">
       <Filter>inc</Filter>
     </ClInclude>
-    <ClInclude Include="src\m_float.h">
-      <Filter>inc</Filter>
-    </ClInclude>
-    <ClInclude Include="src\m_flyer.h">
-      <Filter>inc</Filter>
-    </ClInclude>
     <ClInclude Include="src\m_gladiator.h">
       <Filter>inc</Filter>
     </ClInclude>
     <ClInclude Include="src\m_gunner.h">
-      <Filter>inc</Filter>
-    </ClInclude>
-    <ClInclude Include="src\m_hover.h">
       <Filter>inc</Filter>
     </ClInclude>
     <ClInclude Include="src\m_infantry.h">

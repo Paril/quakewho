@@ -30,11 +30,67 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "q_math.h"
 #include "q_bitflags.h"
 
+#include <string_view>
+#include <string>
+#include <array>
+#include <vector>
+#include <set>
+#include <unordered_set>
+#include <unordered_map>
+
 // type used for interop, but shouldn't be used by game. Use bool.
-typedef int32_t	qboolean;
+using qboolean = int32_t;
 
 // these exist elsewhere
 struct edict_t;
+
+// a safe wrapper to edict_t* for interop and passing nullable entities around
+class edict_ref
+{
+	edict_t *e;
+
+public:
+	edict_ref() :
+		edict_ref(nullptr)
+	{
+	}
+
+	edict_ref(const edict_t &p) :
+		e(const_cast<edict_t *>(&p))
+	{
+	}
+
+	edict_ref(nullptr_t) :
+		e(nullptr)
+	{
+	}
+
+	inline operator bool() const;
+	inline operator const edict_t &() const;
+
+	inline operator edict_t &() { return const_cast<edict_t &>(this->operator const edict_t &()); }
+	inline const edict_t *operator->() const { return &const_cast<edict_t &>(this->operator const edict_t &()); }
+	inline edict_t *operator->() { return &this->operator edict_t &(); }
+	inline bool operator==(const edict_ref &b) const { return e == b.e; }
+	inline bool operator!=(const edict_ref &b) const { return e == b.e; }
+	inline bool operator==(const edict_t &b) const { return e == &b; }
+	inline bool operator!=(const edict_t &b) const { return e != &b; }
+	inline bool operator==(const nullptr_t &) const { return e == nullptr; }
+	inline bool operator!=(const nullptr_t &) const { return e != nullptr; }
+	inline bool operator==(const edict_t *b) const { return e == b; }
+	inline bool operator!=(const edict_t *b) const { return e != b; }
+	inline const edict_t *ptr() const { return e; }
+	inline edict_t *ptr() { return e; }
+};
+
+template<>
+struct std::hash<edict_ref>
+{
+	size_t operator()(const edict_ref& _Keyval) const
+	{
+		return std::hash<const edict_t*>()(_Keyval.ptr());
+	}
+};
 
 // angle indexes
 enum
@@ -44,24 +100,20 @@ enum
 	ROLL		// fall over
 };
 
-const size_t	MAX_STRING_CHARS	= 1024;	// max length of a string passed to Cmd_TokenizeString
-const size_t	MAX_STRING_TOKENS	= 80;		// max tokens resulting from Cmd_TokenizeString
-const size_t	MAX_TOKEN_CHARS		= 128;		// max length of an individual token
-
-const size_t	MAX_QPATH			= 64;		// max length of a quake game pathname
-const size_t	MAX_OSPATH			= 128;		// max length of a filesystem pathname
+constexpr size_t	MAX_QPATH			= 64;		// max length of a quake game pathname
+constexpr size_t	MAX_OSPATH			= 128;		// max length of a filesystem pathname
 
 //
 // per-level limits
 //
-const size_t	MAX_CLIENTS			= 256;		// absolute limit
-const size_t	MAX_EDICTS			= 1024;	    // must change protocol to increase more
-const size_t	MAX_LIGHTSTYLES		= 256;
-const size_t	MAX_MODELS			= 256;		// these are sent over the net as bytes
-const size_t	MAX_SOUNDS			= 256;		// so they cannot be blindly increased
-const size_t	MAX_IMAGES			= 256;
-const size_t	MAX_ITEMS			= 256;
-const size_t	MAX_GENERAL			= (MAX_CLIENTS * 2);	// general config strings
+constexpr size_t	MAX_CLIENTS			= 256;		// absolute limit
+constexpr size_t	MAX_EDICTS			= 1024;	    // must change protocol to increase more
+constexpr size_t	MAX_LIGHTSTYLES		= 256;
+constexpr size_t	MAX_MODELS			= 256;		// these are sent over the net as bytes
+constexpr size_t	MAX_SOUNDS			= 256;		// so they cannot be blindly increased
+constexpr size_t	MAX_IMAGES			= 256;
+constexpr size_t	MAX_ITEMS			= 256;
+constexpr size_t	MAX_GENERAL			= (MAX_CLIENTS * 2);	// general config strings
 
 // game print flags
 enum printflags_t
@@ -85,27 +137,92 @@ enum multicast_t
 
 //=============================================
 
-char *COM_Parse (char **data_p);
-// data is an in/out parm, returns a parsed out token
+constexpr bool iequals(const std::string_view &a, const std::string_view &b)
+{
+    return a.size() == b.size() && std::equal(a.begin(), a.end(), b.begin(), b.end(), [](const char &ac, const char &bc) { return tolower(ac) == tolower(bc); });
+}
 
-//=============================================
+char	*va(const char *format, ...);
 
-char	*va(char *format, ...);
+struct com_parse_t
+{
+	const char			*start;
+	std::string_view	token;
+};
+
+bool COM_Parse(com_parse_t &parse);
 
 //=============================================
 
 //
 // key / value info strings
 //
-const size_t	MAX_INFO_KEY		= 64;
-const size_t	MAX_INFO_VALUE		= 64;
-const size_t	MAX_INFO_STRING		= 512;
+constexpr size_t	MAX_INFO_KEY		= 64;
+constexpr size_t	MAX_INFO_VALUE		= 64;
+constexpr size_t	MAX_INFO_STRING		= 512;
 
-char *Info_ValueForKey (char *s, char *key);
-void Info_RemoveKey (char *s, char *key);
-void Info_SetValueForKey (char *s, char *key, char *value);
-bool Info_Validate (char *s);
+constexpr const char *DEFAULT_USERINFO = "\\name\\badinfo\\skin\\male/grunt";
 
+struct userinfo_value_t
+{
+	std::string		string;
+	vec_t			number;
+};
+
+class userinfo_t
+{
+	std::unordered_map<std::string, userinfo_value_t> _values;
+
+public:
+	bool Parse(const char *s);
+	bool Encode(char *output, size_t output_size = MAX_INFO_STRING);
+
+	inline bool Get(const char *key, const char *&string) const
+	{
+		if (!_values.contains(key))
+			return false;
+
+		string = _values.at(key).string.c_str();
+		return true;
+	}
+
+	template<typename T, typename = typename std::enable_if<std::is_integral_v<T> || std::is_floating_point_v<T>>::type>
+	inline bool Get(const char *key, T &number) const
+	{
+		if (!_values.contains(key))
+			return false;
+
+		number = _values.at(key).number;
+		return true;
+	}
+
+	inline bool Has(const char *key) const
+	{
+		return _values.contains(key);
+	}
+
+	inline bool Set(const char *key, const char *value)
+	{
+		if (!value || !*value)
+		{
+			Remove(key);
+			return true;
+		}
+
+		if (strstr (key, "\\") || strstr (value, "\\") ||
+			strstr (key, ";") || strstr (key, "\"") || strstr (value, "\"") ||
+			strlen(key) > MAX_INFO_KEY - 1 || strlen(value) > MAX_INFO_VALUE - 1)
+			return false;
+
+		_values[key] = { value, strtof(value, nullptr) };
+		return true;
+	}
+
+	inline void Remove(const char *key)
+	{
+		_values.erase(key);
+	}
+};
 
 /*
 ==========================================================
@@ -134,13 +251,13 @@ MAKE_BITFLAGS(cvarflags_t);
 // nothing outside the Cvar_*() functions should modify these fields!
 struct cvar_t
 {
-	char		*name;
-	char		*string;
-	char		*latched_string;	// for CVAR_LATCH vars
-	cvarflags_t	flags;
-	qboolean	modified;	// set each time the cvar is changed
-	vec_t		value;
-	struct cvar_s *next;
+	const char			*name;
+	const char			*string;
+	const char			*latched_string;	// for CVAR_LATCH vars
+	const cvarflags_t	flags;
+	qboolean			modified;	// set each time the cvar is changed
+	const vec_t			value;
+	const cvar_t		*next;
 };
 #endif		// CVAR
 
@@ -246,14 +363,14 @@ struct csurface_t
 // a trace is returned when a box is swept through the world
 struct trace_t
 {
-	qboolean	allsolid;	// if true, plane is not valid
-	qboolean	startsolid;	// if true, the initial point was in a solid area
-	vec_t		fraction;	// time completed, 1.0 = didn't hit anything
-	vec3_t		endpos;		// final position
-	cplane_t	plane;		// surface normal at impact
-	csurface_t	*surface;	// surface hit
+	qboolean		allsolid;	// if true, plane is not valid
+	qboolean		startsolid;	// if true, the initial point was in a solid area
+	vec_t			fraction;	// time completed, 1.0 = didn't hit anything
+	vec3_t			endpos;		// final position
+	cplane_t		plane;		// surface normal at impact
+	const csurface_t*surface;	// surface hit
 	brushcontents_t	contents;	// contents on other side of surface hit
-	edict_t		*ent;		// not set by CM_*() functions
+	edict_ref		ent;		// not set by CM_*() functions
 };
 
 
@@ -336,7 +453,7 @@ enum waterlevel_t
 	WATER_UNDER
 };
 
-const size_t	MAXTOUCH	= 32;
+constexpr size_t	MAXTOUCH	= 32;
 
 struct pmove_t
 {
@@ -349,20 +466,20 @@ struct pmove_t
 
 	// results (out)
 	int32_t			numtouch;
-	edict_t			*touchents[MAXTOUCH];
+	edict_ref		touchents[MAXTOUCH];
 
 	vec3_t			viewangles;			// clamped
 	vec_t			viewheight;
 
 	vec3_t			mins, maxs;			// bounding box size
 
-	edict_t			*groundentity;
+	edict_ref		groundentity;
 	brushcontents_t	watertype;
-	waterlevel_t	 waterlevel;
+	waterlevel_t	waterlevel;
 
 	// callbacks to test the world
-	trace_t			(*trace) (vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end);
-	brushcontents_t	(*pointcontents) (vec3_t point);
+	trace_t			(*trace) (const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end);
+	brushcontents_t	(*pointcontents) (const vec3_t &point);
 };
 
 
@@ -631,46 +748,49 @@ enum statindex_t : uint8_t
 	STAT_SPECTATOR,
 
 	// 18-31 reserved for mods
-	STAT_BULLETS,
+	//STAT_BULLETS,
 	STAT_SHELLS,
 	STAT_GRENADES,
+
+	STAT_HUNTER,
+	STAT_HIDER,
+	STAT_CONTROL,
+	STAT_ROUND_TIMER,
 
 	MAX_STATS				= 32
 };
 
 // dmflags->value flags
-enum
+enum dmflags_bits_t : uint32_t
 {
-	DF_NO_HEALTH		= bit(0),	// 1
-	DF_NO_ITEMS			= bit(1),	// 2
-	DF_WEAPONS_STAY		= bit(2),	// 4
 	DF_NO_FALLING		= bit(3),	// 8
-	DF_INSTANT_ITEMS	= bit(4),	// 16
 	DF_SAME_LEVEL		= bit(5),	// 32
-	DF_SKINTEAMS		= bit(6),	// 64
-	DF_MODELTEAMS		= bit(7),	// 128
 	DF_NO_FRIENDLY_FIRE	= bit(8),	// 256
-	DF_SPAWN_FARTHEST	= bit(9),	// 512
-	DF_FORCE_RESPAWN	= bit(10),	// 1024
-	DF_NO_ARMOR			= bit(11),	// 2048
-	DF_ALLOW_EXIT		= bit(12),	// 4096
-	DF_INFINITE_AMMO	= bit(13),	// 8192
-	DF_QUAD_DROP		= bit(14),	// 16384
-	DF_FIXED_FOV		= bit(15),	// 32768
-
-	// RAFAEL
-	DF_QUADFIRE_DROP	= bit(16),	// 65536
-
-	//ROGUE
-	DF_NO_MINES			= bit(17),
-	DF_NO_STACK_DOUBLE	= bit(18),
-	DF_NO_NUKES			= bit(19),
-	DF_NO_SPHERES		= bit(20)
-	//ROGUE
+	DF_INFINITE_AMMO	= bit(13)	// 8192
 };
 
-// FIXME
-typedef int32_t dmflags_t;
+#pragma warning(disable : 4201)
+union dmflags_t
+{
+	dmflags_bits_t	bits;
+	struct {
+		bool		_dummy0 : 1;
+		bool		_dummy1 : 1;
+		bool		_dummy2 : 1;
+		bool		no_falling_damage : 1;
+		bool		_dummy4 : 1;
+		bool		same_level : 1;
+		bool		_dummy6 : 1;
+		bool		_dummy7 : 1;
+		bool		no_friendly_fire : 1;
+		bool		_dummy9 : 1;
+		bool		_dummy10 : 1;
+		bool		_dummy11 : 1;
+		bool		_dummy12 : 1;
+		bool		infinite_ammo : 1;
+	};
+};
+#pragma warning(default : 4201)
 
 // ROGUE
 /*
@@ -681,9 +801,8 @@ typedef int32_t dmflags_t;
 ==========================================================
 */
 
-constexpr int16_t ANGLE2SHORT(const vec_t &x) { return ((int32_t)(x * 65536 / 360) & 65535); }
+constexpr int16_t ANGLE2SHORT(const vec_t &x) { return (static_cast<int16_t>(x * 65536 / 360) & static_cast<int16_t>(65535)); }
 constexpr vec_t SHORT2ANGLE(const int16_t &x) { return x * (360.0 / 65536); }
-
 
 //
 // config strings are a general means of communication from
@@ -796,7 +915,7 @@ struct player_state_t
 	modelindex_t	gunindex;
 	int32_t			gunframe;
 
-	vec_t			blend[4];			// rgba full screen effect
+	vec4_t			blend;			// rgba full screen effect
 	
 	vec_t			fov;				// horizontal field of view
 

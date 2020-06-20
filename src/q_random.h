@@ -1,8 +1,8 @@
 #pragma once
 
 int32_t irandom();
-int32_t irandom(const int32_t &min, const int32_t &max);
 
+int32_t irandom(const int32_t &min, const int32_t &max);
 inline int32_t irandom(const int32_t &max) { return irandom(0, max); }
 
 vec_t random();

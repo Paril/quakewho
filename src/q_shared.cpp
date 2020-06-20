@@ -34,7 +34,7 @@ varargs versions of all text functions.
 FIXME: make this buffer size safe someday
 ============
 */
-char	*va(char *format, ...)
+char	*va(const char *format, ...)
 {
 	va_list		argptr;
 	static char	string[1024];
@@ -53,85 +53,63 @@ COM_Parse
 Parse a token out of a string
 ==============
 */
-char *COM_Parse (char **data_p)
+bool COM_Parse(com_parse_t &parse)
 {
-	static char	com_token[MAX_TOKEN_CHARS];
-	int32_t		c;
-	int32_t		len;
-	char		*data;
+	size_t len = 0;
 
-	data = *data_p;
-	len = 0;
-	com_token[0] = 0;
-	
-	if (!data)
-	{
-		*data_p = nullptr;
-		return "";
-	}
-		
 // skip whitespace
-skipwhite:
-	while ( (c = *data) <= ' ')
+whitespace:
+	char c;
+
+	while ((c = *parse.start) <= ' ')
 	{
 		if (c == 0)
 		{
-			*data_p = nullptr;
-			return "";
+			parse.token = std::string_view();
+			return false;
 		}
-		data++;
-	}
-	
-// skip // comments
-	if (c=='/' && data[1] == '/')
-	{
-		while (*data && *data != '\n')
-			data++;
-		goto skipwhite;
+
+		parse.start++;
 	}
 
-// handle quoted strings specially
-	if (c == '\"')
+// skip // comments
+	if (c == '/' && parse.start[1] == '/')
 	{
-		data++;
+		while (*parse.start && *parse.start != '\n')
+			parse.start++;
+		goto whitespace;
+	}
+// handle quoted strings specially
+	else if (c == '\"')
+	{
+		parse.start++;
+		const char *token_start = parse.start;
+
 		while (1)
 		{
-			c = *data++;
-			if (c=='\"' || !c)
+			c = *parse.start++;
+
+			if (c == '\"' || !c)
 			{
-				com_token[len] = 0;
-				*data_p = data;
-				return com_token;
+				parse.token = std::string_view(token_start, len);
+				return true;
 			}
-			if (len < MAX_TOKEN_CHARS)
-			{
-				com_token[len] = c;
-				len++;
-			}
+
+			len++;
 		}
 	}
+
+	const char *token_start = parse.start;
 
 // parse a regular word
 	do
 	{
-		if (len < MAX_TOKEN_CHARS)
-		{
-			com_token[len] = c;
-			len++;
-		}
-		data++;
-		c = *data;
-	} while (c>32);
-
-	if (len == MAX_TOKEN_CHARS)
-	{
-//		Com_Printf ("Token exceeded %i chars, discarded.\n", MAX_TOKEN_CHARS);
-		len = 0;
-	}
-	com_token[len] = 0;
-
-	*data_p = data;
-	return com_token;
+		len++;
+		c = *parse.start++;
+	} while (c > 32);
+	
+	parse.token = std::string_view(token_start, len - 1);
+	return true;
 }
 
 /*
@@ -142,177 +120,71 @@ skipwhite:
 =====================================================================
 */
 
-/*
-===============
-Info_ValueForKey
+#include <charconv>
 
-Searches the string for the given
-key and returns the associated value, or an empty string.
-===============
-*/
-char *Info_ValueForKey (char *s, char *key)
+static std::string strtolower(const std::string &str)
 {
-	char	pkey[512];
-	static	char value[2][512];	// use two buffers so compares
-								// work without stomping on each other
-	static	int32_t	valueindex;
-	char	*o;
+	std::string copy(str);
+	std::transform(copy.cbegin(), copy.cend(), copy.begin(), [](const char &c) { return tolower(c); });
+	return copy;
+}
+
+bool userinfo_t::Parse(const char *s)
+{
+	if (*s != '\\')
+		return false;
+
+	const std::string_view str(s);
+
+	// these chars can up parsing
+	if (str.find_first_of("\";", 0, 2) != std::string::npos)
+		return false;
+
+	_values.clear();
+
+	size_t key_start = 1, key_end = 0;
 	
-	valueindex ^= 1;
-	if (*s == '\\')
-		s++;
-	while (1)
+	while ((key_end = str.find_first_of('\\', key_start)) != std::string::npos)
 	{
-		o = pkey;
-		while (*s != '\\')
-		{
-			if (!*s)
-				return "";
-			*o++ = *s++;
-		}
-		*o = 0;
-		s++;
+		const size_t value_end = str.find_first_of('\\', key_end + 1);
+		const std::string_view key = str.substr(key_start, key_end - key_start);
+		const size_t value_start = key_end + 1;
+		const std::string_view value = str.substr(key_end + 1, (value_end == std::string::npos) ? value_end : (value_end - value_start));
+		Set(strtolower(std::string(key.data(), key.size())).data(), std::string(value.data(), value.size()).data());
 
-		o = value[valueindex];
+		if (value_end == std::string::npos)
+			break;
 
-		while (*s != '\\' && *s)
-		{
-			if (!*s)
-				return "";
-			*o++ = *s++;
-		}
-		*o = 0;
-
-		if (!strcmp (key, pkey) )
-			return value[valueindex];
-
-		if (!*s)
-			return "";
-		s++;
-	}
-}
-
-void Info_RemoveKey (char *s, char *key)
-{
-	char	*start;
-	char	pkey[512];
-	char	value[512];
-	char	*o;
-
-	if (strstr (key, "\\"))
-	{
-//		Com_Printf ("Can't use a key with a \\\n");
-		return;
+		key_start = value_end + 1;
 	}
 
-	while (1)
-	{
-		start = s;
-		if (*s == '\\')
-			s++;
-		o = pkey;
-		while (*s != '\\')
-		{
-			if (!*s)
-				return;
-			*o++ = *s++;
-		}
-		*o = 0;
-		s++;
-
-		o = value;
-		while (*s != '\\' && *s)
-		{
-			if (!*s)
-				return;
-			*o++ = *s++;
-		}
-		*o = 0;
-
-		if (!strcmp (key, pkey) )
-		{
-			strcpy (start, s);	// remove this part
-			return;
-		}
-
-		if (!*s)
-			return;
-	}
-
-}
-
-
-/*
-==================
-Info_Validate
-
-Some characters are illegal in info strings because they
-can mess up the server's parsing
-==================
-*/
-bool Info_Validate (char *s)
-{
-	if (strstr (s, "\""))
-		return false;
-	if (strstr (s, ";"))
-		return false;
 	return true;
 }
 
-void Info_SetValueForKey (char *s, char *key, char *value)
+bool userinfo_t::Encode(char *output, size_t output_size)
 {
-	char		newi[MAX_INFO_STRING], *v;
-	int32_t			c;
-	uint32_t	maxsize = MAX_INFO_STRING;
+	size_t offset = 0;
+	*output = 0;
 
-	if (strstr (key, "\\") || strstr (value, "\\") )
+	char scratch[MAX_INFO_KEY + MAX_INFO_VALUE + 2 + 1];
+	char *pos = output;
+
+	for (auto &value : _values)
 	{
-		gi.dprintf ("Can't use keys or values with a \\\n");
-		return;
+		snprintf(scratch, sizeof(scratch), "\\%s\\%s", value.first.c_str(), value.second.string.c_str());
+
+		const size_t written = strlen(scratch);
+
+		if (offset + written >= output_size - 1)
+		{
+			*output = 0;
+			return false;
+		}
+
+		strcpy(pos, scratch);
+		pos += written;
+		offset += written;
 	}
 
-	if (strstr (key, ";") )
-	{
-		gi.dprintf ("Can't use keys or values with a semicolon\n");
-		return;
-	}
-
-	if (strstr (key, "\"") || strstr (value, "\"") )
-	{
-		gi.dprintf ("Can't use keys or values with a \"\n");
-		return;
-	}
-
-	if (strlen(key) > MAX_INFO_KEY-1 || strlen(value) > MAX_INFO_KEY-1)
-	{
-		gi.dprintf ("Keys and values must be < 64 characters.\n");
-		return;
-	}
-	Info_RemoveKey (s, key);
-	if (!value || !strlen(value))
-		return;
-
-	snprintf (newi, sizeof(newi), "\\%s\\%s", key, value);
-
-	if (strlen(newi) + strlen(s) > maxsize)
-	{
-		gi.dprintf ("Info string length exceeded\n");
-		return;
-	}
-
-	// only copy ascii values
-	s += strlen(s);
-	v = newi;
-	while (*v)
-	{
-		c = *v++;
-		c &= 127;		// strip high bits
-		if (c >= 32 && c < 127)
-			*s++ = c;
-	}
-	*s = 0;
+	return true;
 }
-
-//====================================================================
-
-

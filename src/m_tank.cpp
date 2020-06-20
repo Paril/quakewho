@@ -38,267 +38,207 @@ static soundindex_t	sound_step;
 // misc
 //
 
-void tank_footstep (edict_t *self)
+static void tank_footstep (edict_t &self)
 {
-	gi.sound (self, CHAN_BODY, sound_step, 1, ATTN_NORM, 0);
+	self.PlaySound(sound_step, CHAN_BODY);
 }
 
-void tank_thud (edict_t *self)
+static void tank_thud (edict_t &self)
 {
-	gi.sound (self, CHAN_BODY, sound_thud, 1, ATTN_NORM, 0);
+	self.PlaySound(sound_thud, CHAN_BODY);
 }
 
-void tank_idle (edict_t *self)
+static void tank_idle (edict_t &self)
 {
-	gi.sound (self, CHAN_VOICE, sound_idle, 1, ATTN_IDLE, 0);
+	self.PlaySound(sound_idle, CHAN_VOICE, ATTN_IDLE);
 }
-
 
 //
 // stand
 //
 
-mframe_t tank_frames_stand []=
-{
-	ai_stand, 0, nullptr,
-	ai_stand, 0, nullptr,
-	ai_stand, 0, nullptr,
-	ai_stand, 0, nullptr,
-	ai_stand, 0, nullptr,
-	ai_stand, 0, nullptr,
-	ai_stand, 0, nullptr,
-	ai_stand, 0, nullptr,
-	ai_stand, 0, nullptr,
-	ai_stand, 0, nullptr,
-	ai_stand, 0, nullptr,
-	ai_stand, 0, nullptr,
-	ai_stand, 0, nullptr,
-	ai_stand, 0, nullptr,
-	ai_stand, 0, nullptr,
-	ai_stand, 0, nullptr,
-	ai_stand, 0, nullptr,
-	ai_stand, 0, nullptr,
-	ai_stand, 0, nullptr,
-	ai_stand, 0, nullptr,
-	ai_stand, 0, nullptr,
-	ai_stand, 0, nullptr,
-	ai_stand, 0, nullptr,
-	ai_stand, 0, nullptr,
-	ai_stand, 0, nullptr,
-	ai_stand, 0, nullptr,
-	ai_stand, 0, nullptr,
-	ai_stand, 0, nullptr,
-	ai_stand, 0, nullptr,
-	ai_stand, 0, nullptr
+static const mmove_t tank_move_stand = {
+	.firstframe = FRAME_stand01,
+	.lastframe = FRAME_stand30,
+	.frame = {
+		{ ai_stand },
+		{ ai_stand },
+		{ ai_stand },
+		{ ai_stand },
+		{ ai_stand },
+		{ ai_stand },
+		{ ai_stand },
+		{ ai_stand },
+		{ ai_stand },
+		{ ai_stand },
+		{ ai_stand },
+		{ ai_stand },
+		{ ai_stand },
+		{ ai_stand },
+		{ ai_stand },
+		{ ai_stand },
+		{ ai_stand },
+		{ ai_stand },
+		{ ai_stand },
+		{ ai_stand },
+		{ ai_stand },
+		{ ai_stand },
+		{ ai_stand },
+		{ ai_stand },
+		{ ai_stand },
+		{ ai_stand },
+		{ ai_stand },
+		{ ai_stand },
+		{ ai_stand },
+		{ ai_stand }
+	}
 };
-mmove_t	tank_move_stand = {FRAME_stand01, FRAME_stand30, tank_frames_stand, nullptr};
 	
-void tank_stand (edict_t *self)
+static void tank_stand (edict_t &self)
 {
-	self->monsterinfo.currentmove = &tank_move_stand;
+	self.monsterinfo.currentmove = &tank_move_stand;
 }
-
 
 //
 // walk
 //
 
-void tank_walk (edict_t *self);
+static void tank_walk (edict_t &self);
 
-mframe_t tank_frames_start_walk [] =
-{
-	ai_walk,  0, nullptr,
-	ai_walk,  6, nullptr,
-	ai_walk,  6, nullptr,
-	ai_walk, 11, tank_footstep
+static const mmove_t tank_move_walk = {
+	.firstframe = FRAME_walk05,
+	.lastframe = FRAME_walk20,
+	.frame = {
+		{ ai_walk, 4 },
+		{ ai_walk, 5 },
+		{ ai_walk, 3 },
+		{ ai_walk, 2 },
+		{ ai_walk, 5 },
+		{ ai_walk, 5 },
+		{ ai_walk, 4 },
+		{ ai_walk, 4, tank_footstep },
+		{ ai_walk, 3 },
+		{ ai_walk, 5 },
+		{ ai_walk, 4 },
+		{ ai_walk, 5 },
+		{ ai_walk, 7 },
+		{ ai_walk, 7 },
+		{ ai_walk, 6 },
+		{ ai_walk, 6, tank_footstep }
+	}
 };
-mmove_t	tank_move_start_walk = {FRAME_walk01, FRAME_walk04, tank_frames_start_walk, tank_walk};
 
-mframe_t tank_frames_walk [] =
+static void tank_walk (edict_t &self)
 {
-	ai_walk, 4,	nullptr,
-	ai_walk, 5,	nullptr,
-	ai_walk, 3,	nullptr,
-	ai_walk, 2,	nullptr,
-	ai_walk, 5,	nullptr,
-	ai_walk, 5,	nullptr,
-	ai_walk, 4,	nullptr,
-	ai_walk, 4,	tank_footstep,
-	ai_walk, 3,	nullptr,
-	ai_walk, 5,	nullptr,
-	ai_walk, 4,	nullptr,
-	ai_walk, 5,	nullptr,
-	ai_walk, 7,	nullptr,
-	ai_walk, 7,	nullptr,
-	ai_walk, 6,	nullptr,
-	ai_walk, 6,	tank_footstep
-};
-mmove_t	tank_move_walk = {FRAME_walk05, FRAME_walk20, tank_frames_walk, nullptr};
-
-mframe_t tank_frames_stop_walk [] =
-{
-	ai_walk,  3, nullptr,
-	ai_walk,  3, nullptr,
-	ai_walk,  2, nullptr,
-	ai_walk,  2, nullptr,
-	ai_walk,  4, tank_footstep
-};
-mmove_t	tank_move_stop_walk = {FRAME_walk21, FRAME_walk25, tank_frames_stop_walk, tank_stand};
-
-void tank_walk (edict_t *self)
-{
-		self->monsterinfo.currentmove = &tank_move_walk;
+	self.monsterinfo.currentmove = &tank_move_walk;
 }
-
 
 //
 // run
 //
 
-void tank_run (edict_t *self);
+static void tank_run (edict_t &self);
 
-mframe_t tank_frames_start_run [] =
-{
-	ai_run,  0, nullptr,
-	ai_run,  6, nullptr,
-	ai_run,  6, nullptr,
-	ai_run, 11, tank_footstep
+static const mmove_t tank_move_start_run = {
+	.firstframe = FRAME_walk01,
+	.lastframe = FRAME_walk04,
+	.frame = {
+		{ ai_run },
+		{ ai_run, 6 },
+		{ ai_run, 6 },
+		{ ai_run, 11, tank_footstep }
+	},
+	.endfunc = tank_run
 };
-mmove_t	tank_move_start_run = {FRAME_walk01, FRAME_walk04, tank_frames_start_run, tank_run};
 
-mframe_t tank_frames_run [] =
-{
-	ai_run, 4,	nullptr,
-	ai_run, 5,	nullptr,
-	ai_run, 3,	nullptr,
-	ai_run, 2,	nullptr,
-	ai_run, 5,	nullptr,
-	ai_run, 5,	nullptr,
-	ai_run, 4,	nullptr,
-	ai_run, 4,	tank_footstep,
-	ai_run, 3,	nullptr,
-	ai_run, 5,	nullptr,
-	ai_run, 4,	nullptr,
-	ai_run, 5,	nullptr,
-	ai_run, 7,	nullptr,
-	ai_run, 7,	nullptr,
-	ai_run, 6,	nullptr,
-	ai_run, 6,	tank_footstep
-};
-mmove_t	tank_move_run = {FRAME_walk05, FRAME_walk20, tank_frames_run, nullptr};
-
-mframe_t tank_frames_stop_run [] =
-{
-	ai_run,  3, nullptr,
-	ai_run,  3, nullptr,
-	ai_run,  2, nullptr,
-	ai_run,  2, nullptr,
-	ai_run,  4, tank_footstep
-};
-mmove_t	tank_move_stop_run = {FRAME_walk21, FRAME_walk25, tank_frames_stop_run, tank_walk};
-
-void tank_run (edict_t *self)
-{
-	if (self->monsterinfo.currentmove == &tank_move_walk ||
-		self->monsterinfo.currentmove == &tank_move_start_run)
-	{
-		self->monsterinfo.currentmove = &tank_move_run;
+static const mmove_t tank_move_run = {
+	.firstframe = FRAME_walk05,
+	.lastframe = FRAME_walk20,
+	.frame = {
+		{ ai_run, 4 },
+		{ ai_run, 5 },
+		{ ai_run, 3 },
+		{ ai_run, 2 },
+		{ ai_run, 5 },
+		{ ai_run, 5 },
+		{ ai_run, 4 },
+		{ ai_run, 4, tank_footstep },
+		{ ai_run, 3 },
+		{ ai_run, 5 },
+		{ ai_run, 4 },
+		{ ai_run, 5 },
+		{ ai_run, 7 },
+		{ ai_run, 7 },
+		{ ai_run, 6 },
+		{ ai_run, 6,tank_footstep }
 	}
+};
+
+static void tank_run (edict_t &self)
+{
+	if (self.monsterinfo.currentmove == &tank_move_walk ||
+		self.monsterinfo.currentmove == &tank_move_start_run)
+		self.monsterinfo.currentmove = &tank_move_run;
 	else
-	{
-		self->monsterinfo.currentmove = &tank_move_start_run;
-	}
+		self.monsterinfo.currentmove = &tank_move_start_run;
 }
 
-void tank_pain (edict_t *self, edict_t *other, vec_t kick, int32_t damage)
+static void tank_pain (edict_t &self, edict_t &other, const vec_t &kick, const int32_t &damage)
 {
-	if (level.time < self->pain_debounce_time)
+	if (level.time < self.pain_debounce_time)
 		return;
 
-	self->pain_debounce_time = level.time + 3;
-	gi.sound (self, CHAN_VOICE, sound_pain, 1, ATTN_NORM, 0);
-};
+	self.pain_debounce_time = level.time + 3;
+	self.PlaySound(sound_pain, CHAN_VOICE);
+}
 
 //
 // death
 //
-
-void tank_dead (edict_t *self)
-{
-	VectorSet (self->mins, -16, -16, -16);
-	VectorSet (self->maxs, 16, 16, -0);
-	self->movetype = MOVETYPE_TOSS;
-	self->svflags |= SVF_DEADMONSTER;
-	self->nextthink = 0;
-	gi.linkentity (self);
-}
-
-mframe_t tank_frames_death1 [] =
-{
-	ai_move, -7,  nullptr,
-	ai_move, -2,  nullptr,
-	ai_move, -2,  nullptr,
-	ai_move, 1,   nullptr,
-	ai_move, 3,   nullptr,
-	ai_move, 6,   nullptr,
-	ai_move, 1,   nullptr,
-	ai_move, 1,   nullptr,
-	ai_move, 2,   nullptr,
-	ai_move, 0,   nullptr,
-	ai_move, 0,   nullptr,
-	ai_move, 0,   nullptr,
-	ai_move, -2,  nullptr,
-	ai_move, 0,   nullptr,
-	ai_move, 0,   nullptr,
-	ai_move, -3,  nullptr,
-	ai_move, 0,   nullptr,
-	ai_move, 0,   nullptr,
-	ai_move, 0,   nullptr,
-	ai_move, 0,   nullptr,
-	ai_move, 0,   nullptr,
-	ai_move, 0,   nullptr,
-	ai_move, -4,  nullptr,
-	ai_move, -6,  nullptr,
-	ai_move, -4,  nullptr,
-	ai_move, -5,  nullptr,
-	ai_move, -7,  nullptr,
-	ai_move, -15, tank_thud,
-	ai_move, -5,  nullptr,
-	ai_move, 0,   nullptr,
-	ai_move, 0,   nullptr,
-	ai_move, 0,   nullptr
-};
-mmove_t	tank_move_death = {FRAME_death101, FRAME_death132, tank_frames_death1, tank_dead};
-
-void tank_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int32_t damage, const vec3_t point)
-{
-	int32_t		n;
-
-// check for gib
-	if (self->health <= self->gib_health)
-	{
-		gi.sound (self, CHAN_VOICE, gi.soundindex ("misc/udeath.wav"), 1, ATTN_NORM, 0);
-		for (n= 0; n < 1 /*4*/; n++)
-			ThrowGib (self, "models/objects/gibs/sm_meat/tris.md2", damage, GIB_ORGANIC);
-		for (n= 0; n < 4; n++)
-			ThrowGib (self, "models/objects/gibs/sm_metal/tris.md2", damage, GIB_METALLIC);
-		ThrowGib (self, "models/objects/gibs/chest/tris.md2", damage, GIB_ORGANIC);
-		ThrowHead (self, "models/objects/gibs/gear/tris.md2", damage, GIB_METALLIC);
-		self->deadflag = DEAD_DEAD;
-		return;
+static const mmove_t tank_move_death = {
+	.firstframe = FRAME_death101,
+	.lastframe = FRAME_death132,
+	.frame = {
+		{ ai_move, -7 },
+		{ ai_move, -2 },
+		{ ai_move, -2 },
+		{ ai_move, 1 },
+		{ ai_move, 3 },
+		{ ai_move, 6 },
+		{ ai_move, 1 },
+		{ ai_move, 1 },
+		{ ai_move, 2 },
+		{ ai_move },
+		{ ai_move },
+		{ ai_move },
+		{ ai_move, -2 },
+		{ ai_move },
+		{ ai_move },
+		{ ai_move, -3 },
+		{ ai_move },
+		{ ai_move },
+		{ ai_move },
+		{ ai_move },
+		{ ai_move },
+		{ ai_move },
+		{ ai_move, -4 },
+		{ ai_move, -6 },
+		{ ai_move, -4 },
+		{ ai_move, -5 },
+		{ ai_move, -7 },
+		{ ai_move, -15, tank_thud },
+		{ ai_move, -5 },
+		{ ai_move },
+		{ ai_move },
+		{ ai_move }
 	}
+};
 
-	if (self->deadflag == DEAD_DEAD)
-		return;
-
-// regular death
-	gi.sound (self, CHAN_VOICE, sound_die, 1, ATTN_NORM, 0);
-	self->deadflag = DEAD_DEAD;
-	self->takedamage = DAMAGE_YES;
-
-	self->monsterinfo.currentmove = &tank_move_death;
+static void tank_die (edict_t &self)
+{
+	self.PlaySound(sound_die, CHAN_VOICE);
+	self.monsterinfo.currentmove = &tank_move_death;
 }
-
 
 //
 // monster_tank
@@ -308,13 +248,13 @@ void tank_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int32_t dam
 */
 /*QUAKED monster_tank_commander (1 .5 0) (-32 -32 -16) (32 32 72) Ambush Trigger_Spawn Sight
 */
-void SP_monster_tank (edict_t *self)
+void SP_monster_tank (edict_t &self)
 {
-	self->s.modelindex = gi.modelindex ("models/monsters/tank/tris.md2");
-	VectorSet (self->mins, -32, -32, -16);
-	VectorSet (self->maxs, 32, 32, 72);
-	self->movetype = MOVETYPE_STEP;
-	self->solid = SOLID_BBOX;
+	self.s.modelindex = gi.modelindex ("models/monsters/tank/tris.md2");
+	self.mins = { -32.f, -32.f, -16.f };
+	self.maxs = { 32.f, 32.f, 72.f };
+	self.movetype = MOVETYPE_STEP;
+	self.solid = SOLID_BBOX;
 
 	sound_pain = gi.soundindex ("tank/tnkpain2.wav");
 	sound_thud = gi.soundindex ("tank/tnkdeth2.wav");
@@ -322,35 +262,35 @@ void SP_monster_tank (edict_t *self)
 	sound_die = gi.soundindex ("tank/death.wav");
 	sound_step = gi.soundindex ("tank/step.wav");
 
-	if (prandom(50))//(strcmp(self->classname, "monster_tank_commander") == 0)
+	if (prandom(50))
 	{
-		self->health = 1000;
-		self->gib_health = -225;
-		self->s.skinnum = 2;
-		self->monsterinfo.undamaged_skin = 2;
-		self->monsterinfo.damaged_skin = 3;
+		self.health = 1000;
+		self.gib_health = -225;
+		self.s.skinnum = 2;
+		self.monsterinfo.undamaged_skin = 2;
+		self.monsterinfo.damaged_skin = 3;
 	}
 	else
 	{
-		self->health = 750;
-		self->gib_health = -200;
-		self->monsterinfo.undamaged_skin = 0;
-		self->monsterinfo.damaged_skin = 1;
+		self.health = 750;
+		self.gib_health = -200;
+		self.monsterinfo.undamaged_skin = 0;
+		self.monsterinfo.damaged_skin = 1;
 	}
 
-	self->mass = 500;
+	self.mass = 500;
 
-	self->pain = tank_pain;
-	self->die = tank_die;
-	self->monsterinfo.stand = tank_stand;
-	self->monsterinfo.walk = tank_walk;
-	self->monsterinfo.run = tank_run;
-	self->monsterinfo.idle = tank_idle;
+	self.pain = tank_pain;
+	self.monsterinfo.stand = tank_stand;
+	self.monsterinfo.walk = tank_walk;
+	self.monsterinfo.run = tank_run;
+	self.monsterinfo.idle = tank_idle;
+	self.monsterinfo.die = tank_die;
 
-	gi.linkentity (self);
+	self.Link();
 	
-	self->monsterinfo.currentmove = &tank_move_stand;
-	self->monsterinfo.scale = MODEL_SCALE;
+	self.monsterinfo.currentmove = &tank_move_stand;
+	self.monsterinfo.scale = MODEL_SCALE;
 
 	walkmonster_start(self);
 }

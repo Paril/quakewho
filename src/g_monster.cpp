@@ -20,336 +20,321 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "q_shared.h"
 
-bool M_FidgetCheck (edict_t *ent, int percent)
+bool M_FidgetCheck (edict_t &ent, const int &percent)
 {
-	if (ent->control && ((ent->control->client->latched_buttons | ent->control->client->buttons) & BUTTON_ATTACK))
-		return true;
+	//if (ent.control && ((ent.control->client->latched_buttons | ent.control->client->buttons) & BUTTON_ATTACK))
+	//	return true;
 
-	return prandom(percent);
+	return ent.control && prandom(percent);
 }
 
-void M_CheckGround (edict_t *ent)
+void M_CheckGround (edict_t &ent)
 {
-	vec3_t		point;
-	trace_t		trace;
-
-	if (ent->flags & (FL_SWIM|FL_FLY))
-		return;
-
-	if (ent->velocity[2] > 100)
+	if (ent.velocity[2] > 100)
 	{
-		ent->groundentity = nullptr;
+		ent.groundentity = nullptr;
 		return;
 	}
 
-// if the hull point one-quarter unit down is solid the entity is on ground
-	point[0] = ent->s.origin[0];
-	point[1] = ent->s.origin[1];
-	point[2] = ent->s.origin[2] - 0.25;
+	constexpr vec3_t one_quarter_unit_down = { 0.f, 0.f, 0.25f };
 
-	trace = gi.trace (ent->s.origin, ent->mins, ent->maxs, point, ent, MASK_MONSTERSOLID);
+	// if the hull point one-quarter unit down is solid the entity is on ground
+	const vec3_t point = ent.s.origin - one_quarter_unit_down;
+
+	const trace_t trace = gi.trace (ent.s.origin, ent.mins, ent.maxs, point, ent, MASK_MONSTERSOLID | CONTENTS_MONSTER);
 
 	// check steepness
-	if ( trace.plane.normal[2] < 0.7 && !trace.startsolid)
+	if (trace.plane.normal[2] < 0.7f && !trace.startsolid)
 	{
-		ent->groundentity = nullptr;
+		ent.groundentity = nullptr;
 		return;
 	}
 
-//	ent->groundentity = trace.ent;
-//	ent->groundentity_linkcount = trace.ent->linkcount;
-//	if (!trace.startsolid && !trace.allsolid)
-//		VectorCopy (trace.endpos, ent->s.origin);
+	ent.groundentity = trace.ent;
+	ent.groundentity_linkcount = trace.ent->linkcount;
 	if (!trace.startsolid && !trace.allsolid)
+		ent.s.origin = trace.endpos;
+/*	if (!trace.startsolid && !trace.allsolid)
 	{
 		VectorCopy (trace.endpos, ent->s.origin);
 		ent->groundentity = trace.ent;
 		ent->groundentity_linkcount = trace.ent->linkcount;
 		ent->velocity[2] = 0;
-	}
+	}*/
 }
 
-
-void M_CatagorizePosition (edict_t *ent)
+void M_CatagorizePosition (edict_t &ent)
 {
-	vec3_t		point;
-	brushcontents_t	cont;
-
-//
-// get waterlevel
-//
-	point[0] = ent->s.origin[0];
-	point[1] = ent->s.origin[1];
-	point[2] = ent->s.origin[2] + ent->mins[2] + 1;	
-	cont = gi.pointcontents (point);
+	//
+	// get waterlevel
+	//
+	vec3_t point { ent.s.origin[0], ent.s.origin[1], ent.s.origin[2] + ent.mins[2] + 1.f };
+	brushcontents_t cont = gi.pointcontents (point);
 
 	if (!(cont & MASK_WATER))
 	{
-		ent->waterlevel = WATER_NONE;
-		ent->watertype = CONTENTS_NONE;
+		ent.waterlevel = WATER_NONE;
+		ent.watertype = CONTENTS_NONE;
 		return;
 	}
 
-	ent->watertype = cont;
-	ent->waterlevel = WATER_FEET;
+	ent.watertype = cont;
+	ent.waterlevel = WATER_FEET;
 	point[2] += 26;
 	cont = gi.pointcontents (point);
 	if (!(cont & MASK_WATER))
 		return;
 
-	ent->waterlevel = WATER_WAIST;
+	ent.waterlevel = WATER_WAIST;
 	point[2] += 22;
 	cont = gi.pointcontents (point);
 	if (cont & MASK_WATER)
-		ent->waterlevel = WATER_UNDER;
+		ent.waterlevel = WATER_UNDER;
 }
 
-
-void M_WorldEffects (edict_t *ent)
+static void M_WorldEffects (edict_t &ent)
 {
-	int32_t		dmg;
-
-	if (ent->health > 0)
+	if (ent.health > 0)
 	{
-		if (!(ent->flags & FL_SWIM))
+		// TODO
+		/*if (ent->waterlevel > WATER_NONE)
 		{
-			if (ent->waterlevel < WATER_UNDER)
-			{
-				ent->air_finished = level.time + 12;
-			}
-			else if (ent->air_finished < level.time)
-			{	// drown!
-				if (ent->pain_debounce_time < level.time)
-				{
-					dmg = 2 + 2 * floor(level.time - ent->air_finished);
-					if (dmg > 15)
-						dmg = 15;
-					T_Damage (ent, world, world, vec3_origin, ent->s.origin, vec3_origin, dmg, 0, DAMAGE_NO_ARMOR, MOD_WATER);
-					ent->pain_debounce_time = level.time + 1;
-				}
-			}
+			ent->air_finished = level.time + 9;
 		}
-		else
-		{
-			if (ent->waterlevel > WATER_NONE)
+		else if (ent->air_finished < level.time)
+		{	// suffocate!
+			if (ent->pain_debounce_time < level.time)
 			{
-				ent->air_finished = level.time + 9;
+				dmg = 2 + 2 * floor(level.time - ent->air_finished);
+				if (dmg > 15)
+					dmg = 15;
+				T_Damage (ent, world, world, vec3_origin, ent->s.origin, vec3_origin, dmg, 0, DAMAGE_NO_ARMOR);
+				ent->pain_debounce_time = level.time + 1;
 			}
-			else if (ent->air_finished < level.time)
-			{	// suffocate!
-				if (ent->pain_debounce_time < level.time)
-				{
-					dmg = 2 + 2 * floor(level.time - ent->air_finished);
-					if (dmg > 15)
-						dmg = 15;
-					T_Damage (ent, world, world, vec3_origin, ent->s.origin, vec3_origin, dmg, 0, DAMAGE_NO_ARMOR, MOD_WATER);
-					ent->pain_debounce_time = level.time + 1;
-				}
-			}
-		}
+		}*/
 	}
 	
-	if (ent->waterlevel == WATER_NONE)
+	if (ent.waterlevel == WATER_NONE)
 	{
-		if (ent->flags & FL_INWATER)
+		if (ent.flags & FL_INWATER)
 		{	
-			gi.sound (ent, CHAN_BODY, gi.soundindex("player/watr_out.wav"), 1, ATTN_NORM, 0);
-			ent->flags &= ~FL_INWATER;
+			ent.PlaySound(gi.soundindex("player/watr_out.wav"), CHAN_BODY);
+			ent.flags &= ~FL_INWATER;
 		}
+
 		return;
 	}
 
-	if ((ent->watertype & CONTENTS_LAVA) && !(ent->flags & FL_IMMUNE_LAVA))
+	if (ent.watertype & CONTENTS_LAVA)
 	{
-		if (ent->damage_debounce_time < level.time)
+		if (ent.damage_debounce_time < level.time)
 		{
-			ent->damage_debounce_time = level.time + 0.2;
-			T_Damage (ent, world, world, vec3_origin, ent->s.origin, vec3_origin, 10*ent->waterlevel, 0, DAMAGE_NONE, MOD_LAVA);
+			ent.damage_debounce_time = level.time + 0.2f;
+			T_Damage (ent, world, world, vec3_origin, ent.s.origin, vec3_origin, 10 * ent.waterlevel, 0, DAMAGE_NONE);
 		}
 	}
-	if ((ent->watertype & CONTENTS_SLIME) && !(ent->flags & FL_IMMUNE_SLIME))
+
+	if (ent.watertype & CONTENTS_SLIME)
 	{
-		if (ent->damage_debounce_time < level.time)
+		if (ent.damage_debounce_time < level.time)
 		{
-			ent->damage_debounce_time = level.time + 1;
-			T_Damage (ent, world, world, vec3_origin, ent->s.origin, vec3_origin, 4*ent->waterlevel, 0, DAMAGE_NONE, MOD_SLIME);
+			ent.damage_debounce_time = level.time + 1;
+			T_Damage (ent, world, world, vec3_origin, ent.s.origin, vec3_origin, 4 * ent.waterlevel, 0, DAMAGE_NONE);
 		}
 	}
 	
-	if ( !(ent->flags & FL_INWATER) )
+	if (!(ent.flags & FL_INWATER))
 	{	
-		if (!(ent->svflags & SVF_DEADMONSTER))
+		if (!(ent.svflags & SVF_DEADMONSTER))
 		{
-			if (ent->watertype & CONTENTS_LAVA)
+			if (ent.watertype & CONTENTS_LAVA)
+			{
 				if (prandom(50))
-					gi.sound (ent, CHAN_BODY, gi.soundindex("player/lava1.wav"), 1, ATTN_NORM, 0);
+					ent.PlaySound(gi.soundindex("player/lava1.wav"), CHAN_BODY);
 				else
-					gi.sound (ent, CHAN_BODY, gi.soundindex("player/lava2.wav"), 1, ATTN_NORM, 0);
-			else if (ent->watertype & CONTENTS_SLIME)
-				gi.sound (ent, CHAN_BODY, gi.soundindex("player/watr_in.wav"), 1, ATTN_NORM, 0);
-			else if (ent->watertype & CONTENTS_WATER)
-				gi.sound (ent, CHAN_BODY, gi.soundindex("player/watr_in.wav"), 1, ATTN_NORM, 0);
+					ent.PlaySound(gi.soundindex("player/lava2.wav"), CHAN_BODY);
+			}
+			else if (ent.watertype & CONTENTS_SLIME)
+				ent.PlaySound(gi.soundindex("player/watr_in.wav"), CHAN_BODY);
+			else if (ent.watertype & CONTENTS_WATER)
+				ent.PlaySound(gi.soundindex("player/watr_in.wav"), CHAN_BODY);
 		}
 
-		ent->flags |= FL_INWATER;
-		ent->damage_debounce_time = 0;
+		ent.flags |= FL_INWATER;
+		ent.damage_debounce_time = 0;
 	}
 }
 
-
-void M_droptofloor (edict_t *ent)
+void M_droptofloor (edict_t &ent)
 {
-	vec3_t		end;
-	trace_t		trace;
+	ent.s.origin[2] += 1;
 
-	ent->s.origin[2] += 1;
-	VectorCopy (ent->s.origin, end);
-	end[2] -= 256;
-	
-	trace = gi.trace (ent->s.origin, ent->mins, ent->maxs, end, ent, MASK_MONSTERSOLID);
+	const vec3_t end = ent.s.origin - vec3_t { 0.f, 0.f, 256.f };
+	const trace_t trace = gi.trace (ent.s.origin, ent.mins, ent.maxs, end, ent, MASK_MONSTERSOLID);
 
 	if (trace.fraction == 1 || trace.allsolid)
 		return;
 
-	VectorCopy (trace.endpos, ent->s.origin);
+	ent.s.origin = trace.endpos;
 
-	gi.linkentity (ent);
+	ent.Link();
 	M_CheckGround (ent);
 	M_CatagorizePosition (ent);
 }
 
-
-void M_SetEffects (edict_t *ent)
+static void M_SetEffects (edict_t &ent)
 {
-	ent->s.effects &= ~(EF_COLOR_SHELL|EF_POWERSCREEN);
-	ent->s.renderfx &= ~(RF_SHELL_RED|RF_SHELL_GREEN|RF_SHELL_BLUE);
+	ent.s.effects &= ~(EF_COLOR_SHELL|EF_POWERSCREEN|EF_SPHERETRANS);
+	ent.s.renderfx &= ~(RF_SHELL_RED|RF_SHELL_GREEN|RF_SHELL_BLUE|RF_TRANSLUCENT);
+
+	if (ent.deadflag && !ent.control)
+	{
+		const vec_t left = ent.monsterinfo.death_time - level.time;
+		
+		if (left < 5)
+			ent.s.effects |= EF_SPHERETRANS;
+		if (left < 10)
+			ent.s.renderfx |= RF_TRANSLUCENT;
+	}
 }
 
-
-void M_MoveFrame (edict_t *self)
+static void M_MoveFrame (edict_t &self)
 {
-	mmove_t	*move;
-	int32_t		index;
+	const mmove_t *move = self.monsterinfo.currentmove;
+	self.nextthink = level.time + FRAMETIME;
 
-	move = self->monsterinfo.currentmove;
-	self->nextthink = level.time + FRAMETIME;
-
-	if ((self->monsterinfo.nextframe) && (self->monsterinfo.nextframe >= move->firstframe) && (self->monsterinfo.nextframe <= move->lastframe))
+	if (self.monsterinfo.nextframe && (self.monsterinfo.nextframe >= move->firstframe) && (self.monsterinfo.nextframe <= move->lastframe))
 	{
-		self->s.frame = self->monsterinfo.nextframe;
-		self->monsterinfo.nextframe = 0;
+		self.s.frame = self.monsterinfo.nextframe;
+		self.monsterinfo.nextframe = 0;
 	}
 	else
 	{
-		if (self->s.frame == move->lastframe)
+		if (self.s.frame == move->lastframe)
 		{
+			// check for death
+			if (self.svflags & SVF_DEADMONSTER)
+				return;
+
 			if (move->endfunc)
 			{
 				move->endfunc (self);
 
 				// regrab move, endfunc is very likely to change it
-				move = self->monsterinfo.currentmove;
-
-				// check for death
-				if (self->svflags & SVF_DEADMONSTER)
-					return;
+				move = self.monsterinfo.currentmove;
 			}
 		}
 
-		if (self->s.frame < move->firstframe || self->s.frame > move->lastframe)
-			self->s.frame = move->firstframe;
+		if (self.s.frame < move->firstframe || self.s.frame > move->lastframe)
+			self.s.frame = move->firstframe;
 		else
 		{
-			self->s.frame++;
-			if (self->s.frame > move->lastframe)
-				self->s.frame = move->firstframe;
+			self.s.frame++;
+			if (self.s.frame > move->lastframe)
+				self.s.frame = move->firstframe;
 		}
 	}
 
-	index = self->s.frame - move->firstframe;
-	if (move->frame[index].aifunc)
-		move->frame[index].aifunc (self, move->frame[index].dist * self->monsterinfo.scale);
+	const int32_t index = self.s.frame - move->firstframe;
+	const mframe_t *frames = move->frame.begin();
 
-	if (move->frame[index].thinkfunc)
-		move->frame[index].thinkfunc (self);
+	if (frames[index].aifunc)
+		frames[index].aifunc (self, frames[index].dist * self.monsterinfo.scale);
+
+	if (frames[index].thinkfunc)
+		frames[index].thinkfunc (self);
 }
 
-void EnsureGoodPosition(edict_t *whomst);
-
-void Unpossess(edict_t *player)
+void Unpossess(edict_t &player)
 {
-	player->movetype = MOVETYPE_WALK;
-	player->solid = SOLID_BBOX;
-	player->svflags &= ~SVF_NOCLIENT;
-	player->client->ps.pmove.pm_type = PM_NORMAL;
-	player->viewheight = 22;
-	player->client->ps.pmove.pm_flags &= ~PMF_NO_PREDICTION;
-	VectorCopy(player->control->velocity, player->velocity);
-	VectorCopy(player->control->s.origin, player->s.origin);
-	player->s.origin[2] += player->control->mins[2];
-	player->s.origin[2] -= player->mins[2];
+	player.movetype = MOVETYPE_WALK;
+	player.solid = SOLID_BBOX;
+	player.svflags &= ~SVF_NOCLIENT;
+	player.client->ps.pmove.pm_type = PM_NORMAL;
+	player.client->ps.pmove.pm_flags &= ~PMF_NO_PREDICTION;
+	player.viewheight = 22;
+	player.velocity.Clear();
+	player.s.origin = player.control->s.origin;
+	player.s.origin[2] += player.control->mins[2];
+	player.s.origin[2] -= player.mins[2];
 	
-	player->health = player->control->health;
-	G_FreeEdict(player->control);
-	player->control = nullptr;
+	player.health = player.control->health;
+	G_FreeEdict(player.control);
+	player.control = nullptr;
 
 	EnsureGoodPosition(player);
-	gi.linkentity (player);
+	player.Link();
 
-	player->s.event = EV_PLAYER_TELEPORT;
-	player->client->jump_sound_debounce = level.time + 1;
+	player.s.event = EV_PLAYER_TELEPORT;
+	player.client->jump_sound_debounce = level.time + 1;
+
 }
 
-void monster_think (edict_t *self)
+static void monster_think (edict_t &self)
 {
-	if (self->control && (self->control->client->cmd.upmove > 0 || self->waterlevel >= WATER_UNDER))
+	if (self.control && level.control_delay < level.time)
 	{
-		Unpossess(self->control);
-		return;
-	}
-	else if (self->control && (self->control->client->cmd.forwardmove ||
-			self->control->client->cmd.sidemove))
-	{
-		vec_t len = sqrt((self->control->client->cmd.forwardmove * self->control->client->cmd.forwardmove) + (self->control->client->cmd.sidemove * self->control->client->cmd.sidemove));
+		if (self.control->client->cmd.upmove > 0 || self.waterlevel >= WATER_UNDER)
+		{
+			Unpossess(self.control);
+			return;
+		}
+		else if (self.control->client->cmd.forwardmove || self.control->client->cmd.sidemove)
+		{
+			const vec_t len = sqrt((self.control->client->cmd.forwardmove * self.control->client->cmd.forwardmove) + (self.control->client->cmd.sidemove * self.control->client->cmd.sidemove));
 
-		if (len <= 200)
-		{
-			if (self->monsterinfo.currentmove->frame->aifunc != ai_walk)
-				self->monsterinfo.walk(self);
-		}
-		else
-		{
-			if (self->monsterinfo.currentmove->frame->aifunc != ai_run)
-				self->monsterinfo.run(self);
-		}
-	}
-	else if (!self->control)
-	{
-		if (self->monsterinfo.currentmove->frame->aifunc == ai_stand)
-		{
-			if (level.time > self->monsterinfo.next_runwalk_check)
+			if (len <= 200)
 			{
-				if (prandom(50))
-				{
-					self->ideal_yaw = random(360);
-
-					if (random() < 0.5)
-						self->monsterinfo.run(self);
-					else
-						self->monsterinfo.walk(self);
-
-					self->monsterinfo.should_stand_check = level.time + irandom(1, 24);
-				}
-
-				self->monsterinfo.next_runwalk_check = level.time + irandom(1, 24);
+				if (self.monsterinfo.currentmove->frame.begin()->aifunc != ai_walk)
+					self.monsterinfo.walk(self);
 			}
+			else
+			{
+				if (self.monsterinfo.currentmove->frame.begin()->aifunc != ai_run)
+					self.monsterinfo.run(self);
+			}
+		}
+	}
+	else
+	{
+		if (self.waterlevel >= WATER_UNDER)
+			EmplaceMonsterInGoodSpot(self);
+
+		if (self.deadflag && self.monsterinfo.death_time < level.time)
+		{
+			// send effect
+			gi.WriteByte (SVC_MUZZLEFLASH);
+			gi.WriteEntity (self);
+			gi.WriteByte (MZ_LOGOUT);
+			gi.multicast (self.s.origin, MULTICAST_PVS);
+
+			G_FreeEdict(self);
+			return;
+		}
+
+		if (self.monsterinfo.currentmove->frame.begin()->aifunc == ai_stand &&
+			level.time > self.monsterinfo.next_runwalk_check)
+		{
+			if (prandom(50))
+			{
+				self.ideal_yaw = random(360);
+
+				if (random() < 0.5f)
+					self.monsterinfo.run(self);
+				else
+					self.monsterinfo.walk(self);
+
+				self.monsterinfo.should_stand_check = level.time + random(1, 24);
+			}
+
+			self.monsterinfo.next_runwalk_check = level.time + random(1, 24);
 		}
 	}
 
 	M_MoveFrame (self);
-	if (self->linkcount != self->monsterinfo.linkcount)
+	if (self.linkcount != self.monsterinfo.linkcount)
 	{
-		self->monsterinfo.linkcount = self->linkcount;
+		self.monsterinfo.linkcount = self.linkcount;
 		M_CheckGround (self);
 	}
 	M_CatagorizePosition (self);
@@ -357,209 +342,125 @@ void monster_think (edict_t *self)
 	M_SetEffects (self);
 }
 
-/*
-================
-monster_death_use
-
-When a monster dies, it fires all of its targets with the current
-enemy as activator.
-================
-*/
-void monster_death_use (edict_t *self)
-{
-	self->flags &= ~(FL_FLY|FL_SWIM);
-}
-
-
 //============================================================================
 
-bool monster_start (edict_t *self)
+static void monster_die(edict_t &self, edict_t &inflictor, edict_t &attacker, const int32_t &damage, const vec3_t &point)
 {
-	if (self->spawnflags & 4)
+	if (self.control)
 	{
-		self->spawnflags &= ~4;
-		self->spawnflags |= 1;
-//		gi.dprintf("fixed spawnflags on %s at %s\n", self->classname, vtos(self->s.origin));
+		edict_t &player = self.control;
+		Unpossess(player);
+		player.die(player, inflictor, attacker, damage, point);
+		return;
 	}
 
-	self->mins[0] = self->mins[1] = -16;
-	self->maxs[0] = self->maxs[1] = 16;
-
-	gi.linkentity(self);
-
-	self->nextthink = level.time + FRAMETIME;
-	self->svflags |= SVF_MONSTER;
-	self->takedamage = DAMAGE_AIM;
-	self->air_finished = level.time + 12;
-	self->max_health = self->health;
-	self->clipmask = MASK_MONSTERSOLID;
-
-	self->deadflag = DEAD_NO;
-	self->svflags &= ~SVF_DEADMONSTER;
-
-	VectorCopy (self->s.origin, self->s.old_origin);
-
-	// randomize what frame they start on
-	if (self->monsterinfo.currentmove)
-		self->s.frame = irandom(self->monsterinfo.currentmove->firstframe, self->monsterinfo.currentmove->lastframe);
-
-	bool damaged = prandom(50);
-
-	self->max_health = 200;
-	self->health = damaged ? 100 : 200;
-
-	if (damaged)
-		self->s.skinnum = self->monsterinfo.damaged_skin;
-
-	return true;
-}
-
-void monster_start_go (edict_t *self)
-{
-	vec3_t	v;
-
-	if (self->health <= 0)
+	if (self.deadflag)
 		return;
 
-	// check for target to combat_point and change to combattarget
-	if (self->target)
+	for (auto it = level.monsters.begin(); it != level.monsters.end(); it++)
 	{
-		bool		notcombat;
-		bool		fixup;
-		edict_t		*target;
-
-		target = nullptr;
-		notcombat = false;
-		fixup = false;
-		while ((target = G_Find (target, FOFS(targetname), self->target)) != nullptr)
+		if (*it == self)
 		{
-			if (strcmp(target->classname, "point_combat") == 0)
-			{
-				self->combattarget = self->target;
-				fixup = true;
-			}
-			else
-			{
-				notcombat = true;
-			}
-		}
-		if (notcombat && self->combattarget)
-			gi.dprintf("%s at %s has target with mixed types\n", self->classname, vtos(self->s.origin));
-		if (fixup)
-			self->target = nullptr;
-	}
-
-	// validate combattarget
-	if (self->combattarget)
-	{
-		edict_t		*target;
-
-		target = nullptr;
-		while ((target = G_Find (target, FOFS(targetname), self->combattarget)) != nullptr)
-		{
-			if (strcmp(target->classname, "point_combat") != 0)
-			{
-				gi.dprintf("%s at (%i %i %i) has a bad combattarget %s : %s at (%i %i %i)\n",
-					self->classname, (int32_t)self->s.origin[0], (int32_t)self->s.origin[1], (int32_t)self->s.origin[2],
-					self->combattarget, target->classname, (int32_t)target->s.origin[0], (int32_t)target->s.origin[1],
-					(int32_t)target->s.origin[2]);
-			}
+			level.monsters.erase(it);
+			break;
 		}
 	}
 
-	if (self->target)
-	{
-		self->goalentity = self->movetarget = G_PickTarget(self->target);
-		if (!self->movetarget)
-		{
-			gi.dprintf ("%s can't find target %s at %s\n", self->classname, self->target, vtos(self->s.origin));
-			self->target = nullptr;
-			self->monsterinfo.pausetime = 100000000;
-			self->monsterinfo.stand (self);
-		}
-		else if (strcmp (self->movetarget->classname, "path_corner") == 0)
-		{
-			VectorSubtract (self->goalentity->s.origin, self->s.origin, v);
-			self->ideal_yaw = self->s.angles[YAW] = vectoyaw(v);
-			self->monsterinfo.walk (self);
-			self->target = nullptr;
-		}
-		else
-		{
-			self->goalentity = self->movetarget = nullptr;
-			self->monsterinfo.pausetime = 100000000;
-			self->monsterinfo.stand (self);
-		}
-	}
-	else
-	{
-		self->monsterinfo.pausetime = 100000000;
-		self->monsterinfo.stand (self);
-	}
+	self.monsterinfo.die(self);
+	self.deadflag = true;
+	self.takedamage = false;
+	self.svflags |= SVF_DEADMONSTER;
+	self.solid = SOLID_NOT;
+	self.monsterinfo.death_time = level.time + random(30, 40);
 
-	self->think = monster_think;
-	self->nextthink = level.time + FRAMETIME;
+	self.Link();
+
+	if (attacker.client)
+		gi.bprintf(PRINT_HIGH, "%s has killed an innocent Stroggo!\n", attacker.client->pers.netname);
+	//else
+	//	gi.bprintf(PRINT_HIGH, "A monster has died from unnatural causes.\n");
 }
 
-
-void walkmonster_start_go (edict_t *self)
+static void monster_touch (edict_t &self, edict_t &other, const cplane_t *plane, const csurface_t *surf)
 {
-	if (!(self->spawnflags & 2) && level.time < 1)
-	{
-		M_droptofloor (self);
+	if (!other.groundentity || other.groundentity == self)
+		return;
 
-		if (self->groundentity)
-			if (!M_walkmove (self, 0, 0))
-				gi.dprintf ("%s in solid at %s\n", self->classname, vtos(self->s.origin));
+	const vec_t ratio = static_cast<vec_t>(other.mass) / self.mass;
+	const vec3_t v = self.s.origin - other.s.origin;
+	M_walkmove (self, v.ToYaw(), 20 * ratio * FRAMETIME);
+}
+
+static void monster_start (edict_t &self)
+{
+	self.mins[0] = self.mins[1] = -16;
+	self.maxs[0] = self.maxs[1] = 16;
+
+	const vec_t height = self.maxs[2] - self.mins[2];
+
+	if (height > 56)
+		self.maxs[2] -= height - 56;
+
+	self.Link();
+
+	self.nextthink = level.time + FRAMETIME;
+	self.svflags |= SVF_MONSTER;
+	self.takedamage = true;
+	self.air_finished = level.time + 12;
+	self.max_health = self.health;
+	self.clipmask = MASK_MONSTERSOLID;
+
+	self.deadflag = false;
+	self.svflags &= ~SVF_DEADMONSTER;
+
+	self.die = monster_die;
+	self.touch = monster_touch;
+
+	self.s.old_origin = self.s.origin;
+
+	// randomize what frame they start on
+	if (self.monsterinfo.currentmove)
+		self.s.frame = irandom(self.monsterinfo.currentmove->firstframe, self.monsterinfo.currentmove->lastframe);
+
+	const bool damaged = prandom(50);
+
+	self.health = self.max_health = DEFAULT_HEALTH;
+
+	if (damaged)
+	{
+		self.health *= 0.5f;
+		self.s.skinnum = self.monsterinfo.damaged_skin;
 	}
+}
+
+static void monster_start_go (edict_t &self)
+{
+	if (self.health <= 0)
+		return;
+
+	self.monsterinfo.stand (self);
+	self.think = monster_think;
+	self.nextthink = level.time + FRAMETIME;
+}
+
+static void walkmonster_start_go (edict_t &self)
+{
+	M_droptofloor (self);
+
+	if (self.groundentity)
+		if (!M_walkmove (self, 0, 0))
+			gi.dprintf ("%s in solid at %s\n", self.classname, vtos(self.s.origin));
 	
-	if (!self->yaw_speed)
-		self->yaw_speed = 20;
-	self->viewheight = 25;
+	if (!self.yaw_speed)
+		self.yaw_speed = 20;
+	if (!self.viewheight)
+		self.viewheight = self.maxs[2] - 4;
 
 	monster_start_go (self);
 }
 
-void walkmonster_start (edict_t *self)
+void walkmonster_start (edict_t &self)
 {
-	self->think = walkmonster_start_go;
-	monster_start (self);
-}
-
-
-void flymonster_start_go (edict_t *self)
-{
-	if (!M_walkmove (self, 0, 0))
-		gi.dprintf ("%s in solid at %s\n", self->classname, vtos(self->s.origin));
-
-	if (!self->yaw_speed)
-		self->yaw_speed = 10;
-	self->viewheight = 25;
-
-	monster_start_go (self);
-}
-
-
-void flymonster_start (edict_t *self)
-{
-	self->flags |= FL_FLY;
-	self->think = flymonster_start_go;
-	monster_start (self);
-}
-
-
-void swimmonster_start_go (edict_t *self)
-{
-	if (!self->yaw_speed)
-		self->yaw_speed = 10;
-	self->viewheight = 10;
-
-	monster_start_go (self);
-}
-
-void swimmonster_start (edict_t *self)
-{
-	self->flags |= FL_SWIM;
-	self->think = swimmonster_start_go;
-	monster_start (self);
+	monster_start(self);
+	walkmonster_start_go(self);
 }

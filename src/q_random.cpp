@@ -2,7 +2,7 @@
 #include <ctime>
 #include <random>
 
-static std::mt19937 mt(time(NULL));
+static std::mt19937 mt(static_cast<std::mt19937::result_type>(time(nullptr)));
 
 int32_t irandom()
 {

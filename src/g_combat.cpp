@@ -29,56 +29,35 @@ Returns true if the inflictor can directly damage the target.  Used for
 explosions and melee attacks.
 ============
 */
-bool CanDamage (edict_t *targ, edict_t *inflictor)
+bool CanDamage (const edict_t &targ, const edict_t &inflictor)
 {
-	vec3_t	dest;
-	trace_t	trace;
-
-// bmodels need special checking because their origin is 0,0,0
-	if (targ->movetype == MOVETYPE_PUSH)
+	// bmodels need special checking because their origin is 0,0,0
+	if (targ.movetype == MOVETYPE_PUSH)
 	{
-		VectorAdd (targ->absmin, targ->absmax, dest);
-		VectorScale (dest, 0.5, dest);
-		trace = gi.trace (inflictor->s.origin, vec3_origin, vec3_origin, dest, inflictor, MASK_SOLID);
-		if (trace.fraction == 1.0)
+		const vec3_t dest = (targ.absmin + targ.absmax) * 0.5f;
+		const trace_t trace = gi.trace (inflictor.s.origin, dest, inflictor, MASK_SOLID);
+		if (trace.fraction == 1.0f)
 			return true;
 		if (trace.ent == targ)
 			return true;
 		return false;
 	}
+
+	static constexpr vec3_t offsets[] = {
+		{ 0, 0, 0 },
+		{ 15, 15, 0 },
+		{ 15, -15, 0 },
+		{ -15, 15, 0 },
+		{ -15, -15, 0 }
+	};
 	
-	trace = gi.trace (inflictor->s.origin, vec3_origin, vec3_origin, targ->s.origin, inflictor, MASK_SOLID);
-	if (trace.fraction == 1.0)
-		return true;
+	for (auto &offset : offsets)
+	{
+		trace_t trace = gi.trace (inflictor.s.origin, targ.s.origin + offset, inflictor, MASK_SOLID);
 
-	VectorCopy (targ->s.origin, dest);
-	dest[0] += 15.0;
-	dest[1] += 15.0;
-	trace = gi.trace (inflictor->s.origin, vec3_origin, vec3_origin, dest, inflictor, MASK_SOLID);
-	if (trace.fraction == 1.0)
-		return true;
-
-	VectorCopy (targ->s.origin, dest);
-	dest[0] += 15.0;
-	dest[1] -= 15.0;
-	trace = gi.trace (inflictor->s.origin, vec3_origin, vec3_origin, dest, inflictor, MASK_SOLID);
-	if (trace.fraction == 1.0)
-		return true;
-
-	VectorCopy (targ->s.origin, dest);
-	dest[0] -= 15.0;
-	dest[1] += 15.0;
-	trace = gi.trace (inflictor->s.origin, vec3_origin, vec3_origin, dest, inflictor, MASK_SOLID);
-	if (trace.fraction == 1.0)
-		return true;
-
-	VectorCopy (targ->s.origin, dest);
-	dest[0] -= 15.0;
-	dest[1] -= 15.0;
-	trace = gi.trace (inflictor->s.origin, vec3_origin, vec3_origin, dest, inflictor, MASK_SOLID);
-	if (trace.fraction == 1.0)
-		return true;
-
+		if (trace.fraction == 1.0f)
+			return true;
+	}
 
 	return false;
 }
@@ -89,26 +68,24 @@ bool CanDamage (edict_t *targ, edict_t *inflictor)
 Killed
 ============
 */
-void Killed (edict_t *targ, edict_t *inflictor, edict_t *attacker, int32_t damage, const vec3_t point)
+static void Killed (edict_t &targ, edict_t &inflictor, edict_t &attacker, const int32_t &damage, const vec3_t &point)
 {
-	if (targ->health < -999)
-		targ->health = -999;
+	if (targ.health < -999)
+		targ.health = -999;
 
-	targ->enemy = attacker;
+	targ.enemy = attacker;
 
-	if (targ->movetype == MOVETYPE_PUSH || targ->movetype == MOVETYPE_STOP || targ->movetype == MOVETYPE_NONE)
-	{	// doors, triggers, etc
-		targ->die (targ, inflictor, attacker, damage, point);
+	if (targ.movetype == MOVETYPE_PUSH || targ.movetype == MOVETYPE_STOP || targ.movetype == MOVETYPE_NONE)
+	{
+		// doors, triggers, etc
+		targ.die (targ, inflictor, attacker, damage, point);
 		return;
 	}
 
-	if ((targ->svflags & SVF_MONSTER) && (targ->deadflag != DEAD_DEAD))
-	{
-		targ->touch = nullptr;
-		monster_death_use (targ);
-	}
+	if ((targ.svflags & SVF_MONSTER) && (targ.deadflag != true))
+		targ.touch = nullptr;
 
-	targ->die (targ, inflictor, attacker, damage, point);
+	targ.die (targ, inflictor, attacker, damage, point);
 }
 
 
@@ -117,137 +94,111 @@ void Killed (edict_t *targ, edict_t *inflictor, edict_t *attacker, int32_t damag
 SpawnDamage
 ================
 */
-void SpawnDamage (int32_t type, const vec3_t origin, const vec3_t normal, int32_t damage)
+static void SpawnDamage (const temp_event_t &type, const vec3_t &origin, const vec3_t &normal)
 {
-	if (damage > 255)
-		damage = 255;
 	gi.WriteByte (SVC_TEMP_ENTITY);
 	gi.WriteByte (type);
-//	gi.WriteByte (damage);
 	gi.WritePosition (origin);
 	gi.WriteDir (normal);
 	gi.multicast (origin, MULTICAST_PVS);
 }
 
-bool CheckTeamDamage (edict_t *targ, edict_t *attacker)
+void T_Damage (edict_t &targ, edict_t &inflictor, edict_t &attacker, const vec3_t &dir, const vec3_t &point, const vec3_t &normal, int32_t damage, int32_t knockback, damageflag_t dflags)
 {
-		//FIXME make the next line real and uncomment this block
-		// if ((ability to damage a teammate == OFF) && (targ's team == attacker's team))
-	return false;
-}
-
-void T_Damage (edict_t *targ, edict_t *inflictor, edict_t *attacker, const vec3_t dir, const vec3_t point, const vec3_t normal, int32_t damage, int32_t knockback, damageflag_t dflags, meansofdeath_t mod)
-{
-	gclient_t	*client;
-	int32_t		take;
-	int32_t		save;
-	int32_t		te_sparks;
-
-	if (!targ->takedamage)
+	if (!targ.takedamage)
 		return;
 
 	// friendly fire avoidance
 	// if enabled you can't hurt teammates (but you can hurt yourself)
 	// knockback still occurs
-	if ((targ != attacker) && (((dmflags_t)dmflags->value & (DF_MODELTEAMS | DF_SKINTEAMS))))
-	{
-		if (OnSameTeam (targ, attacker))
-		{
-			if ((dmflags_t)dmflags->value & DF_NO_FRIENDLY_FIRE)
-				damage = 0;
-			else
-				mod |= MOD_FRIENDLY_FIRE;
-		}
-	}
+	if (targ != attacker && OnSameTeam (targ, attacker) && dmflags.no_friendly_fire)
+		damage = 0;
 
-	meansOfDeath = mod;
-
-	client = targ->client;
+	gclient_t *client = targ.client;
+	temp_event_t te_sparks;
 
 	if (dflags & DAMAGE_BULLET)
 		te_sparks = TE_BULLET_SPARKS;
 	else
 		te_sparks = TE_SPARKS;
 
-	if (targ->flags & FL_NO_KNOCKBACK)
+	if (targ.flags & FL_NO_KNOCKBACK)
 		knockback = 0;
 
 // figure momentum add
 	if (!(dflags & DAMAGE_NO_KNOCKBACK))
 	{
-		if ((knockback) && (targ->movetype != MOVETYPE_NONE) && (targ->movetype != MOVETYPE_BOUNCE) && (targ->movetype != MOVETYPE_PUSH) && (targ->movetype != MOVETYPE_STOP))
+		if (knockback && (targ.movetype != MOVETYPE_NONE) && (targ.movetype != MOVETYPE_BOUNCE) && (targ.movetype != MOVETYPE_PUSH) && (targ.movetype != MOVETYPE_STOP))
 		{
-			vec3_t	kvel;
-			vec_t	mass;
-
-			if (targ->mass < 50)
-				mass = 50;
-			else
-				mass = targ->mass;
+			const vec_t mass = max(50, targ.mass);
+			vec3_t kvel;
 	
-			VectorNormalize(dir, kvel);
+			dir.Normalize(kvel);
 
-			if (targ->client  && attacker == targ)
-				VectorScale (kvel, 1600.0 * (vec_t)knockback / mass, kvel);	// the rocket jump hack...
+			if (targ.client && attacker == targ)
+				kvel *= 1600.0f * static_cast<vec_t>(knockback) / mass;	// the rocket jump hack...
 			else
-				VectorScale (kvel, 500.0 * (vec_t)knockback / mass, kvel);
+				kvel *= 500.0f * static_cast<vec_t>(knockback) / mass;
 
-			VectorAdd (targ->velocity, kvel, targ->velocity);
+			targ.velocity += kvel;
 		}
 	}
 
-	take = damage;
-	save = 0;
+	int32_t take = damage;
 
 	// check for godmode
-	if ((targ->flags & FL_GODMODE) && !(dflags & DAMAGE_NO_PROTECTION))
+	if ((targ.flags & FL_GODMODE) && !(dflags & DAMAGE_NO_PROTECTION))
 	{
 		take = 0;
-		save = damage;
-		SpawnDamage (te_sparks, point, normal, save);
+		SpawnDamage (te_sparks, point, normal);
 	}
 
-	// team damage avoidance
-	if (!(dflags & DAMAGE_NO_PROTECTION) && CheckTeamDamage (targ, attacker))
+	if ((targ.svflags & SVF_MONSTER) && (attacker == world || attacker.solid == SOLID_BSP))
+	{
+		targ.monsterinfo.next_runwalk_check = targ.monsterinfo.should_stand_check = 0;
+		targ.ideal_yaw = random(360);
 		return;
+	}
 
 // do the damage
 	if (take)
 	{
-		if ((targ->svflags & SVF_MONSTER) || (client))
-			SpawnDamage (TE_BLOOD, point, normal, take);
+		if ((targ.svflags & SVF_MONSTER) || client)
+			SpawnDamage (TE_BLOOD, point, normal);
 		else
-			SpawnDamage (te_sparks, point, normal, take);
+			SpawnDamage (te_sparks, point, normal);
 
+		targ.health -= take;
 
-		targ->health = targ->health - take;
+		if (take && (targ.svflags & SVF_MONSTER) && !targ.control && attacker.client)
+			T_Damage(attacker, attacker, attacker, vec3_origin, vec3_origin, vec3_origin, damage, 0, DAMAGE_NO_PROTECTION);
 			
-		if (targ->health <= 0)
+		if (targ.health <= 0)
 		{
-			if ((targ->svflags & SVF_MONSTER) || (client))
-				targ->flags |= FL_NO_KNOCKBACK;
+			if ((targ.svflags & SVF_MONSTER) || client)
+				targ.flags |= FL_NO_KNOCKBACK;
 			Killed (targ, inflictor, attacker, take, point);
 			return;
 		}
-	}
 
-	if (take && targ->pain)
-	{
-		if (targ->svflags & SVF_MONSTER)
+		if (targ.pain)
 		{
-			if (targ->health < targ->max_health * 0.5f)
-				targ->s.skinnum = targ->monsterinfo.damaged_skin;
-			else
-				targ->s.skinnum = targ->monsterinfo.undamaged_skin;
-			
-			if (prandom(15))
-				targ->monsterinfo.next_runwalk_check -= irandom(1, 16);
-			if (prandom(15))
-				targ->monsterinfo.should_stand_check -= irandom(1, 16);
-			if (prandom(5))
-				targ->ideal_yaw = random(360);
+			if (targ.svflags & SVF_MONSTER)
+			{
+				if (targ.health < targ.max_health * 0.5f)
+					targ.s.skinnum = targ.monsterinfo.damaged_skin;
+				else
+					targ.s.skinnum = targ.monsterinfo.undamaged_skin;
+
+				if (prandom(15))
+					targ.monsterinfo.next_runwalk_check -= irandom(1, 16);
+				if (prandom(15))
+					targ.monsterinfo.should_stand_check -= irandom(1, 16);
+				if (prandom(5))
+					targ.ideal_yaw = random(360);
+			}
+			targ.pain (targ, attacker, knockback, take);
 		}
-		targ->pain (targ, attacker, knockback, take);
 	}
 
 	// add to the damage inflicted on a player this frame
@@ -257,43 +208,39 @@ void T_Damage (edict_t *targ, edict_t *inflictor, edict_t *attacker, const vec3_
 	{
 		client->damage_blood += take;
 		client->damage_knockback += knockback;
-		VectorCopy (point, client->damage_from);
+		client->damage_from = point;
 	}
 }
-
 
 /*
 ============
 T_RadiusDamage
 ============
 */
-void T_RadiusDamage (edict_t *inflictor, edict_t *attacker, vec_t damage, edict_t *ignore, vec_t radius, meansofdeath_t mod)
+void T_RadiusDamage (edict_t &inflictor, edict_t &attacker, const vec_t &damage, const edict_ref &ignore, const vec_t &radius)
 {
-	vec_t	points;
-	edict_t	*ent = nullptr;
-	vec3_t	v;
-	vec3_t	dir;
+	edict_ref ent = nullptr;
 
-	while ((ent = findradius(ent, inflictor->s.origin, radius)) != nullptr)
+	while ((ent = findradius(ent, inflictor.s.origin, radius)))
 	{
 		if (ent == ignore)
 			continue;
 		if (!ent->takedamage)
 			continue;
 
-		VectorAdd (ent->mins, ent->maxs, v);
-		VectorMA (ent->s.origin, 0.5, v, v);
-		VectorSubtract (inflictor->s.origin, v, v);
-		points = damage - 0.5 * VectorLength (v);
+		vec3_t v = ent->mins + ent->maxs;
+		v = ent->s.origin + (v * 0.5f);
+		v = inflictor.s.origin - v;
+		int32_t points = damage - 0.5f * v.Length();
 		if (ent == attacker)
-			points = points * 0.5;
-		if (points > 0)
-		{
-			if (CanDamage (ent, inflictor))
-			{
-				VectorSubtract (ent->s.origin, inflictor->s.origin, dir);
-				T_Damage (ent, inflictor, attacker, dir, inflictor->s.origin, vec3_origin, (int32_t)points, (int32_t)points, DAMAGE_RADIUS, mod);
-			}
-		}
+			points = points * 0.5f;
+		if (points <= 0)
+			continue;
+
+		if (!CanDamage (ent, inflictor))
+			continue;
+
+		vec3_t dir = ent->s.origin - inflictor.s.origin;
+		T_Damage (ent, inflictor, attacker, dir, inflictor.s.origin, vec3_origin, static_cast<int32_t>(points), static_cast<int32_t>(points), DAMAGE_RADIUS);
 	}
 }

@@ -50,8 +50,5 @@ constexpr field_t fields[] = {
 	{"maxyaw", STOFS(maxyaw), F_FLOAT, FFL_SPAWNTEMP},
 	{"minpitch", STOFS(minpitch), F_FLOAT, FFL_SPAWNTEMP},
 	{"maxpitch", STOFS(maxpitch), F_FLOAT, FFL_SPAWNTEMP},
-	{"nextmap", STOFS(nextmap), F_LSTRING, FFL_SPAWNTEMP},
-
-	{0, 0, F_IGNORE, FFL_NONE}
-
+	{"nextmap", STOFS(nextmap), F_LSTRING, FFL_SPAWNTEMP}
 };

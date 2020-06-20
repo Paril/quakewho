@@ -28,8 +28,8 @@ chick
 #include "q_shared.h"
 #include "m_chick.h"
 
-void chick_stand (edict_t *self);
-void chick_run (edict_t *self);
+static void chick_stand (edict_t &self);
+static void chick_run (edict_t &self);
 
 static soundindex_t	sound_death1;
 static soundindex_t	sound_death2;
@@ -40,276 +40,248 @@ static soundindex_t	sound_pain2;
 static soundindex_t	sound_pain3;
 static soundindex_t	sound_search;
 
-
-void ChickMoan (edict_t *self)
+static void ChickMoan (edict_t &self)
 {
 	if (prandom(50))
-		gi.sound (self, CHAN_VOICE, sound_idle1, 1, ATTN_IDLE, 0);
+		self.PlaySound(sound_idle1, CHAN_VOICE, ATTN_IDLE);
 	else
-		gi.sound (self, CHAN_VOICE, sound_idle2, 1, ATTN_IDLE, 0);
+		self.PlaySound(sound_idle2, CHAN_VOICE, ATTN_IDLE);
 }
 
-mframe_t chick_frames_fidget [] =
-{
-	ai_stand, 0,  nullptr,
-	ai_stand, 0,  nullptr,
-	ai_stand, 0,  nullptr,
-	ai_stand, 0,  nullptr,
-	ai_stand, 0,  nullptr,
-	ai_stand, 0,  nullptr,
-	ai_stand, 0,  nullptr,
-	ai_stand, 0,  nullptr,
-	ai_stand, 0,  ChickMoan,
-	ai_stand, 0,  nullptr,
-	ai_stand, 0,  nullptr,
-	ai_stand, 0,  nullptr,
-	ai_stand, 0,  nullptr,
-	ai_stand, 0,  nullptr,
-	ai_stand, 0,  nullptr,
-	ai_stand, 0,  nullptr,
-	ai_stand, 0,  nullptr,
-	ai_stand, 0,  nullptr,
-	ai_stand, 0,  nullptr,
-	ai_stand, 0,  nullptr,
-	ai_stand, 0,  nullptr,
-	ai_stand, 0,  nullptr,
-	ai_stand, 0,  nullptr,
-	ai_stand, 0,  nullptr,
-	ai_stand, 0,  nullptr,
-	ai_stand, 0,  nullptr,
-	ai_stand, 0,  nullptr,
-	ai_stand, 0,  nullptr,
-	ai_stand, 0,  nullptr,
-	ai_stand, 0,  nullptr
+static const mmove_t chick_move_fidget = {
+	.firstframe = FRAME_stand201,
+	.lastframe = FRAME_stand230,
+	.frame = {
+		{ ai_stand },
+		{ ai_stand },
+		{ ai_stand },
+		{ ai_stand },
+		{ ai_stand },
+		{ ai_stand },
+		{ ai_stand },
+		{ ai_stand },
+		{ .aifunc = ai_stand, .thinkfunc = ChickMoan },
+		{ ai_stand },
+		{ ai_stand },
+		{ ai_stand },
+		{ ai_stand },
+		{ ai_stand },
+		{ ai_stand },
+		{ ai_stand },
+		{ ai_stand },
+		{ ai_stand },
+		{ ai_stand },
+		{ ai_stand },
+		{ ai_stand },
+		{ ai_stand },
+		{ ai_stand },
+		{ ai_stand },
+		{ ai_stand },
+		{ ai_stand },
+		{ ai_stand },
+		{ ai_stand },
+		{ ai_stand },
+		{ ai_stand }
+	},
+	.endfunc = chick_stand
 };
-mmove_t chick_move_fidget = {FRAME_stand201, FRAME_stand230, chick_frames_fidget, chick_stand};
 
-void chick_fidget (edict_t *self)
+static void chick_fidget (edict_t &self)
 {
 	if (M_FidgetCheck(self, 30))
-		self->monsterinfo.currentmove = &chick_move_fidget;
+		self.monsterinfo.currentmove = &chick_move_fidget;
 }
 
-mframe_t chick_frames_stand [] =
-{
-	ai_stand, 0, nullptr,
-	ai_stand, 0, nullptr,
-	ai_stand, 0, nullptr,
-	ai_stand, 0, nullptr,
-	ai_stand, 0, nullptr,
-	ai_stand, 0, nullptr,
-	ai_stand, 0, nullptr,
-	ai_stand, 0, nullptr,
-	ai_stand, 0, nullptr,
-	ai_stand, 0, nullptr,
-	ai_stand, 0, nullptr,
-	ai_stand, 0, nullptr,
-	ai_stand, 0, nullptr,
-	ai_stand, 0, nullptr,
-	ai_stand, 0, nullptr,
-	ai_stand, 0, nullptr,
-	ai_stand, 0, nullptr,
-	ai_stand, 0, nullptr,
-	ai_stand, 0, nullptr,
-	ai_stand, 0, nullptr,
-	ai_stand, 0, nullptr,
-	ai_stand, 0, nullptr,
-	ai_stand, 0, nullptr,
-	ai_stand, 0, nullptr,
-	ai_stand, 0, nullptr,
-	ai_stand, 0, nullptr,
-	ai_stand, 0, nullptr,
-	ai_stand, 0, nullptr,
-	ai_stand, 0, nullptr,
-	ai_stand, 0, chick_fidget,
-
-};
-mmove_t chick_move_stand = {FRAME_stand101, FRAME_stand130, chick_frames_stand, nullptr};
-
-void chick_stand (edict_t *self)
-{
-	self->monsterinfo.currentmove = &chick_move_stand;
-}
-
-mframe_t chick_frames_start_run [] =
-{
-	ai_run, 1,  nullptr,
-	ai_run, 0,  nullptr,
-	ai_run, 0,	 nullptr,
-	ai_run, -1, nullptr, 
-	ai_run, -1, nullptr, 
-	ai_run, 0,  nullptr,
-	ai_run, 1,  nullptr,
-	ai_run, 3,  nullptr,
-	ai_run, 6,	 nullptr,
-	ai_run, 3,	 nullptr
-};
-mmove_t chick_move_start_run = {FRAME_walk01, FRAME_walk10, chick_frames_start_run, chick_run};
-
-mframe_t chick_frames_run [] =
-{
-	ai_run, 6,	nullptr,
-	ai_run, 8,  nullptr,
-	ai_run, 13, nullptr,
-	ai_run, 5,  nullptr,
-	ai_run, 7,  nullptr,
-	ai_run, 4,  nullptr,
-	ai_run, 11, nullptr,
-	ai_run, 5,  nullptr,
-	ai_run, 9,  nullptr,
-	ai_run, 7,  nullptr
-
-};
-
-mmove_t chick_move_run = {FRAME_walk11, FRAME_walk20, chick_frames_run, nullptr};
-
-mframe_t chick_frames_walk [] =
-{
-	ai_walk, 6,	 nullptr,
-	ai_walk, 8,  nullptr,
-	ai_walk, 13, nullptr,
-	ai_walk, 5,  nullptr,
-	ai_walk, 7,  nullptr,
-	ai_walk, 4,  nullptr,
-	ai_walk, 11, nullptr,
-	ai_walk, 5,  nullptr,
-	ai_walk, 9,  nullptr,
-	ai_walk, 7,  nullptr
-};
-
-mmove_t chick_move_walk = {FRAME_walk11, FRAME_walk20, chick_frames_walk, nullptr};
-
-void chick_walk (edict_t *self)
-{
-	self->monsterinfo.currentmove = &chick_move_walk;
-}
-
-void chick_run (edict_t *self)
-{
-	if (self->monsterinfo.currentmove == &chick_move_walk ||
-		self->monsterinfo.currentmove == &chick_move_start_run)
-	{
-		self->monsterinfo.currentmove = &chick_move_run;
+static const mmove_t chick_move_stand = {
+	.firstframe = FRAME_stand101,
+	.lastframe = FRAME_stand130,
+	.frame = {
+		{ ai_stand },
+		{ ai_stand },
+		{ ai_stand },
+		{ ai_stand },
+		{ ai_stand },
+		{ ai_stand },
+		{ ai_stand },
+		{ ai_stand },
+		{ ai_stand },
+		{ ai_stand },
+		{ ai_stand },
+		{ ai_stand },
+		{ ai_stand },
+		{ ai_stand },
+		{ ai_stand },
+		{ ai_stand },
+		{ ai_stand },
+		{ ai_stand },
+		{ ai_stand },
+		{ ai_stand },
+		{ ai_stand },
+		{ ai_stand },
+		{ ai_stand },
+		{ ai_stand },
+		{ ai_stand },
+		{ ai_stand },
+		{ ai_stand },
+		{ ai_stand },
+		{ ai_stand },
+		{ .aifunc = ai_stand, .thinkfunc = chick_fidget },
 	}
+};
+
+static void chick_stand (edict_t &self)
+{
+	self.monsterinfo.currentmove = &chick_move_stand;
+}
+
+static const mmove_t chick_move_start_run = {
+	.firstframe = FRAME_walk01,
+	.lastframe = FRAME_walk10,
+	.frame = {
+		{ ai_run, 1 },
+		{ ai_run },
+		{ ai_run },
+		{ ai_run, -1 }, 
+		{ ai_run, -1 }, 
+		{ ai_run },
+		{ ai_run, 1 },
+		{ ai_run, 3 },
+		{ ai_run, 6 },
+		{ ai_run, 3 }
+	},
+	.endfunc = chick_run
+};
+
+static const mmove_t chick_move_run = {
+	.firstframe = FRAME_walk11,
+	.lastframe = FRAME_walk20,
+	.frame = {
+		{ ai_run, 6 },
+		{ ai_run, 8 },
+		{ ai_run, 13 },
+		{ ai_run, 5 },
+		{ ai_run, 7 },
+		{ ai_run, 4 },
+		{ ai_run, 11 },
+		{ ai_run, 5 },
+		{ ai_run, 9 },
+		{ ai_run, 7 }
+	}
+};
+
+static const mmove_t chick_move_walk = {
+	.firstframe = FRAME_walk11,
+	.lastframe = FRAME_walk20,
+	.frame = {
+		{ ai_walk, 6 },
+		{ ai_walk, 8 },
+		{ ai_walk, 13 },
+		{ ai_walk, 5 },
+		{ ai_walk, 7 },
+		{ ai_walk, 4 },
+		{ ai_walk, 11 },
+		{ ai_walk, 5 },
+		{ ai_walk, 9 },
+		{ ai_walk, 7 }
+	}
+};
+
+static void chick_walk (edict_t &self)
+{
+	self.monsterinfo.currentmove = &chick_move_walk;
+}
+
+static void chick_run (edict_t &self)
+{
+	if (self.monsterinfo.currentmove == &chick_move_walk ||
+		self.monsterinfo.currentmove == &chick_move_start_run)
+		self.monsterinfo.currentmove = &chick_move_run;
 	else
-	{
-		self->monsterinfo.currentmove = &chick_move_start_run;
-	}
+		self.monsterinfo.currentmove = &chick_move_start_run;
 }
 
-void chick_pain (edict_t *self, edict_t *other, vec_t kick, int32_t damage)
+static void chick_pain (edict_t &self, edict_t &other, const vec_t &kick, const int32_t &damage)
 {
-	if (level.time < self->pain_debounce_time)
+	if (level.time < self.pain_debounce_time)
 		return;
 
-	self->pain_debounce_time = level.time + 3;
+	self.pain_debounce_time = level.time + 3;
 
-	int32_t r = irandom(2);
+	const int32_t r = irandom(2);
 	if (r == 0)
-		gi.sound (self, CHAN_VOICE, sound_pain1, 1, ATTN_NORM, 0);
+		self.PlaySound(sound_pain1, CHAN_VOICE);
 	else if (r == 1)
-		gi.sound (self, CHAN_VOICE, sound_pain2, 1, ATTN_NORM, 0);
+		self.PlaySound(sound_pain2, CHAN_VOICE);
 	else
-		gi.sound (self, CHAN_VOICE, sound_pain3, 1, ATTN_NORM, 0);
+		self.PlaySound(sound_pain3, CHAN_VOICE);
 }
 
-void chick_dead (edict_t *self)
-{
-	VectorSet (self->mins, -16, -16, 0);
-	VectorSet (self->maxs, 16, 16, 16);
-	self->movetype = MOVETYPE_TOSS;
-	self->svflags |= SVF_DEADMONSTER;
-	self->nextthink = 0;
-	gi.linkentity (self);
-}
-
-mframe_t chick_frames_death2 [] =
-{
-	ai_move, -6, nullptr,
-	ai_move, 0,  nullptr,
-	ai_move, -1,  nullptr,
-	ai_move, -5, nullptr,
-	ai_move, 0, nullptr,
-	ai_move, -1,  nullptr,
-	ai_move, -2,  nullptr,
-	ai_move, 1,  nullptr,
-	ai_move, 10, nullptr,
-	ai_move, 2,  nullptr,
-	ai_move, 3,  nullptr,
-	ai_move, 1,  nullptr,
-	ai_move, 2, nullptr,
-	ai_move, 0,  nullptr,
-	ai_move, 3,  nullptr,
-	ai_move, 3,  nullptr,
-	ai_move, 1,  nullptr,
-	ai_move, -3,  nullptr,
-	ai_move, -5, nullptr,
-	ai_move, 4, nullptr,
-	ai_move, 15, nullptr,
-	ai_move, 14, nullptr,
-	ai_move, 1, nullptr
-};
-mmove_t chick_move_death2 = {FRAME_death201, FRAME_death223, chick_frames_death2, chick_dead};
-
-mframe_t chick_frames_death1 [] =
-{
-	ai_move, 0,  nullptr,
-	ai_move, 0,  nullptr,
-	ai_move, -7, nullptr,
-	ai_move, 4,  nullptr,
-	ai_move, 11, nullptr,
-	ai_move, 0,  nullptr,
-	ai_move, 0,  nullptr,
-	ai_move, 0,  nullptr,
-	ai_move, 0,  nullptr,
-	ai_move, 0,  nullptr,
-	ai_move, 0,  nullptr,
-	ai_move, 0,  nullptr
-	
-};
-mmove_t chick_move_death1 = {FRAME_death101, FRAME_death112, chick_frames_death1, chick_dead};
-
-void chick_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int32_t damage, const vec3_t point)
-{
-	int32_t		n;
-
-// check for gib
-	if (self->health <= self->gib_health)
-	{
-		gi.sound (self, CHAN_VOICE, gi.soundindex ("misc/udeath.wav"), 1, ATTN_NORM, 0);
-		for (n= 0; n < 2; n++)
-			ThrowGib (self, "models/objects/gibs/bone/tris.md2", damage, GIB_ORGANIC);
-		for (n= 0; n < 4; n++)
-			ThrowGib (self, "models/objects/gibs/sm_meat/tris.md2", damage, GIB_ORGANIC);
-		ThrowHead (self, "models/objects/gibs/head2/tris.md2", damage, GIB_ORGANIC);
-		self->deadflag = DEAD_DEAD;
-		return;
+static const mmove_t chick_move_death2 = {
+	.firstframe = FRAME_death201,
+	.lastframe = FRAME_death223,
+	.frame = {
+		{ ai_move, -6 },
+		{ ai_move },
+		{ ai_move, -1 },
+		{ ai_move, -5 },
+		{ ai_move },
+		{ ai_move, -1 },
+		{ ai_move, -2 },
+		{ ai_move, 1 },
+		{ ai_move, 10 },
+		{ ai_move, 2 },
+		{ ai_move, 3 },
+		{ ai_move, 1 },
+		{ ai_move, 2 },
+		{ ai_move },
+		{ ai_move, 3 },
+		{ ai_move, 3 },
+		{ ai_move, 1 },
+		{ ai_move, -3 },
+		{ ai_move, -5 },
+		{ ai_move, 4 },
+		{ ai_move, 15 },
+		{ ai_move, 14 },
+		{ ai_move, 1 }
 	}
+};
 
-	if (self->deadflag == DEAD_DEAD)
-		return;
+static const mmove_t chick_move_death1 = {
+	.firstframe = FRAME_death101,
+	.lastframe = FRAME_death112,
+	.frame = {
+		{ ai_move },
+		{ ai_move },
+		{ ai_move, -7 },
+		{ ai_move, 4 },
+		{ ai_move, 11 },
+		{ ai_move },
+		{ ai_move },
+		{ ai_move },
+		{ ai_move },
+		{ ai_move },
+		{ ai_move },
+		{ ai_move }
+	}
+};
 
-// regular death
-	self->deadflag = DEAD_DEAD;
-	self->takedamage = DAMAGE_YES;
-
-	n = prandom(50);
-	if (n == 0)
+static void chick_die (edict_t &self)
+{
+	if (prandom(50))
 	{
-		self->monsterinfo.currentmove = &chick_move_death1;
-		gi.sound (self, CHAN_VOICE, sound_death1, 1, ATTN_NORM, 0);
+		self.monsterinfo.currentmove = &chick_move_death1;
+		self.PlaySound(sound_death1, CHAN_VOICE);
 	}
 	else
 	{
-		self->monsterinfo.currentmove = &chick_move_death2;
-		gi.sound (self, CHAN_VOICE, sound_death2, 1, ATTN_NORM, 0);
+		self.monsterinfo.currentmove = &chick_move_death2;
+		self.PlaySound(sound_death2, CHAN_VOICE);
 	}
 }
-
 
 /*QUAKED monster_chick (1 .5 0) (-16 -16 -24) (16 16 32) Ambush Trigger_Spawn Sight
 */
-void SP_monster_chick (edict_t *self)
+void SP_monster_chick (edict_t &self)
 {
 	sound_death1			= gi.soundindex ("chick/chkdeth1.wav");
 	sound_death2			= gi.soundindex ("chick/chkdeth2.wav");
@@ -320,28 +292,28 @@ void SP_monster_chick (edict_t *self)
 	sound_pain3				= gi.soundindex ("chick/chkpain3.wav");
 	sound_search			= gi.soundindex ("chick/chksrch1.wav");
 
-	self->movetype = MOVETYPE_STEP;
-	self->solid = SOLID_BBOX;
-	self->s.modelindex = gi.modelindex ("models/monsters/bitch/tris.md2");
-	VectorSet (self->mins, -16, -16, 0);
-	VectorSet (self->maxs, 16, 16, 56);
+	self.movetype = MOVETYPE_STEP;
+	self.solid = SOLID_BBOX;
+	self.s.modelindex = gi.modelindex ("models/monsters/bitch/tris.md2");
+	self.mins = { -16.f, -16.f, 0.f };
+	self.maxs = { 16.f, 16.f, 56.f };
 
-	self->health = 175;
-	self->gib_health = -70;
-	self->mass = 200;
+	self.health = 175;
+	self.gib_health = -70;
+	self.mass = 200;
 
-	self->pain = chick_pain;
-	self->die = chick_die;
+	self.pain = chick_pain;
 
-	self->monsterinfo.stand = chick_stand;
-	self->monsterinfo.walk = chick_walk;
-	self->monsterinfo.run = chick_run;
+	self.monsterinfo.stand = chick_stand;
+	self.monsterinfo.walk = chick_walk;
+	self.monsterinfo.run = chick_run;
+	self.monsterinfo.die = chick_die;
 
-	gi.linkentity (self);
+	self.Link();
 
-	self->monsterinfo.currentmove = &chick_move_stand;
-	self->monsterinfo.scale = MODEL_SCALE;
-	self->monsterinfo.damaged_skin = 1;
+	self.monsterinfo.currentmove = &chick_move_stand;
+	self.monsterinfo.scale = MODEL_SCALE;
+	self.monsterinfo.damaged_skin = 1;
 
 	walkmonster_start (self);
 }

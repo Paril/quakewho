@@ -20,13 +20,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "q_shared.h"
 
-void		Use_Weapon (edict_t *ent, gitem_t *inv);
-
-void Weapon_Blaster (edict_t *ent);
-void Weapon_Shotgun (edict_t *ent);
-void Weapon_Machinegun (edict_t *ent);
-void Weapon_GrenadeLauncher (edict_t *ent);
-
 gitem_t g_weapons[WEAP_TOTAL] =
 {
 	{
@@ -55,7 +48,7 @@ gitem_t g_weapons[WEAP_TOTAL] =
 		"weapons/shotgf1b.wav weapons/shotgr1b.wav"
 	},
 
-	{
+	/*{
 		Use_Weapon,
 		Weapon_Machinegun,
 		"models/weapons/v_machn/tris.md2",
@@ -66,7 +59,7 @@ gitem_t g_weapons[WEAP_TOTAL] =
 		AMMO_BULLETS,
 		WEAP_MACHINEGUN,
 		"weapons/machgf1b.wav weapons/machgf2b.wav weapons/machgf3b.wav weapons/machgf4b.wav weapons/machgf5b.wav"
-	},
+	},*/
 
 	{
 		Use_Weapon,
@@ -91,38 +84,36 @@ This will be called for each item spawned in a level,
 and for each item in each client's inventory.
 ===============
 */
-static void PrecacheItem (gitem_t *it)
+static void PrecacheItem (const gitem_t &it)
 {
-	char	*s, *start;
-	char	data[MAX_QPATH];
-	int32_t		len;
-
-	if (!it)
-		return;
-
-	if (it->vwep_model)
-		gi.modelindex (it->vwep_model);
-	if (it->view_model)
-		gi.modelindex (it->view_model);
-	if (it->icon)
-		gi.imageindex (it->icon);
+	if (it.vwep_model)
+		gi.modelindex (it.vwep_model);
+	if (it.view_model)
+		gi.modelindex (it.view_model);
+	if (it.icon)
+		gi.imageindex (it.icon);
 
 	// parse the space seperated precache string for other items
-	s = it->precaches;
+	const char *s = it.precaches;
+
 	if (!s || !s[0])
 		return;
 
 	while (*s)
 	{
-		start = s;
+		const char *start = s;
+
 		while (*s && *s != ' ')
 			s++;
 
-		len = s-start;
+		const size_t len = s - start;
+
 		if (len >= MAX_QPATH || len < 5)
-			gi.error ("PrecacheItem: %s has bad precache string", it->pickup_name);
-		memcpy (data, start, len);
-		data[len] = 0;
+			gi.error ("%s: %s has bad precache string", __FUNCTION__, it.pickup_name);
+
+		char data[MAX_QPATH];
+		strncpy_s(data, sizeof(data), start, len);
+
 		if (*s)
 			s++;
 
@@ -140,6 +131,6 @@ static void PrecacheItem (gitem_t *it)
 
 void InitItems ()
 {
-	for (size_t i = 0; i < lengthof(g_weapons); i++)
-		PrecacheItem(&g_weapons[i]);
+	for (auto &weapon : g_weapons)
+		PrecacheItem(weapon);
 }
