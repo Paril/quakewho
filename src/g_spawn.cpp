@@ -875,15 +875,15 @@ void SpawnEntities (const char *mapname, const char *entities, const char *spawn
 // parse ents
 	while (1)
 	{
+		// parse the opening brace	
+		if (!COM_Parse (parse))
+			break;
+		
 		// if our last entity spawned, prep a new entity ID 
 		if (ent)
 			ent = G_Spawn();
 		else if (!ent->inuse)
 			G_InitEdict(ent);
-
-		// parse the opening brace	
-		if (!COM_Parse (parse))
-			break;
 
 		if (parse.token.data()[0] != '{')
 			gi.error ("%s: found %.*s when expecting {", __FUNCTION__, parse.token.size(), parse.token.data());

@@ -270,11 +270,12 @@ void G_SetMovedir (vec3_t &angles, vec3_t &movedir)
 	angles.Clear();
 }
 
-void G_InitEdict (edict_t &e)
+edict_t &G_InitEdict (edict_t &e)
 {
 	e = edict_t();
 	e.inuse = true;
 	e.s.number = &e - g_edicts;
+	return e;
 }
 
 /*
@@ -292,24 +293,20 @@ edict_t &G_Spawn ()
 {
 	for (uint32_t i = game.maxclients + 1; i < globals.num_edicts; i++)
 	{
-		if (i == game.maxentities)
-			gi.error ("ED_Alloc: no free edicts");
-
 		edict_t &e = g_edicts[i];
 
 		// the first couple seconds of server time can involve a lot of
 		// freeing and allocating, so relax the replacement policy
 		if (!e.inuse && (e.freetime < 2 || level.time - e.freetime > 0.5f ))
-		{
-			G_InitEdict(e);
-			return e;
-		}
+			return G_InitEdict(e);
 	}
 	
+	if (globals.num_edicts == game.maxentities)
+		gi.error ("ED_Alloc: no free edicts");
+
 	edict_t &e = g_edicts[globals.num_edicts];
 	globals.num_edicts++;
-	G_InitEdict(e);
-	return e;
+	return G_InitEdict(e);
 }
 
 /*
@@ -321,10 +318,10 @@ Marks the edict as free
 */
 void G_FreeEdict (edict_t &ed)
 {
-	ed.Unlink();
-
 	if (ed.s.number != &ed - g_edicts)
 		gi.error("entity broken\n");
+
+	ed.Unlink();
 
 	if (static_cast<size_t>(ed.s.number) <= game.maxclients)
 	{
