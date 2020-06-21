@@ -903,25 +903,25 @@ struct entity_state_t
 // frame rates
 struct player_state_t
 {
-	pmove_state_t	pmove;				// for prediction
+	pmove_state_t					pmove;				// for prediction
 
-	vec3_t			viewangles;			// for fixed views
-	vec3_t			viewoffset;			// add to pmovestate->origin
-	vec3_t			kick_angles;		// add to view direction to get render angles
-										// set by weapon kicks, pain effects, etc
+	vec3_t							viewangles;			// for fixed views
+	vec3_t							viewoffset;			// add to pmovestate->origin
+	vec3_t							kick_angles;		// add to view direction to get render angles
+														// set by weapon kicks, pain effects, etc
 
-	vec3_t			gunangles;
-	vec3_t			gunoffset;
-	modelindex_t	gunindex;
-	int32_t			gunframe;
+	vec3_t							gunangles;
+	vec3_t							gunoffset;
+	modelindex_t					gunindex;
+	int32_t							gunframe;
 
-	vec4_t			blend;			// rgba full screen effect
+	vec4_t							blend;			// rgba full screen effect
 	
-	vec_t			fov;				// horizontal field of view
+	vec_t							fov;				// horizontal field of view
 
-	refdef_flags_t	rdflags;			// refdef flags
+	refdef_flags_t					rdflags;			// refdef flags
 
-	int16_t			stats[MAX_STATS];	// fast status bar updates
+	std::array<int16_t, MAX_STATS>	stats;	// fast status bar updates
 };
 
 #include "g_local.h"
