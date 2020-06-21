@@ -290,7 +290,7 @@ static const char *G_Radar(edict_t &ent)
 	
 	ent.client->SendSound(gi.soundindex("world/scan1.wav"));
 
-	for (size_t i = game.maxclients + 1; i < globals.num_edicts; i++)
+	for (size_t i = game.maxclients + 1; i < globals.pool.num; i++)
 	{
 		edict_t &e = g_edicts[i];
 

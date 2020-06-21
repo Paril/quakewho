@@ -26,6 +26,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define	GAME_INCLUDE
 #include "game.h"
 
+extern	game_import_t	gi;
+extern	game_export_t	globals;
+
 // the "gameversion" client command will print this plus compile date
 constexpr const char *GAMEVERSION = "quakewho";
 
@@ -186,19 +189,100 @@ struct gitem_t
 	const char			*precaches;
 };
 
+class entity_iterator
+{
+	edict_t *_ptr = nullptr;
+
+public:
+	entity_iterator(const size_t &offset) :
+		_ptr(reinterpret_cast<edict_t*>((reinterpret_cast<uint8_t*>(globals.pool.head) + (globals.pool.size * offset))))
+	{
+	}
+	entity_iterator& operator++()
+	{
+		_ptr = reinterpret_cast<edict_t*>((reinterpret_cast<uint8_t*>(_ptr) + globals.pool.size));
+		return *this;
+	}
+	entity_iterator operator+(const size_t &offset)
+	{
+		entity_iterator retval = *this;
+		retval._ptr = reinterpret_cast<edict_t*>((reinterpret_cast<uint8_t*>(retval._ptr) + (globals.pool.size * offset)));
+		return retval;
+	}
+
+	entity_iterator operator++(int)
+	{
+		entity_iterator retval = *this;
+		++(*this);
+		return retval;
+	}
+
+	bool operator==(const entity_iterator &other) const { return _ptr == other._ptr; }
+	bool operator!=(const entity_iterator &other) const { return !(*this == other); }
+	edict_t &operator*() { return *_ptr; }
+
+	// iterator traits
+	using difference_type = ptrdiff_t;
+	using value_type = edict_t*;
+	using pointer = const edict_t**;
+	using reference = const edict_t*&;
+	using iterator_category = std::forward_iterator_tag;
+};
+
+struct entity_range
+{
+private:
+	size_t _start, _end;
+
+public:
+	entity_range(size_t start, size_t end) :
+		_start(start),
+		_end(end)
+	{
+	}
+
+	entity_iterator begin() { return entity_iterator(_start); }
+	entity_iterator end() { return entity_iterator(_end); }
+};
+
 //
 // this structure is left intact through an entire game
 // it should be initialized at dll load time, and read/written to
 // the server.ssv file for savegames
 //
-struct game_locals_t
+extern struct game_locals_t
 {
 	gclient_t	*clients;		// [maxclients]
 
 	// store latched cvars here that we want to get at often
 	size_t		maxclients;
 	size_t		maxentities;
-};
+
+	inline edict_t &world()
+	{
+		return *globals.pool.head;
+	}
+
+	struct entity_list_t
+	{
+		entity_iterator begin() { return entity_iterator(0); }
+		entity_iterator end() { return entity_iterator(globals.pool.num + 1); }
+
+		entity_range range(const size_t &start, const size_t &end = -1)
+		{
+			if (end == static_cast<size_t>(-1))
+				return entity_range(start, globals.pool.num + 1);
+
+			return entity_range(start, end + 1);
+		}
+	} entities;
+
+	struct player_list_t
+	{
+		entity_iterator begin() { return entity_iterator(1); }
+		entity_iterator end();
+	} players;
+} game;
 
 enum gamestate_t
 {
@@ -212,7 +296,7 @@ enum gamestate_t
 // this structure is cleared as each map is entered
 // it is read/written to the level.sav file for savegames
 //
-struct level_locals_t
+extern struct level_locals_t
 {
 	int32_t		framenum;
 	vec_t		time;
@@ -245,13 +329,13 @@ struct level_locals_t
 	vec_t monster_kill_time;
 	vec_t round_end;
 	bool countdown_sound;
-};
+} level;
 
 
 // spawn_temp_t is only used to hold entity field values that
 // can be set from the editor, but aren't actualy present
 // in edict_t during gameplay
-struct spawn_temp_t
+extern struct spawn_temp_t
 {
 	// world vars
 	char		*sky;
@@ -271,7 +355,7 @@ struct spawn_temp_t
 	vec_t		maxyaw;
 	vec_t		minpitch;
 	vec_t		maxpitch;
-};
+} st;
 
 enum movestate_t : uint8_t
 {
@@ -353,18 +437,16 @@ struct monsterinfo_t
 
 	void			(*die)(edict_t &self);
 	const char		*name;
-};
 
-extern	game_locals_t	game;
-extern	level_locals_t	level;
-extern	game_import_t	gi;
-extern	game_export_t	globals;
-extern	spawn_temp_t	st;
+	vec_t			stubborn_check_time, stubborn_time;
+	vec_t			slow_turn_check, slow_turn_time, slow_turn_speed;
+	vec_t			follow_check;
+	edict_ref		follow_ent;
+	bool			hunter_visible;
+};
 
 extern	modelindex_t	sm_meat_index;
 extern	soundindex_t	snd_fry;
-
-extern	edict_t			*g_edicts;
 
 #define	FOFS(x)		offsetof(edict_t, x)
 #define	STOFS(x)	offsetof(spawn_temp_t, x)
@@ -407,7 +489,7 @@ extern	cvar_t		*flood_waitdelay;
 					
 extern	cvar_t		*sv_maplist;
 
-#define world		(g_edicts[0])
+#define g_edicts	globals.pool.head
 
 // item spawnflags
 const uint32_t ITEM_TRIGGER_SPAWN		= bit(0);
@@ -909,22 +991,24 @@ struct gclient_t : gclient_server_t
 	bool				temp_spectator;
 	int32_t				num_jumps, last_num_jumps;
 
+	static inline edict_t &ClientToEntity(gclient_t &client);
+
 	template<typename ... Args>
 	inline void Print(const printflags_t &printlevel, const char *fmt, Args... args)
 	{
-		gi.cprintf(g_edicts[(this - game.clients) + 1], printlevel, fmt, args...);
+		gi.cprintf(ClientToEntity(*this), printlevel, fmt, args...);
 	}
 
 	template<typename ... Args>
 	inline void Print(const char *fmt, Args... args)
 	{
-		gi.cprintf(g_edicts[(this - game.clients) + 1], PRINT_HIGH, fmt, args...);
+		gi.cprintf(ClientToEntity(*this), PRINT_HIGH, fmt, args...);
 	}
 	
 	template<typename ... Args>
 	inline void CenterPrint(const char *fmt, Args... args)
 	{
-		gi.centerprintf(g_edicts[(this - game.clients) + 1], fmt, args...);
+		gi.centerprintf(ClientToEntity(*this), fmt, args...);
 	}
 
 	inline void SendSound(const soundindex_t &sound, const vec_t volume = DEFAULT_SOUND_PACKET_VOLUME, const soundchannel_t &channel = CHAN_AUTO, const soundattn_t &attn = DEFAULT_SOUND_PACKET_ATTENUATION, const bool &reliable = false);
@@ -1080,10 +1164,16 @@ struct edict_t : edict_server_t
 	}
 };
 
+/*static*/ inline edict_t &gclient_t::ClientToEntity(gclient_t &client)
+{
+	return g_edicts[(&client - game.clients) + 1];
+}
+
 inline void gclient_t::SendSound(const soundindex_t &sound, const vec_t volume, const soundchannel_t &channel, const soundattn_t &attn, const bool &reliable)
 {
+	const edict_t &ent = ClientToEntity(*this);
 	const vec_t attenuation = min(static_cast<vec_t>(attn), 255.0f / 64);
-	const int16_t sendchan = static_cast<int16_t>((((this - game.clients) + 1) << 3) | (static_cast<int16_t>(channel) & 7));
+	const int16_t sendchan = static_cast<int16_t>((ent.s.number << 3) | (static_cast<int16_t>(channel) & 7));
 
 	soundflags_t flags = SND_ENT;
 	
@@ -1101,7 +1191,7 @@ inline void gclient_t::SendSound(const soundindex_t &sound, const vec_t volume, 
 	if (flags & SND_ATTENUATION)
 		gi.WriteByte(static_cast<uint8_t>(attenuation * 64));
 	gi.WriteShort(sendchan);
-	gi.unicast(g_edicts[(this - game.clients) + 1], reliable);
+	gi.unicast(ent, reliable);
 }
 
 inline edict_ref::operator bool() const
@@ -1117,7 +1207,7 @@ inline edict_ref::operator const edict_t &() const
 		__debugbreak();
 #endif
 		gi.dprintf("dereferencing null entity\n");
-		return world;
+		return game.world();
 	}
 
 	return *e;

@@ -263,9 +263,9 @@ static void LookAtKiller (edict_t &self, edict_t &inflictor, edict_t &attacker)
 {
 	vec3_t		dir;
 
-	if (attacker != world && attacker != self)
+	if (attacker != game.world() && attacker != self)
 		dir = attacker.s.origin - self.s.origin;
-	else if (inflictor != world && inflictor != self)
+	else if (inflictor != game.world() && inflictor != self)
 		dir = inflictor.s.origin - self.s.origin;
 	else
 	{
@@ -321,7 +321,7 @@ void G_TeamWins(const playerteam_t &team)
 	}
 
 	gi.bprintf(PRINT_HIGH, "The %s win!\n", team == TEAM_HIDERS ? "hiders" : "hunters");
-	world.PlaySound(gi.soundindex ("misc/secret.wav"), CHAN_AUTO, ATTN_NONE);
+	game.world().PlaySound(gi.soundindex ("misc/secret.wav"), CHAN_AUTO, ATTN_NONE);
 	level.state = GAMESTATE_INTERMISSION;
 	level.state_time = level.time + 5;
 }

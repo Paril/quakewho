@@ -130,7 +130,7 @@ static void M_WorldEffects (edict_t &ent)
 		if (ent.damage_debounce_time < level.time)
 		{
 			ent.damage_debounce_time = level.time + 0.2f;
-			T_Damage (ent, world, world, vec3_origin, ent.s.origin, vec3_origin, 10 * ent.waterlevel, 0, DAMAGE_NONE);
+			T_Damage (ent, game.world(), game.world(), vec3_origin, ent.s.origin, vec3_origin, 10 * ent.waterlevel, 0, DAMAGE_NONE);
 		}
 	}
 
@@ -139,7 +139,7 @@ static void M_WorldEffects (edict_t &ent)
 		if (ent.damage_debounce_time < level.time)
 		{
 			ent.damage_debounce_time = level.time + 1;
-			T_Damage (ent, world, world, vec3_origin, ent.s.origin, vec3_origin, 4 * ent.waterlevel, 0, DAMAGE_NONE);
+			T_Damage (ent, game.world(), game.world(), vec3_origin, ent.s.origin, vec3_origin, 4 * ent.waterlevel, 0, DAMAGE_NONE);
 		}
 	}
 	

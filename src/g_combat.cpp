@@ -153,7 +153,7 @@ void T_Damage (edict_t &targ, edict_t &inflictor, edict_t &attacker, const vec3_
 		SpawnDamage (te_sparks, point, normal);
 	}
 
-	if ((targ.svflags & SVF_MONSTER) && (attacker == world || attacker.solid == SOLID_BSP))
+	if ((targ.svflags & SVF_MONSTER) && (attacker == game.world() || attacker.solid == SOLID_BSP))
 	{
 		targ.monsterinfo.next_runwalk_check = targ.monsterinfo.should_stand_check = 0;
 		targ.ideal_yaw = random(360);

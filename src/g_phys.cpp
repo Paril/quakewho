@@ -332,7 +332,7 @@ static edict_ref SV_Push (edict_t &pusher, const vec3_t &move, const vec3_t &amo
 	pusher.Link();
 
 // see if any solid entities are inside the final position
-	for (size_t e = 1; e < globals.num_edicts; e++)
+	for (size_t e = 1; e < globals.pool.num; e++)
 	{
 		edict_t &check = g_edicts[e];
 
@@ -615,9 +615,9 @@ static void SV_Physics_Toss (edict_t &ent)
 	ent.waterlevel = isinwater ? WATER_FEET : WATER_NONE;
 
 	if (!wasinwater && isinwater)
-		world.PlayPositionedSound(gi.soundindex("misc/h2ohit1.wav"), old_origin);
+		game.world().PlayPositionedSound(gi.soundindex("misc/h2ohit1.wav"), old_origin);
 	else if (wasinwater && !isinwater)
-		world.PlayPositionedSound (gi.soundindex("misc/h2ohit1.wav"), ent.s.origin);
+		game.world().PlayPositionedSound (gi.soundindex("misc/h2ohit1.wav"), ent.s.origin);
 
 // move teamslaves
 	for (edict_ref slave = ent.teamchain; slave; slave = slave->teamchain)

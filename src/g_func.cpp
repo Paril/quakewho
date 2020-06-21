@@ -623,7 +623,7 @@ void SP_func_rotating (edict_t &ent)
 		ent.blocked = rotating_blocked;
 
 	if (ent.spawnflags & 1)
-		ent.use (ent, world, world);
+		ent.use (ent, game.world(), game.world());
 
 	if (ent.spawnflags & 64)
 		ent.s.effects |= EF_ANIM_ALL;

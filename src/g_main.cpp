@@ -25,8 +25,6 @@ game_locals_t	game;
 level_locals_t	level;
 game_import_t	gi;
 
-edict_t		*g_edicts;
-
 static cvar_t	*dmflags_cvar;
 
 cvar_t		*maxentities;
@@ -133,8 +131,7 @@ static void InitGame ()
 	for (size_t i = 0; i < game.maxentities; i++)
 		new(&g_edicts[i]) edict_t();
 
-	globals.edicts = g_edicts;
-	globals.max_edicts = game.maxentities;
+	globals.pool.max = game.maxentities;
 
 	// initialize all clients for this game
 	game.maxclients = maxclients->value;
@@ -143,7 +140,8 @@ static void InitGame ()
 	for (size_t i = 0; i < game.maxclients; i++)
 		new(&game.clients[i]) gclient_t();
 
-	globals.num_edicts = game.maxclients + 1;
+	globals.pool.num = game.maxclients + 1;
+	globals.pool.size = sizeof(edict_t);
 }
 
 //===================================================================
@@ -346,7 +344,7 @@ void G_CheckPlayerReady()
 		level.monsters.clear();
 
 		gi.bprintf(PRINT_HIGH, "Players ready! Please be patient while the enemies spawn...\n");
-		world.PlaySound(gi.soundindex ("misc/secret.wav"), CHAN_AUTO, ATTN_NONE);
+		game.world().PlaySound(gi.soundindex ("misc/secret.wav"), CHAN_AUTO, ATTN_NONE);
 	}
 }
 
@@ -362,7 +360,7 @@ static vec_t EntitiesRangeFromSpot (nav_grid_node *spot)
 {
 	vec_t	bestdistance = 9999999;
 
-	for (uint32_t n = 1; n < globals.num_edicts; n++)
+	for (uint32_t n = 1; n < globals.pool.num; n++)
 	{
 		const edict_t &e = g_edicts[n];
 
@@ -462,7 +460,7 @@ static void G_SpawnMonsters()
 
 		// spawn players
 		gi.bprintf(PRINT_HIGH, "Done spawning monsters!\n");
-		world.PlaySound(gi.soundindex ("misc/secret.wav"), CHAN_AUTO, ATTN_NONE);
+		game.world().PlaySound(gi.soundindex ("misc/secret.wav"), CHAN_AUTO, ATTN_NONE);
 
 		playerteam_t team = prandom(50) ? TEAM_HIDERS : TEAM_HUNTERS;
 
@@ -528,7 +526,7 @@ static void G_CheckForEnd()
 		if (level.round_end - level.time <= 11 && !level.countdown_sound)
 		{
 			level.countdown_sound = true;
-			world.PlaySound(gi.soundindex("world/10_0.wav"), CHAN_AUTO, ATTN_NONE);
+			game.world().PlaySound(gi.soundindex("world/10_0.wav"), CHAN_AUTO, ATTN_NONE);
 		}
 
 		return;
@@ -681,7 +679,7 @@ static void G_RunFrame ()
 	// treat each object in turn
 	// even the world gets a chance to think
 	//
-	for (size_t i = 0; i < globals.num_edicts; i++)
+	for (size_t i = 0; i < globals.pool.num; i++)
 	{
 		edict_t &ent = g_edicts[i];
 
@@ -723,7 +721,7 @@ static void G_RunFrame ()
 }
 
 game_export_t globals = {
-	.apiversion = GAME_API_VERSION,
+	.apiversion = 3,
 
 	.Init = InitGame,
 	.Shutdown = ShutdownGame,
@@ -745,9 +743,7 @@ game_export_t globals = {
 
 	.RunFrame = G_RunFrame,
 
-	.ServerCommand = ServerCommand,
-
-	.edict_size = sizeof(edict_t)
+	.ServerCommand = ServerCommand
 };
 
 /*

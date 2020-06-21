@@ -35,7 +35,7 @@ nullptr will be returned if the end of the list is reached.
 */
 edict_ref G_Find (const edict_ref &from, const ptrdiff_t &fieldofs, const char *match)
 {
-	for (size_t n = from ? (from->s.number + 1) : 0; n < globals.num_edicts; n++)
+	for (size_t n = from ? (from->s.number + 1) : 0; n < globals.pool.num; n++)
 	{
 		edict_t &e = g_edicts[n];
 
@@ -65,7 +65,7 @@ findradius (origin, radius)
 */
 edict_ref findradius (const edict_ref &from, const vec3_t &org, const vec_t &rad)
 {
-	for (size_t n = from ? (from->s.number + 1) : 0; n < globals.num_edicts; n++)
+	for (size_t n = from ? (from->s.number + 1) : 0; n < globals.pool.num; n++)
 	{
 		edict_t &e = g_edicts[n];
 
@@ -291,7 +291,7 @@ angles and bad trails.
 */
 edict_t &G_Spawn ()
 {
-	for (uint32_t i = game.maxclients + 1; i < globals.num_edicts; i++)
+	for (uint32_t i = game.maxclients + 1; i < globals.pool.num; i++)
 	{
 		edict_t &e = g_edicts[i];
 
@@ -301,11 +301,11 @@ edict_t &G_Spawn ()
 			return G_InitEdict(e);
 	}
 	
-	if (globals.num_edicts == game.maxentities)
+	if (globals.pool.num == game.maxentities)
 		gi.error ("ED_Alloc: no free edicts");
 
-	edict_t &e = g_edicts[globals.num_edicts];
-	globals.num_edicts++;
+	edict_t &e = g_edicts[globals.pool.num];
+	globals.pool.num++;
 	return G_InitEdict(e);
 }
 
@@ -384,7 +384,7 @@ bool KillBox (edict_t &ent)
 	{
 		trace_t tr = gi.trace (ent.s.origin, ent.mins, ent.maxs, ent.s.origin, nullptr, MASK_PLAYERSOLID);
 		
-		if (tr.ent != world)
+		if (tr.ent != game.world())
 			break;
 
 		// nail it

@@ -412,7 +412,7 @@ static void Cmd_PlayerList_f(const edict_t &ent)
 	ent.client->Print("%s", text);
 }
 
-static void Cmd_Team_f(edict_t &ent)
+/*static void Cmd_Team_f(edict_t &ent)
 {
 	const char *team = gi.argv(1);
 
@@ -423,7 +423,7 @@ static void Cmd_Team_f(edict_t &ent)
 
 	ent.client->resp.spectator = false;
 	respawn(ent);
-}
+}*/
 
 /*
 =================

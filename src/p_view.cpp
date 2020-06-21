@@ -434,7 +434,7 @@ static void P_FallingDamage ()
 		const int32_t damage = max(1, static_cast<int32_t>((delta - 30) / 2));
 
 		if (!dmflags.no_falling_damage)
-			T_Damage (current_player, world, world, { 0.f, 0.f, 1.f }, current_player->s.origin, vec3_origin, damage, 0, DAMAGE_NONE);
+			T_Damage (current_player, game.world(), game.world(), { 0.f, 0.f, 1.f }, current_player->s.origin, vec3_origin, damage, 0, DAMAGE_NONE);
 
 		return;
 	}
@@ -531,7 +531,7 @@ static void P_WorldEffects ()
 
 				current_player->pain_debounce_time = level.time;
 
-				T_Damage (current_player, world, world, vec3_origin, current_player->s.origin, vec3_origin, current_player->dmg, 0, DAMAGE_NO_ARMOR);
+				T_Damage (current_player, game.world(), game.world(), vec3_origin, current_player->s.origin, vec3_origin, current_player->dmg, 0, DAMAGE_NO_ARMOR);
 			}
 		}
 	}
@@ -558,11 +558,11 @@ static void P_WorldEffects ()
 				current_player->pain_debounce_time = level.time + 1;
 			}
 
-			T_Damage (current_player, world, world, vec3_origin, current_player->s.origin, vec3_origin, 3*waterlevel, 0, DAMAGE_NONE);
+			T_Damage (current_player, game.world(), game.world(), vec3_origin, current_player->s.origin, vec3_origin, 3*waterlevel, 0, DAMAGE_NONE);
 		}
 
 		if (current_player->watertype & CONTENTS_SLIME)
-			T_Damage (current_player, world, world, vec3_origin, current_player->s.origin, vec3_origin, 1*waterlevel, 0, DAMAGE_NONE);
+			T_Damage (current_player, game.world(), game.world(), vec3_origin, current_player->s.origin, vec3_origin, 1*waterlevel, 0, DAMAGE_NONE);
 	}
 }
 

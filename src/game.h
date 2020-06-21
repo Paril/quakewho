@@ -21,8 +21,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 // game.h -- game dll information visible to server
 #pragma once
 
-constexpr int32_t	GAME_API_VERSION	= 3;
-
 // edict->svflags
 
 enum svflags_t
@@ -204,12 +202,23 @@ public:
 	void	(*DebugGraph) (vec_t value, int32_t color);
 };
 
+struct edict_pool_t
+{
+	// The edict array is allocated in the game dll so it
+	// can vary in size from one game to another.
+	// The size will be fixed when ge->Init() is called
+	edict_t		*head;
+	uint32_t	size;
+	uint32_t	num;		// current number, <= max_edicts
+	uint32_t	max;
+};
+
 //
 // functions exported by the game subsystem
 //
 struct game_export_t
 {
-	int32_t			apiversion;
+	const int32_t	apiversion = 3;
 
 	// the init function will only be called when a game starts,
 	// not each time a level is loaded.  Persistant data for clients
@@ -250,13 +259,5 @@ struct game_export_t
 	//
 	// global variables shared between game and server
 	//
-
-	// The edict array is allocated in the game dll so it
-	// can vary in size from one game to another.
-	// 
-	// The size will be fixed when ge->Init() is called
-	edict_t		*edicts;
-	uint32_t	edict_size;
-	uint32_t	num_edicts;		// current number, <= max_edicts
-	uint32_t	max_edicts;
+	edict_pool_t	pool;
 };

@@ -265,7 +265,7 @@ static void G_FindTeams ()
 {
 	int32_t c = 0, c2 = 0;
 
-	for (uint32_t i = 1; i < globals.num_edicts; i++)
+	for (uint32_t i = 1; i < globals.pool.num; i++)
 	{
 		edict_t &e = g_edicts[i];
 
@@ -281,7 +281,7 @@ static void G_FindTeams ()
 		c++;
 		c2++;
 
-		for (uint32_t j = i + 1; j < globals.num_edicts; j++)
+		for (uint32_t j = i + 1; j < globals.pool.num; j++)
 		{
 			edict_t &e2 = g_edicts[j];
 

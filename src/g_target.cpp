@@ -398,7 +398,7 @@ static void target_earthquake_think (edict_t &self)
 		self.last_move_time = level.time + 0.5f;
 	}
 
-	for (size_t i = 1; i < globals.num_edicts; i++)
+	for (size_t i = 1; i < globals.pool.num; i++)
 	{
 		edict_t &e = g_edicts[i];
 
