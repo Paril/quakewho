@@ -523,7 +523,7 @@ static radar_status_t G_EntityWithinRadarRange(edict_t &from, edict_t &other)
 	if (gi.trace(from.s.origin, other.s.origin, MASK_SOLID).fraction < 1.0f)
 		dist *= 2;
 
-	if (dist >= 1024.f)
+	if (dist >= 768.f)
 		return RADAR_STAGE_2;
 
 	return RADAR_STAGE_3;
@@ -564,6 +564,7 @@ static void G_UpdateRadars()
 			{
 				player.client->radar.entity = radar_choices[random(radar_choices.size() - 1)];
 				player.client->radar.status = RADAR_STAGE_1;
+				player.client->radar.entity->client->radar.status = player.client->radar.status;
 			}
 		}
 		else

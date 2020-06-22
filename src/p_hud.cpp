@@ -295,6 +295,43 @@ void G_SetStats (edict_t &ent)
 				}
 			
 				client.ps.stats[STAT_CONTROL] = static_cast<int16_t>(CS_GAME_STATUS);
+
+				if (client.radar.last_status != client.radar.status)
+				{
+					const char *radar_status;
+					const char *sound;
+
+					gi.WriteByte(SVC_CONFIGSTRING);
+					gi.WriteShort(CS_RADAR_STATUS);
+					switch (client.radar.status)
+					{
+					case RADAR_EMPTY:
+					default:
+						radar_status = "Not detected";
+						sound = "world/scan1.wav";
+						break;
+					case RADAR_STAGE_1:
+						radar_status = "33% signal strength";
+						sound = "world/lite_on2.wav";
+						break;
+					case RADAR_STAGE_2:
+						radar_status = "66% signal strength";
+						sound = "world/lite_on2.wav";
+						break;
+					case RADAR_STAGE_3:
+						radar_status = "Locked on!";
+						sound = "world/klaxon2.wav";
+						break;
+					}
+					gi.WriteString(radar_status);
+					gi.unicast(ent, true);
+
+					client.SendSound(gi.soundindex(sound));
+
+					client.radar.last_status = client.radar.status;
+				}
+
+				client.ps.stats[STAT_RADAR] = static_cast<int16_t>(CS_RADAR_STATUS);
 			}
 
 			client.ps.stats[STAT_CONTROL] = static_cast<int16_t>(CS_GAME_STATUS);
@@ -309,6 +346,7 @@ void G_SetStats (edict_t &ent)
 				if (client.radar.last_status != client.radar.status || level.last_radar_left != radar_left)
 				{
 					const char *radar_status;
+					const char *sound;
 
 					gi.WriteByte(SVC_CONFIGSTRING);
 					gi.WriteShort(CS_RADAR_STATUS);
@@ -317,21 +355,29 @@ void G_SetStats (edict_t &ent)
 					case RADAR_EMPTY:
 					default:
 						radar_status = "No signal";
+						sound = "world/scan1.wav";
 						break;
 					case RADAR_STAGE_1:
 						radar_status = "33% signal strength...";
+						sound = "world/lite_on2.wav";
 						break;
 					case RADAR_STAGE_2:
 						radar_status = "66% signal strength...";
+						sound = "world/lite_on2.wav";
 						break;
 					case RADAR_STAGE_3:
 						radar_status = va("Lock! %s", client.radar.entity->control ? client.radar.entity->control->monsterinfo.name : "Human");
+						sound = "world/fusein.wav";
 						break;
 					}
 					radar_status = va("%s (ping in %u...)", radar_status, static_cast<int32_t>(radar_left));
 					level.last_radar_left = radar_left;
 					gi.WriteString(radar_status);
 					gi.unicast(ent, true);
+
+					if (client.radar.last_status != client.radar.status)
+						client.SendSound(gi.soundindex(sound));
+
 					client.radar.last_status = client.radar.status;
 				}
 
