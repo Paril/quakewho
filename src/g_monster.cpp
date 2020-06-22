@@ -290,6 +290,20 @@ static edict_ref G_FindEnemyToFollow(edict_t &self)
 	return choices[irandom(choices.size() - 1)];
 }
 
+static bool M_VisibleToHunters(edict_t &ent)
+{
+	for (auto &player : game.players)
+	{
+		if (!player.inuse || !player.client || player.client->resp.team != TEAM_HUNTERS || player.client->resp.spectator)
+			continue;
+
+		if (visible(ent, player))
+			return true;
+	}
+	
+	return false;
+}
+
 static void monster_think (edict_t &self)
 {
 	if (self.control && level.control_delay < level.time)
@@ -368,6 +382,15 @@ static void monster_think (edict_t &self)
 						static_cast<uint32_t>(self.monsterinfo.follow_time - level.time));*/
 				}
 			}
+		}
+
+		const bool hunter_visible = M_VisibleToHunters(self);
+		
+		if (self.monsterinfo.hunter_visible != hunter_visible)
+		{
+			if (prandom(35))
+				self.monsterinfo.next_runwalk_check = self.monsterinfo.should_stand_check = 0;
+			self.monsterinfo.hunter_visible = hunter_visible;
 		}
 	}
 
