@@ -18,7 +18,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
 
-#include "q_shared.h"
+#include "g_local.h"
 #include "m_player.h"
 
 bool OnSameTeam (const edict_t &ent1, const edict_t &ent2)
@@ -40,7 +40,7 @@ Give items to a client
 */
 static void Cmd_Give_f (edict_t &ent)
 {
-	if (!sv_cheats->value)
+	if (!game.cheats_enabled)
 	{
 		ent.client->Print("You must run the server with '+set cheats 1' to enable this command.\n");
 		return;
@@ -99,7 +99,7 @@ argv(0) god
 */
 static void Cmd_God_f (edict_t &ent)
 {
-	if (!sv_cheats->value)
+	if (!game.cheats_enabled)
 	{
 		ent.client->Print("You must run the server with '+set cheats 1' to enable this command.\n");
 		return;
@@ -118,7 +118,7 @@ argv(0) noclip
 */
 static void Cmd_Noclip_f (edict_t &ent)
 {
-	if (!sv_cheats->value)
+	if (!game.cheats_enabled)
 	{
 		ent.client->Print("You must run the server with '+set cheats 1' to enable this command.\n");
 		return;
@@ -244,10 +244,10 @@ static void Cmd_Players_f (const edict_t &ent)
 	std::array<size_t, MAX_CLIENTS>	index;
 
 	count = 0;
-	for (size_t i = 0; i < game.maxclients; i++)
-		if (game.clients[i].pers.connected)
+	for (auto &player : game.players)
+		if (player.client->pers.connected)
 		{
-			index[count] = i;
+			index[count] = player.s.number - 1;
 			count++;
 		}
 
@@ -364,9 +364,8 @@ static void Cmd_Say_f (edict_t &ent, const bool &team, const bool &arg0)
 	if (dedicated->value)
 		gi.dprintf("%s\n", text);
 
-	for (size_t j = 1; j <= game.maxclients; j++)
+	for (auto &other : game.players)
 	{
-		const edict_t &other = g_edicts[j];
 		if (!other.inuse)
 			continue;
 		if (!other.client)
@@ -384,10 +383,8 @@ static void Cmd_PlayerList_f(const edict_t &ent)
 
 	// connect time, ping, score, name
 	*text = 0;
-	for (size_t i = 0; i <= game.maxclients; i++)
-	{
-		const edict_t &e2 = g_edicts[i];
-		
+	for (auto &e2 : game.players)
+	{		
 		if (!e2.inuse || !e2.client)
 			continue;
 

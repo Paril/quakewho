@@ -61,8 +61,8 @@
       <MinimalRebuild>false</MinimalRebuild>
       <DiagnosticsFormat>Caret</DiagnosticsFormat>
       <ErrorReporting>Send</ErrorReporting>
-      <PrecompiledHeader>Use</PrecompiledHeader>
-      <PrecompiledHeaderFile>q_shared.h</PrecompiledHeaderFile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeaderFile>g_local.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <AdditionalOptions>-Weverything -Wpedantic -Wno-missing-braces -Wno-c++98-compat-pedantic -Wno-newline-eof -Wno-implicit-float-conversion -Wno-unused-parameter -Wno-gnu-anonymous-struct -Wno-microsoft-include -Wno-float-conversion -Wno-missing-field-initializers -Wno-exit-time-destructors -Wno-global-constructors -Wno-sign-conversion -Wno-invalid-offsetof -Wno-float-equal -Wno-format-nonliteral -Wno-date-time %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
@@ -83,8 +83,8 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <DiagnosticsFormat>Caret</DiagnosticsFormat>
       <ErrorReporting>Send</ErrorReporting>
-      <PrecompiledHeader>Use</PrecompiledHeader>
-      <PrecompiledHeaderFile>q_shared.h</PrecompiledHeaderFile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeaderFile>g_local.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <AdditionalOptions>-Weverything -Wpedantic -Wno-missing-braces -Wno-c++98-compat-pedantic -Wno-newline-eof -Wno-implicit-float-conversion -Wno-unused-parameter -Wno-gnu-anonymous-struct -Wno-microsoft-include -Wno-float-conversion -Wno-missing-field-initializers -Wno-exit-time-destructors -Wno-global-constructors -Wno-sign-conversion -Wno-invalid-offsetof -Wno-float-equal -Wno-format-nonliteral -Wno-date-time %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
@@ -98,6 +98,7 @@
     <None Include="src\game.def" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\entity_iterator.cpp" />
     <ClCompile Include="src\g_ai.cpp" />
     <ClCompile Include="src\g_chase.cpp" />
     <ClCompile Include="src\g_cmds.cpp" />
@@ -117,6 +118,7 @@
     <ClCompile Include="src\m_berserk.cpp" />
     <ClCompile Include="src\m_brain.cpp" />
     <ClCompile Include="src\m_chick.cpp" />
+    <ClInclude Include="src\entity_iterator.hpp" />
     <ClInclude Include="src\g_fields.h" />
     <ClInclude Include="src\m_flash.h" />
     <ClCompile Include="src\m_gladiator.cpp" />
@@ -152,7 +154,6 @@
     <ClInclude Include="src\m_mutant.h" />
     <ClInclude Include="src\m_parasite.h" />
     <ClInclude Include="src\m_player.h" />
-    <ClInclude Include="src\m_rider.h" />
     <ClInclude Include="src\m_soldier.h" />
     <ClInclude Include="src\m_tank.h" />
     <ClInclude Include="src\q_bitflags.h" />

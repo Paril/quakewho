@@ -18,7 +18,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
 
-#include "q_shared.h"
+#include "g_local.h"
 
 constexpr vec3_t chase_offset { 0, 0, 6 };
 
@@ -35,22 +35,13 @@ void UpdateTargetCam(edict_t &ent)
 	vec3_t forward = angles.Forward();
 	forward.Normalize();
 
-	vec3_t o = ownerv + (forward * -30);
-	trace_t trace = gi.trace(ownerv, o, targ, MASK_SOLID);
-	vec3_t goal = trace.endpos + (forward * 2);
+	trace_t tr = gi.trace(targ.s.origin, targ.mins, targ.maxs, ownerv, targ, MASK_SOLID | CONTENTS_MONSTER);
 
-	// pad for floors and ceilings
-	o = goal + chase_offset;
-	trace = gi.trace(goal, o, targ, MASK_SOLID);
+	vec3_t goal = tr.endpos;
 
-	if (trace.fraction < 1)
-		goal = trace.endpos - chase_offset;
+	tr = gi.trace(goal, targ.mins, targ.maxs, goal + (forward * -30.f), targ, MASK_SOLID | CONTENTS_MONSTER);
 
-	o = goal - chase_offset;
-	trace = gi.trace(goal, o, targ, MASK_SOLID);
-
-	if (trace.fraction < 1)
-		goal = trace.endpos + chase_offset;
+	goal = tr.endpos;
 
 	ent.s.origin = goal;
 	ent.viewheight = 0;
@@ -144,7 +135,7 @@ void ChaseNext(edict_t &ent)
 	do
 	{
 		i++;
-		if (i > game.maxclients)
+		if (i > game.clients.size())
 			i = 1;
 
 		e = g_edicts[i];
@@ -171,7 +162,7 @@ void ChasePrev(edict_t &ent)
 	{
 		i--;
 		if (i < 1)
-			i = game.maxclients;
+			i = game.clients.size();
 
 		e = g_edicts[i];
 
@@ -187,10 +178,8 @@ void ChasePrev(edict_t &ent)
 
 void GetChaseTarget(edict_t &ent)
 {
-	for (size_t i = 1; i <= game.maxclients; i++)
+	for (auto &other : game.players)
 	{
-		edict_t &other = g_edicts[i];
-
 		if (!other.inuse || other.client->resp.spectator)
 			continue;
 

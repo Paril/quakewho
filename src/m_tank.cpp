@@ -25,7 +25,7 @@ TANK
 ==============================================================================
 */
 
-#include "q_shared.h"
+#include "g_local.h"
 #include "m_tank.h"
 
 static soundindex_t	sound_thud;

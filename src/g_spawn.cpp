@@ -18,7 +18,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
 
-#include "q_shared.h"
+#include "g_local.h"
 
 spawn_temp_t	st;
 
@@ -245,9 +245,6 @@ static void ED_ParseEdict (com_parse_t &last_token, edict_t &ent)
 
 		ED_ParseField (key_token, last_token.token, ent);
 	}
-
-	if (!init)
-		ent = {};
 }
 
 
@@ -265,10 +262,8 @@ static void G_FindTeams ()
 {
 	int32_t c = 0, c2 = 0;
 
-	for (uint32_t i = 1; i < globals.pool.num; i++)
+	for (auto &e : game.entities)
 	{
-		edict_t &e = g_edicts[i];
-
 		if (!e.inuse)
 			continue;
 		if (!e.team)
@@ -281,10 +276,8 @@ static void G_FindTeams ()
 		c++;
 		c2++;
 
-		for (uint32_t j = i + 1; j < globals.pool.num; j++)
+		for (auto &e2 : game.entities.range(e.s.number + 1))
 		{
-			edict_t &e2 = g_edicts[j];
-
 			if (!e2.inuse)
 				continue;
 			if (!e2.team)
@@ -860,15 +853,13 @@ void SpawnEntities (const char *mapname, const char *entities, const char *spawn
 	strncpy (level.mapname, mapname, sizeof(level.mapname)-1);
 
 	// set client fields on player ents
-	for (size_t i = 0; i < game.maxentities; i++)
-	{
-		g_edicts[i] = edict_t();
+	for (auto &e : game.entities.range(0, globals.entities.max))
+		e.Reset();
 
-		if (i < game.maxclients)
-			g_edicts[i + 1].client = game.clients + i;
-	}
+	for (auto &player : game.players)
+		player.client = &game.clients[player.s.number - 1];
 
-	edict_ref ent = *g_edicts;
+	edict_ref ent = game.world();
 	size_t inhibit = 0;
 	com_parse_t parse = { .start = entities };
 
@@ -1062,7 +1053,7 @@ static void SP_worldspawn (edict_t &ent)
 
 	gi.configstring (CS_CDTRACK, va("%i", ent.sounds));
 
-	gi.configstring (CS_MAXCLIENTS, va("%u", game.maxclients));
+	gi.configstring (CS_MAXCLIENTS, va("%u", game.clients.size()));
 
 	// status bar program
 	gi.configstring (CS_STATUSBAR, dm_statusbar.c_str());

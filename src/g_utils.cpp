@@ -19,7 +19,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 // g_utils.c -- misc utility functions for game module
 
-#include "q_shared.h"
+#include "g_local.h"
 
 /*
 =============
@@ -35,7 +35,7 @@ nullptr will be returned if the end of the list is reached.
 */
 edict_ref G_Find (const edict_ref &from, const ptrdiff_t &fieldofs, const char *match)
 {
-	for (size_t n = from ? (from->s.number + 1) : 0; n < globals.pool.num; n++)
+	for (size_t n = from ? (from->s.number + 1) : 0; n < globals.entities.num; n++)
 	{
 		edict_t &e = g_edicts[n];
 
@@ -65,7 +65,7 @@ findradius (origin, radius)
 */
 edict_ref findradius (const edict_ref &from, const vec3_t &org, const vec_t &rad)
 {
-	for (size_t n = from ? (from->s.number + 1) : 0; n < globals.pool.num; n++)
+	for (size_t n = from ? (from->s.number + 1) : 0; n < globals.entities.num; n++)
 	{
 		edict_t &e = g_edicts[n];
 
@@ -272,9 +272,8 @@ void G_SetMovedir (vec3_t &angles, vec3_t &movedir)
 
 edict_t &G_InitEdict (edict_t &e)
 {
-	e = edict_t();
+	e.Reset();
 	e.inuse = true;
-	e.s.number = &e - g_edicts;
 	return e;
 }
 
@@ -291,22 +290,16 @@ angles and bad trails.
 */
 edict_t &G_Spawn ()
 {
-	for (uint32_t i = game.maxclients + 1; i < globals.pool.num; i++)
-	{
-		edict_t &e = g_edicts[i];
-
-		// the first couple seconds of server time can involve a lot of
-		// freeing and allocating, so relax the replacement policy
+	// the first couple seconds of server time can involve a lot of
+	// freeing and allocating, so relax the replacement policy
+	for (auto &e : game.entities.range(game.clients.size() + 1))
 		if (!e.inuse && (e.freetime < 2 || level.time - e.freetime > 0.5f ))
 			return G_InitEdict(e);
-	}
 	
-	if (globals.pool.num == game.maxentities)
+	if (globals.entities.num == globals.entities.max)
 		gi.error ("ED_Alloc: no free edicts");
 
-	edict_t &e = g_edicts[globals.pool.num];
-	globals.pool.num++;
-	return G_InitEdict(e);
+	return G_InitEdict(g_edicts[globals.entities.num++]);
 }
 
 /*
@@ -323,14 +316,13 @@ void G_FreeEdict (edict_t &ed)
 
 	ed.Unlink();
 
-	if (static_cast<size_t>(ed.s.number) <= game.maxclients)
+	if (static_cast<size_t>(ed.s.number) <= game.clients.size())
 	{
 		gi.dprintf("tried to free special edict\n");
 		return;
 	}
 
-	ed = edict_t();
-	ed.s.number = &ed - g_edicts;
+	ed.Reset();
 	ed.classname = "freed";
 	ed.freetime = level.time;
 }

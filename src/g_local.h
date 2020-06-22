@@ -20,6 +20,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 // g_local.h -- local definitions for game module
 #pragma once
 
+#include "q_shared.h"
+
 // define GAME_INCLUDE so that game.h does not define the
 // int16_t, server-visible gclient_t and edict_t structures,
 // because we define the full size ones in this file
@@ -189,61 +191,7 @@ struct gitem_t
 	const char			*precaches;
 };
 
-class entity_iterator
-{
-	edict_t *_ptr = nullptr;
-
-public:
-	entity_iterator(const size_t &offset) :
-		_ptr(reinterpret_cast<edict_t*>((reinterpret_cast<uint8_t*>(globals.pool.head) + (globals.pool.size * offset))))
-	{
-	}
-	entity_iterator& operator++()
-	{
-		_ptr = reinterpret_cast<edict_t*>((reinterpret_cast<uint8_t*>(_ptr) + globals.pool.size));
-		return *this;
-	}
-	entity_iterator operator+(const size_t &offset)
-	{
-		entity_iterator retval = *this;
-		retval._ptr = reinterpret_cast<edict_t*>((reinterpret_cast<uint8_t*>(retval._ptr) + (globals.pool.size * offset)));
-		return retval;
-	}
-
-	entity_iterator operator++(int)
-	{
-		entity_iterator retval = *this;
-		++(*this);
-		return retval;
-	}
-
-	bool operator==(const entity_iterator &other) const { return _ptr == other._ptr; }
-	bool operator!=(const entity_iterator &other) const { return !(*this == other); }
-	edict_t &operator*() { return *_ptr; }
-
-	// iterator traits
-	using difference_type = ptrdiff_t;
-	using value_type = edict_t*;
-	using pointer = const edict_t**;
-	using reference = const edict_t*&;
-	using iterator_category = std::forward_iterator_tag;
-};
-
-struct entity_range
-{
-private:
-	size_t _start, _end;
-
-public:
-	entity_range(size_t start, size_t end) :
-		_start(start),
-		_end(end)
-	{
-	}
-
-	entity_iterator begin() { return entity_iterator(_start); }
-	entity_iterator end() { return entity_iterator(_end); }
-};
+#include "entity_iterator.hpp"
 
 //
 // this structure is left intact through an entire game
@@ -252,28 +200,27 @@ public:
 //
 extern struct game_locals_t
 {
-	gclient_t	*clients;		// [maxclients]
+	std::vector<gclient_t>	clients;		// [maxclients]
 
 	// store latched cvars here that we want to get at often
-	size_t		maxclients;
-	size_t		maxentities;
+	bool					cheats_enabled;
 
 	inline edict_t &world()
 	{
-		return *globals.pool.head;
+		return *globals.entities.pool;
 	}
 
 	struct entity_list_t
 	{
 		entity_iterator begin() { return entity_iterator(0); }
-		entity_iterator end() { return entity_iterator(globals.pool.num + 1); }
+		entity_iterator end() { return entity_iterator(globals.entities.num); }
 
 		entity_range range(const size_t &start, const size_t &end = -1)
 		{
 			if (end == static_cast<size_t>(-1))
-				return entity_range(start, globals.pool.num + 1);
+				return entity_range(start, globals.entities.num);
 
-			return entity_range(start, end + 1);
+			return entity_range(start, end);
 		}
 	} entities;
 
@@ -440,8 +387,9 @@ struct monsterinfo_t
 
 	vec_t			stubborn_check_time, stubborn_time;
 	vec_t			slow_turn_check, slow_turn_time, slow_turn_speed;
-	vec_t			follow_check;
+	vec_t			follow_check, follow_time;
 	edict_ref		follow_ent;
+	bool			follow_direction;
 	bool			hunter_visible;
 };
 
@@ -453,9 +401,6 @@ extern	soundindex_t	snd_fry;
 #define	LLOFS(x)	offsetof(level_locals_t, x)
 #define	CLOFS(x)	offsetof(gclient_t, x)
 
-#include "q_random.h"
-
-extern	cvar_t		*maxentities;
 extern	dmflags_t	dmflags;
 extern	cvar_t		*fraglimit;
 extern	cvar_t		*timelimit;
@@ -479,8 +424,6 @@ extern	cvar_t		*bob_up;
 extern	cvar_t		*bob_pitch;
 extern	cvar_t		*bob_roll;
 					
-extern	cvar_t		*sv_cheats;
-extern	cvar_t		*maxclients;
 extern	cvar_t		*maxspectators;
 					
 extern	cvar_t		*flood_msgs;
@@ -489,7 +432,7 @@ extern	cvar_t		*flood_waitdelay;
 					
 extern	cvar_t		*sv_maplist;
 
-#define g_edicts	globals.pool.head
+#define g_edicts	globals.entities.pool
 
 // item spawnflags
 const uint32_t ITEM_TRIGGER_SPAWN		= bit(0);
@@ -769,6 +712,7 @@ bool M_CheckBottom (edict_t &ent);
 bool M_walkmove (edict_t &ent, vec_t yaw, const vec_t &dist);
 void M_MoveToGoal (edict_t &ent, const vec_t &dist);
 void M_MoveToController (edict_t &ent, const vec_t &dist, const bool &turn);
+bool M_GonnaHitSpecificThing(edict_t &ent, edict_t &other);
 
 //
 // g_phys.c
@@ -1016,6 +960,21 @@ struct gclient_t : gclient_server_t
 
 struct edict_t : edict_server_t
 {
+private:
+	edict_t() = default;
+
+public:
+	static inline void initialize(edict_t *e)
+	{
+		new(e) edict_t;
+	}
+
+	inline void Reset()
+	{
+		*this = edict_t();
+		s.number = this - g_edicts;
+	}
+
 	movetype_t		movetype;
 	edictflags_t	flags;
 
@@ -1166,7 +1125,7 @@ struct edict_t : edict_server_t
 
 /*static*/ inline edict_t &gclient_t::ClientToEntity(gclient_t &client)
 {
-	return g_edicts[(&client - game.clients) + 1];
+	return g_edicts[(&client - game.clients.data()) + 1];
 }
 
 inline void gclient_t::SendSound(const soundindex_t &sound, const vec_t volume, const soundchannel_t &channel, const soundattn_t &attn, const bool &reliable)
@@ -1192,23 +1151,4 @@ inline void gclient_t::SendSound(const soundindex_t &sound, const vec_t volume, 
 		gi.WriteByte(static_cast<uint8_t>(attenuation * 64));
 	gi.WriteShort(sendchan);
 	gi.unicast(ent, reliable);
-}
-
-inline edict_ref::operator bool() const
-{
-	return e && e->inuse;
-}
-
-inline edict_ref::operator const edict_t &() const
-{
-	if (!e)
-	{
-#ifdef _DEBUG
-		__debugbreak();
-#endif
-		gi.dprintf("dereferencing null entity\n");
-		return game.world();
-	}
-
-	return *e;
 }

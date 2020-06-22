@@ -29,6 +29,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "q_math.h"
 #include "q_bitflags.h"
+#include "q_random.h"
 
 #include <string_view>
 #include <string>
@@ -65,10 +66,6 @@ public:
 	{
 	}
 
-	inline operator bool() const;
-	inline operator const edict_t &() const;
-
-	inline operator edict_t &() { return const_cast<edict_t &>(this->operator const edict_t &()); }
 	inline const edict_t *operator->() const { return &const_cast<edict_t &>(this->operator const edict_t &()); }
 	inline edict_t *operator->() { return &this->operator edict_t &(); }
 	inline bool operator==(const edict_ref &b) const { return e == b.e; }
@@ -81,6 +78,10 @@ public:
 	inline bool operator!=(const edict_t *b) const { return e != b; }
 	inline const edict_t *ptr() const { return e; }
 	inline edict_t *ptr() { return e; }
+
+	operator bool() const;
+	operator const edict_t &() const;
+	operator edict_t &() { return const_cast<edict_t &>(this->operator const edict_t &()); }
 };
 
 template<>
@@ -923,5 +924,3 @@ struct player_state_t
 
 	std::array<int16_t, MAX_STATS>	stats;	// fast status bar updates
 };
-
-#include "g_local.h"

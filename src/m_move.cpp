@@ -19,7 +19,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 // m_move.c -- monster movement
 
-#include "q_shared.h"
+#include "g_local.h"
 
 constexpr vec_t STEPSIZE = 18;
 
@@ -201,6 +201,11 @@ static bool M_StepSlideMove (edict_t &ent, vec3_t &velocity, std::unordered_set<
 	return true;
 }
 
+static bool M_CanStepDownToFollow(edict_t &ent, edict_t &other)
+{
+	return (ent.absmin[2] - other.absmin[2]) > STEPSIZE;
+}
+
 /*
 =============
 SV_movestep
@@ -229,7 +234,7 @@ static bool SV_movestep (edict_t &ent, const vec3_t &move, const bool &relink)
 	if (!moved)
 		return false;
 
-	if (!M_CheckBottom (ent) && (!ent.control || !ent.control->client->cmd.upmove))
+	if (!M_CheckBottom (ent) && (!ent.control || !ent.control->client->cmd.upmove) && (!ent.monsterinfo.follow_ent || !M_CanStepDownToFollow(ent, ent.monsterinfo.follow_ent)))
 	{
 		ent.s.origin = start_o;
 		return false;
@@ -263,28 +268,6 @@ M_ChangeYaw
 */
 static void M_ChangeYaw (edict_t &ent)
 {
-/*	const vec_t current = anglemod(ent.s.angles[YAW]);
-	const vec_t ideal = ent.ideal_yaw;
-
-	if (current == ideal)
-		return;
-
-	vec_t move = ideal - current;
-	const vec_t speed = ent.yaw_speed;
-
-	if (ideal > current)
-	{
-		if (move >= 180)
-			move -= 360;
-	}
-	else
-	{
-		if (move <= -180)
-			move += 360;
-	}
-
-	move = clamp(move, -speed, speed);	
-	ent.s.angles[YAW] = anglemod (current + move);*/
 	const vec_t current = anglemod(ent.s.angles[YAW]);
 	const vec_t &ideal = ent.ideal_yaw;
 
@@ -347,6 +330,15 @@ static bool SV_StepDirection (edict_t &ent, vec_t yaw, const vec_t &dist)
 
 		const vec3_t v = oldorigin - ent.s.origin;
 
+		if (ent.monsterinfo.follow_ent && v.Length() < dist * 0.4f)
+		{
+			if (M_GonnaHitSpecificThing(ent, game.world()))
+			{
+				ent.monsterinfo.follow_ent = nullptr;
+				ent.monsterinfo.follow_check = level.time + random(4, 24);
+			}
+		}
+
 		if (v.Length() < dist * 0.1f)
 			return false;
 
@@ -366,8 +358,22 @@ M_GonnaHitSomething
 static bool M_GonnaHitSomething(edict_t &ent)
 {
 	const vec3_t forward = ent.s.angles.Forward();
-	const vec3_t end = ent.s.origin + (forward * 8);
+	const vec3_t end = ent.s.origin + (forward * 10);
 	return gi.trace(ent.s.origin, ent.mins, ent.maxs, end, ent, MASK_PLAYERSOLID).fraction != 1.0f;
+}
+
+/*
+======================
+M_GonnaHitSomething
+======================
+*/
+bool M_GonnaHitSpecificThing(edict_t &ent, edict_t &other)
+{
+	const vec3_t forward = ent.s.angles.Forward();
+	const vec3_t end = ent.s.origin + (forward * 16);
+	const trace_t tr = gi.trace(ent.s.origin, ent.mins, ent.maxs, end, ent, MASK_PLAYERSOLID);
+	
+	return tr.fraction != 1.0f && tr.ent == other;
 }
 
 /*
@@ -377,7 +383,17 @@ M_MoveToGoal
 */
 void M_MoveToGoal (edict_t &ent, const vec_t &dist)
 {
-	if (level.time > ent.monsterinfo.should_stand_check)
+	if (ent.monsterinfo.follow_ent)
+	{
+		if (M_GonnaHitSpecificThing(ent, ent.monsterinfo.follow_ent))
+		{
+			ent.monsterinfo.stand(ent);
+			return;
+		}
+
+		ent.ideal_yaw = (ent.monsterinfo.follow_ent->s.origin - ent.s.origin).Normalized().ToYaw();
+	}
+	else if (level.time > ent.monsterinfo.should_stand_check && ent.monsterinfo.stubborn_time < level.time)
 	{
 		ent.monsterinfo.should_stand_check = level.time + random(1, 24);
 
@@ -388,7 +404,7 @@ void M_MoveToGoal (edict_t &ent, const vec_t &dist)
 		}
 	}
 
-	if (!SV_StepDirection (ent, ent.ideal_yaw, dist) || M_GonnaHitSomething(ent))
+	if ((!SV_StepDirection (ent, ent.ideal_yaw, dist) || M_GonnaHitSomething(ent)) && ent.monsterinfo.stubborn_time < level.time)
 	{
 		if (ent.inuse && FacingIdeal(ent) && prandom(65))
 			ent.ideal_yaw = random(360);

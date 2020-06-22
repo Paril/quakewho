@@ -18,7 +18,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
 
-#include "q_shared.h"
+#include "g_local.h"
 
 bool M_FidgetCheck (edict_t &ent, const int &percent)
 {
@@ -267,7 +267,27 @@ void Unpossess(edict_t &player)
 
 	player.s.event = EV_PLAYER_TELEPORT;
 	player.client->jump_sound_debounce = level.time + 1;
+}
 
+static edict_ref G_FindEnemyToFollow(edict_t &self)
+{
+	std::vector<edict_ref> choices;
+
+	for (auto &e : game.entities.range(1))
+	{
+		if (!e.client && !(e.svflags & SVF_MONSTER))
+			continue;
+
+		if (!visible(self, e))
+			continue;
+
+		choices.push_back(e);
+	}
+
+	if (!choices.size())
+		return nullptr;
+
+	return choices[irandom(choices.size() - 1)];
 }
 
 static void monster_think (edict_t &self)
@@ -297,9 +317,6 @@ static void monster_think (edict_t &self)
 	}
 	else
 	{
-		if (self.waterlevel >= WATER_UNDER)
-			EmplaceMonsterInGoodSpot(self);
-
 		if (self.deadflag && self.monsterinfo.death_time < level.time)
 		{
 			// send effect
@@ -312,22 +329,45 @@ static void monster_think (edict_t &self)
 			return;
 		}
 
-		if (self.monsterinfo.currentmove->frame.begin()->aifunc == ai_stand &&
-			level.time > self.monsterinfo.next_runwalk_check)
+		if (self.waterlevel >= WATER_UNDER)
+			EmplaceMonsterInGoodSpot(self);
+
+		if (level.time < self.monsterinfo.stubborn_check_time)
 		{
-			if (prandom(50))
+			self.monsterinfo.stubborn_check_time = level.time + random(0, 16);
+			self.monsterinfo.stubborn_time = level.time + random(0, 8);
+		}
+
+		if (level.time < self.monsterinfo.follow_time)
+		{
+			if (!self.monsterinfo.follow_ent || !visible(self, self.monsterinfo.follow_ent))
 			{
-				self.ideal_yaw = random(360);
-
-				if (random() < 0.5f)
-					self.monsterinfo.run(self);
-				else
-					self.monsterinfo.walk(self);
-
-				self.monsterinfo.should_stand_check = level.time + random(1, 24);
+				self.monsterinfo.follow_ent = nullptr;
+				self.monsterinfo.follow_time = 0;
+		
+				self.monsterinfo.follow_check = level.time + random(4, 24);
 			}
+		}
+		else
+			self.monsterinfo.follow_ent = nullptr;
 
-			self.monsterinfo.next_runwalk_check = level.time + random(1, 24);
+		if (!self.monsterinfo.follow_ent && self.monsterinfo.follow_check < level.time)
+		{
+			self.monsterinfo.follow_check = level.time + random(4, 24);
+
+			if (prandom(20))
+			{
+				self.monsterinfo.follow_ent = G_FindEnemyToFollow(self);
+
+				if (self.monsterinfo.follow_ent)
+				{
+					self.monsterinfo.follow_direction = prandom(50);
+					self.monsterinfo.follow_time = level.time + random(8, 48);
+					/*gi.dprintf("%s following %s for %u sec\n", self.monsterinfo.name,
+						self.monsterinfo.follow_ent->monsterinfo.name ? self.monsterinfo.follow_ent->monsterinfo.name : self.monsterinfo.follow_ent->client->pers.netname,
+						static_cast<uint32_t>(self.monsterinfo.follow_time - level.time));*/
+				}
+			}
 		}
 	}
 

@@ -19,7 +19,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 // g_phys.c
 
-#include "q_shared.h"
+#include "g_local.h"
 
 /*
 ============
@@ -332,10 +332,8 @@ static edict_ref SV_Push (edict_t &pusher, const vec3_t &move, const vec3_t &amo
 	pusher.Link();
 
 // see if any solid entities are inside the final position
-	for (size_t e = 1; e < globals.pool.num; e++)
+	for (auto &check : game.entities.range(1))
 	{
-		edict_t &check = g_edicts[e];
-
 		if (!check.inuse)
 			continue;
 

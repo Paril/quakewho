@@ -25,7 +25,7 @@ BERSERK
 ==============================================================================
 */
 
-#include "q_shared.h"
+#include "g_local.h"
 #include "m_berserk.h"
 
 static soundindex_t sound_pain;

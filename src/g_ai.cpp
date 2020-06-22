@@ -19,7 +19,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 // g_ai.c
 
-#include "q_shared.h"
+#include "g_local.h"
 
 /*
 =============
@@ -87,6 +87,40 @@ void ai_stand (edict_t &self, const vec_t &dist)
 				self.monsterinfo.idle_time = level.time + random(15);
 		}
 	}
+
+	if (self.monsterinfo.follow_ent)
+	{
+		if (!M_GonnaHitSpecificThing(self, self.monsterinfo.follow_ent))
+		{
+			self.ideal_yaw = (self.monsterinfo.follow_ent->s.origin - self.s.origin).Normalized().ToYaw();
+
+			if (self.monsterinfo.follow_direction)
+				self.ideal_yaw += 180;
+
+			if (random() < 0.5f)
+				self.monsterinfo.run(self);
+			else
+				self.monsterinfo.walk(self);
+		}
+		else
+			self.monsterinfo.follow_time -= random(0, 3);
+	}
+	else if (level.time > self.monsterinfo.next_runwalk_check)
+	{
+		if (prandom(50))
+		{
+			self.ideal_yaw = random(360);
+
+			if (random() < 0.5f)
+				self.monsterinfo.run(self);
+			else
+				self.monsterinfo.walk(self);
+
+			self.monsterinfo.should_stand_check = level.time + random(1, 24);
+		}
+
+		self.monsterinfo.next_runwalk_check = level.time + random(1, 24);
+	}
 }
 
 
@@ -147,6 +181,9 @@ returns 1 if the entity is visible to self, even if not infront ()
 */
 bool visible (const edict_t &self, const edict_t &other)
 {
+	if ((other.svflags & SVF_NOCLIENT) || !other.health || other.deadflag)
+		return false;
+
 	const vec3_t spot1 = self.s.origin + vec3_t{ 0, 0, self.viewheight };
 	const vec3_t spot2 = other.s.origin + vec3_t{ 0, 0, other.viewheight };
 

@@ -18,7 +18,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
 
-#include "q_shared.h"
+#include "g_local.h"
 
 /*
 ======================================================================
@@ -63,16 +63,9 @@ void BeginIntermission (edict_t &targ)
 		return;		// already activated
 
 	// respawn any dead clients
-	for (size_t i = 0; i < game.maxclients; i++)
-	{
-		edict_t &client = g_edicts[1 + i];
-		
-		if (!client.inuse)
-			continue;
-		
-		if (client.health <= 0)
+	for (auto &client : game.players)
+		if (client.inuse && client.health <= 0)
 			respawn(client);
-	}
 
 	level.intermissiontime = level.time;
 	level.changemap = targ.map;
@@ -102,15 +95,9 @@ void BeginIntermission (edict_t &targ)
 	level.intermission_angle = ent->s.angles;
 
 	// move all clients to the intermission point
-	for (size_t i = 0; i < game.maxclients; i++)
-	{
-		edict_t &client = g_edicts[1 + i];
-		
-		if (!client.inuse)
-			continue;
-
-		MoveClientToIntermission (client);
-	}
+	for (auto &player : game.players)
+		if (player.inuse)
+			MoveClientToIntermission (player);
 }
 
 
@@ -127,14 +114,17 @@ void DeathmatchScoreboardMessage (edict_t &client, const edict_ref &killer)
 	int32_t		sorted[MAX_CLIENTS];
 	int32_t		sortedscores[MAX_CLIENTS];
 
-	for (size_t i = 0; i < game.maxclients; i++)
+	for (auto &player : game.players)
 	{
-		edict_t &cl_ent = g_edicts[1 + i];
-
-		if (!cl_ent.inuse || game.clients[i].resp.spectator)
+		if (!player.inuse)
 			continue;
 
-		const int32_t score = game.clients[i].resp.score;
+		gclient_t &cl = *player.client;
+
+		if (cl.resp.spectator)
+			continue;
+
+		const int32_t score = cl.resp.score;
 		int32_t j, k;
 
 		for (j = 0; j < total; j++)
@@ -147,7 +137,7 @@ void DeathmatchScoreboardMessage (edict_t &client, const edict_ref &killer)
 			sortedscores[k] = sortedscores[k - 1];
 		}
 
-		sorted[j] = i;
+		sorted[j] = player.s.number;
 		sortedscores[j] = score;
 		total++;
 	}
@@ -162,8 +152,8 @@ void DeathmatchScoreboardMessage (edict_t &client, const edict_ref &killer)
 
 	for (int32_t i = 0; i < total; i++)
 	{
-		const gclient_t &cl = game.clients[sorted[i]];
-		const edict_t &cl_ent = g_edicts[1 + sorted[i]];
+		const gclient_t &cl = game.clients[sorted[i] - 1];
+		const edict_t &cl_ent = g_edicts[sorted[i]];
 		const int32_t x = (i>=6) ? 160 : 0;
 		const int32_t y = 32 + 32 * (i%6);
 		const char *tag = nullptr;
@@ -190,7 +180,7 @@ void DeathmatchScoreboardMessage (edict_t &client, const edict_ref &killer)
 		// send the layout
 		snprintf (entry, sizeof(entry),
 			"client %i %i %i %i %i %i ",
-			x, y, sorted[i], cl.resp.score, cl.ping, (level.framenum - cl.resp.enterframe) / 600);
+			x, y, sorted[i] - 1, cl.resp.score, cl.ping, (level.framenum - cl.resp.enterframe) / 600);
 
 		const size_t j = strlen(entry);
 		if (stringlength + j > 1024)
@@ -290,10 +280,8 @@ static const char *G_Radar(edict_t &ent)
 	
 	ent.client->SendSound(gi.soundindex("world/scan1.wav"));
 
-	for (size_t i = game.maxclients + 1; i < globals.pool.num; i++)
+	for (auto &e : game.entities.range(game.clients.size() + 1))
 	{
-		edict_t &e = g_edicts[i];
-
 		if (!e.inuse || !(e.svflags & SVF_MONSTER) || !e.control)
 			continue;
 
@@ -449,15 +437,15 @@ G_CheckChaseStats
 */
 void G_CheckChaseStats (edict_t &ent)
 {
-	for (size_t i = 1; i <= game.maxclients; i++)
+	for (auto &player : game.players)
 	{
-		gclient_t &cl = *g_edicts[i].client;
+		gclient_t &cl = *player.client;
 
-		if (!g_edicts[i].inuse || cl.chase_target != ent)
+		if (!player.inuse || cl.chase_target != ent)
 			continue;
 		
 		cl.ps.stats = ent.client->ps.stats;
-		G_SetSpectatorStats(g_edicts[i]);
+		G_SetSpectatorStats(player);
 	}
 }
 

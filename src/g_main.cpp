@@ -17,17 +17,41 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
-#include "q_shared.h"
+#include "g_local.h"
 
 #include <cstdarg>
 
 game_locals_t	game;
+
+edict_ref::operator bool() const
+{
+	return e && e->inuse;
+}
+
+edict_ref::operator const edict_t &() const
+{
+	if (!e)
+	{
+#ifdef _DEBUG
+		__debugbreak();
+#endif
+		gi.dprintf("dereferencing null entity\n");
+		return game.world();
+	}
+
+	return *e;
+}
+
+entity_iterator game_locals_t::player_list_t::end()
+{
+	return entity_iterator(game.clients.size() + 1);
+}
+
 level_locals_t	level;
 game_import_t	gi;
 
 static cvar_t	*dmflags_cvar;
 
-cvar_t		*maxentities;
 dmflags_t	dmflags;
 cvar_t		*fraglimit;
 cvar_t		*timelimit;
@@ -35,7 +59,6 @@ cvar_t		*roundlimit;
 cvar_t		*password;
 cvar_t		*spectator_password;
 cvar_t		*needpass;
-cvar_t		*maxclients;
 cvar_t		*maxspectators;
 cvar_t		*g_select_empty;
 cvar_t		*dedicated;
@@ -54,8 +77,6 @@ cvar_t		*run_roll;
 cvar_t		*bob_up;
 cvar_t		*bob_pitch;
 cvar_t		*bob_roll;
-
-cvar_t		*sv_cheats;
 
 cvar_t		*flood_msgs;
 cvar_t		*flood_persecond;
@@ -89,14 +110,10 @@ static void InitGame ()
 	// noset vars
 	dedicated = gi.cvar ("dedicated", "0", CVAR_NOSET);
 
-	// latched vars
-	sv_cheats = gi.cvar ("cheats", "0", CVAR_SERVERINFO | CVAR_LATCH);
 	gi.cvar ("gamename", GAMEVERSION, CVAR_SERVERINFO | CVAR_LATCH);
 	gi.cvar ("gamedate", __DATE__, CVAR_SERVERINFO | CVAR_LATCH);
 
-	maxclients = gi.cvar ("maxclients", "4", CVAR_SERVERINFO | CVAR_LATCH);
 	maxspectators = gi.cvar ("maxspectators", "4", CVAR_SERVERINFO);
-	maxentities = gi.cvar ("maxentities", "1024", CVAR_LATCH);
 
 	// change anytime vars
 	dmflags_cvar = gi.cvar ("dmflags", "0", CVAR_SERVERINFO);
@@ -124,24 +141,23 @@ static void InitGame ()
 	// dm map list
 	sv_maplist = gi.cvar ("sv_maplist", "", CVAR_NONE);
 
-	// initialize all entities for this game
-	game.maxentities = maxentities->value;
-	g_edicts = gi.TagMalloc<edict_t>(game.maxentities, TAG_GAME);
-
-	for (size_t i = 0; i < game.maxentities; i++)
-		new(&g_edicts[i]) edict_t();
-
-	globals.pool.max = game.maxentities;
+	const cvar_t *sv_cheats = gi.cvar ("cheats", "0", CVAR_SERVERINFO | CVAR_LATCH);
+	game.cheats_enabled = !!sv_cheats->value;
 
 	// initialize all clients for this game
-	game.maxclients = maxclients->value;
-	game.clients = gi.TagMalloc<gclient_t>(game.maxclients, TAG_GAME);
+	const cvar_t *maxclients = gi.cvar ("maxclients", "4", CVAR_SERVERINFO | CVAR_LATCH);
+	game.clients.resize(maxclients->value);
 
-	for (size_t i = 0; i < game.maxclients; i++)
-		new(&game.clients[i]) gclient_t();
+	for (auto &client : game.clients)
+		new(&client) gclient_t();
 
-	globals.pool.num = game.maxclients + 1;
-	globals.pool.size = sizeof(edict_t);
+	// initialize all entities for this game
+	globals.entities.size = sizeof(edict_t);
+	globals.entities.num = game.clients.size() + 1;
+	globals.entities.pool = gi.TagMalloc<edict_t>(globals.entities.max, TAG_GAME);
+
+	for (auto &e : game.entities.range(0, globals.entities.max))
+		edict_t::initialize(&e);
 }
 
 //===================================================================
@@ -151,14 +167,13 @@ static void ShutdownGame ()
 {
 	gi.dprintf ("==== %s ====\n", __FUNCTION__);
 
-	for (size_t i = 0; i < game.maxentities; i++)
-		g_edicts[i].~edict_t();
-
-	for (size_t i = 0; i < game.maxclients; i++)
-		game.clients[i].~gclient_t();
+	for (auto &e : game.entities.range(0, globals.entities.max))
+		e.~edict_t();
 
 	gi.FreeTags (TAG_LEVEL);
 	gi.FreeTags (TAG_GAME);
+
+	game = {};
 }
 
 //======================================================================
@@ -173,13 +188,9 @@ static void ClientEndServerFrames ()
 {
 	// calc the player views now that all pushing
 	// and damage has been added
-	for (size_t i = 0; i < game.maxclients; i++)
-	{
-		edict_t &ent = g_edicts[1 + i];
-
+	for (auto &ent : game.players)
 		if (ent.inuse && ent.client)
 			ClientEndServerFrame (ent);
-	}
 }
 
 /*
@@ -302,13 +313,9 @@ static size_t G_NumClients()
 {
 	size_t num_clients = 0;
 
-	for (size_t i = 1; i <= game.maxclients; i++)
-	{
-		edict_t &player = g_edicts[i];
-
+	for (edict_t &player : game.players)
 		if (player.inuse && player.client && player.client->pers.connected)
 			num_clients++;
-	}
 
 	return num_clients;
 }
@@ -320,16 +327,9 @@ void G_CheckPlayerReady()
 
 	size_t num_ready = 0;
 
-	for (size_t i = 1; i <= game.maxclients; i++)
-	{
-		edict_t &player = g_edicts[i];
-
-		if (!player.inuse || !player.client || !player.client->pers.connected)
-			continue;
-
-		if (player.client->resp.ready)
+	for (auto &player : game.players)
+		if (player.inuse && player.client && player.client->pers.connected && player.client->resp.ready)
 			num_ready++;
-	}
 
 	const size_t num_clients = G_NumClients();
 
@@ -360,18 +360,9 @@ static vec_t EntitiesRangeFromSpot (nav_grid_node *spot)
 {
 	vec_t	bestdistance = 9999999;
 
-	for (uint32_t n = 1; n < globals.pool.num; n++)
-	{
-		const edict_t &e = g_edicts[n];
-
-		if (!e.inuse || (!e.client && !(e.svflags & SVF_MONSTER)) || (e.svflags & SVF_NOCLIENT) || e.health <= 0)
-			continue;
-
-		vec_t playerdistance = spot->position.Distance(e.s.origin);
-
-		if (playerdistance < bestdistance)
-			bestdistance = playerdistance;
-	}
+	for (auto &e : game.entities.range(1))
+		if (e.inuse && (e.client || (e.svflags & SVF_MONSTER)) && !(e.svflags & SVF_NOCLIENT) && e.health)
+			bestdistance = min(bestdistance, spot->position.Distance(e.s.origin));
 
 	return bestdistance;
 }
@@ -464,13 +455,13 @@ static void G_SpawnMonsters()
 
 		playerteam_t team = prandom(50) ? TEAM_HIDERS : TEAM_HUNTERS;
 
-		for (size_t i = 1; i <= game.maxclients; i++)
+		for (auto &player : game.players)
 		{
-			edict_t &player = g_edicts[i];
-
 			if (!player.client || !player.client->pers.connected || !player.client->resp.ready)
 				continue;
 
+			// if we're a new player, assign us a random team
+			// FIXME
 			if (!player.client->resp.team)
 			{
 				player.client->resp.team = team;
@@ -541,10 +532,8 @@ static void G_WaitForReplay()
 		return;
 
 	// swap all player teams and clear their state prepped for next respawn
-	for (size_t i = 1; i <= game.maxclients; i++)
+	for (auto &player : game.players)
 	{
-		edict_t &player = g_edicts[i];
-
 		if (!player.inuse || !player.client || !player.client->pers.connected || !player.client->resp.ready)
 			continue;
 
@@ -634,17 +623,9 @@ static void ExitLevel ()
 	ClientEndServerFrames ();
 
 	// clear some things before going to next level
-	for (size_t i = 0; i < game.maxclients; i++)
-	{
-		edict_t &ent = g_edicts[1 + i];
-
-		if (!ent.inuse)
-			continue;
-
-		if (ent.health > ent.client->pers.max_health)
+	for (auto &ent : game.players)
+		if (ent.inuse && ent.health > ent.client->pers.max_health)
 			ent.health = ent.client->pers.max_health;
-	}
-
 }
 
 /*
@@ -679,10 +660,8 @@ static void G_RunFrame ()
 	// treat each object in turn
 	// even the world gets a chance to think
 	//
-	for (size_t i = 0; i < globals.pool.num; i++)
+	for (auto &ent : game.entities)
 	{
-		edict_t &ent = g_edicts[i];
-
 		if (!ent.inuse)
 			continue;
 
@@ -699,13 +678,10 @@ static void G_RunFrame ()
 				M_CheckGround (ent);
 		}
 
-		if (i > 0 && i <= game.maxclients)
-		{
+		if (ent.client)
 			ClientBeginServerFrame (ent);
-			continue;
-		}
-
-		G_RunEntity (ent);
+		else
+			G_RunEntity (ent);
 
 		level.current_entity = nullptr;
 	}

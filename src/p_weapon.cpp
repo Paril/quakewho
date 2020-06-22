@@ -19,7 +19,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 // g_weapon.c
 
-#include "q_shared.h"
+#include "g_local.h"
 #include "m_player.h"
 
 constexpr vec3_t P_ProjectSource (const gclient_t *client, const vec3_t &point, const vec3_t &distance, const vec3_t &forward, const vec3_t &right, const vec3_t &up)
@@ -204,10 +204,8 @@ static void Shift(edict_t &control, edict_t &other)
 
 static void Think_HidersWeapon(edict_t &ent)
 {
-	for (size_t i = 1; i < game.maxclients; i++)
+	for (auto &other : game.players)
 	{
-		edict_t &other = g_edicts[i];
-
 		if (ent == other || !other.client || other.client->resp.spectator || other.client->resp.team != ent.client->resp.team ||
 			!gi.inPVS(ent.s.origin, other.s.origin))
 			continue;

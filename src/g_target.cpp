@@ -18,7 +18,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
 
-#include "q_shared.h"
+#include "g_local.h"
 
 /*QUAKED target_temp_entity (1 0 0) (-8 -8 -8) (8 8 8)
 Fire an origin based temp entity event to the clients.
@@ -398,10 +398,8 @@ static void target_earthquake_think (edict_t &self)
 		self.last_move_time = level.time + 0.5f;
 	}
 
-	for (size_t i = 1; i < globals.pool.num; i++)
+	for (auto &e : game.entities.range(1))
 	{
-		edict_t &e = g_edicts[i];
-
 		if (!e.inuse)
 			continue;
 		if (!e.client)

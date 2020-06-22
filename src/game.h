@@ -207,10 +207,10 @@ struct edict_pool_t
 	// The edict array is allocated in the game dll so it
 	// can vary in size from one game to another.
 	// The size will be fixed when ge->Init() is called
-	edict_t		*head;
+	edict_t		*pool;
 	uint32_t	size;
 	uint32_t	num;		// current number, <= max_edicts
-	uint32_t	max;
+	uint32_t	max = MAX_EDICTS;
 };
 
 //
@@ -259,5 +259,5 @@ struct game_export_t
 	//
 	// global variables shared between game and server
 	//
-	edict_pool_t	pool;
+	edict_pool_t	entities;
 };

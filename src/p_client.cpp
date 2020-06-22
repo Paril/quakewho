@@ -18,7 +18,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
 
-#include "q_shared.h"
+#include "g_local.h"
 #include "m_player.h"
 
 /*QUAKED info_player_start (1 0 0) (-16 -16 -24) (16 16 32)
@@ -292,15 +292,9 @@ static size_t G_PlayersAliveOnTeam(const playerteam_t &team)
 {
 	size_t count = 0;
 
-	for (size_t i = 1; i <= game.maxclients; i++)
-	{
-		edict_t &player = g_edicts[i];
-
-		if (!player.inuse || !player.client || !player.client->pers.connected || player.client->resp.team != team || player.client->temp_spectator || player.deadflag)
-			continue;
-
-		count++;
-	}
+	for (auto &player : game.players)
+		if (player.inuse && player.client && player.client->pers.connected && player.client->resp.team == team && !player.client->temp_spectator && !player.deadflag)
+			count++;
 
 	return count;
 }
@@ -310,15 +304,9 @@ void G_TeamWins(const playerteam_t &team)
 	if (level.state != GAMESTATE_PLAYING)
 		return;
 
-	for (size_t i = 1; i <= game.maxclients; i++)
-	{
-		edict_t &player = g_edicts[i];
-
-		if (!player.inuse || !player.client || !player.client->pers.connected || player.client->resp.team != team || player.client->temp_spectator || player.deadflag)
-			continue;
-
-		player.client->resp.score++;
-	}
+	for (auto &player : game.players)
+		if (player.inuse && player.client && player.client->pers.connected && player.client->resp.team == team && !player.client->temp_spectator && !player.deadflag)
+			player.client->resp.score++;
 
 	gi.bprintf(PRINT_HIGH, "The %s win!\n", team == TEAM_HIDERS ? "hiders" : "hunters");
 	game.world().PlaySound(gi.soundindex ("misc/secret.wav"), CHAN_AUTO, ATTN_NONE);
@@ -448,16 +436,16 @@ edicts are wiped.
 */
 void SaveClientData ()
 {
-	for (size_t i = 0; i < game.maxclients; i++)
+	for (auto &ent : game.players)
 	{
-		edict_t &ent = g_edicts[1 + i];
-
 		if (!ent.inuse)
 			continue;
 
-		game.clients[i].pers.health = ent.health;
-		game.clients[i].pers.max_health = ent.max_health;
-		game.clients[i].pers.savedFlags = (ent.flags & FL_GODMODE);
+		gclient_t &cl = *ent.client;
+
+		cl.pers.health = ent.health;
+		cl.pers.max_health = ent.max_health;
+		cl.pers.savedFlags = (ent.flags & FL_GODMODE);
 	}
 }
 
@@ -487,10 +475,8 @@ static vec_t PlayersRangeFromSpot (edict_t &player, edict_t &spot)
 {
 	vec_t bestplayerdistance = FLT_MAX;
 
-	for (size_t n = 1; n <= game.maxclients; n++)
+	for (auto &check : game.players)
 	{
-		edict_t &check = g_edicts[n];
-
 		// team players can spawn near each other
 		if (OnSameTeam(player, check))
 			continue;
@@ -631,8 +617,9 @@ static void spectator_respawn (edict_t &ent)
 
 		// count spectators
 		size_t numspec = 0;
-		for (size_t i = 1; i <= game.maxclients; i++)
-			if (g_edicts[i].inuse && g_edicts[i].client->pers.spectator)
+
+		for (auto &player : game.players)
+			if (player.inuse && player.client->pers.spectator)
 				numspec++;
 
 		if (numspec >= maxspectators->value)
@@ -932,7 +919,7 @@ void ClientBegin (edict_t &ent)
 {
 	G_InitEdict (ent);
 
-	ent.client = game.clients + (ent.s.number - 1);
+	ent.client = &game.clients[ent.s.number - 1];
 
 	InitClientResp (*ent.client);
 
@@ -985,7 +972,7 @@ qboolean ClientConnect (edict_t &ent, char *userinfo_string)
 
 	if (userinfo.Get("spectator", value) && strcmp(value, "0"))
 	{
-		size_t i, numspec;
+		size_t numspec = 0;
 
 		if (*spectator_password->string &&
 			strcmp(spectator_password->string, "none") &&
@@ -997,8 +984,8 @@ qboolean ClientConnect (edict_t &ent, char *userinfo_string)
 		}
 
 		// count spectators
-		for (i = 1, numspec = 0; i <= game.maxclients; i++)
-			if (g_edicts[i].inuse && g_edicts[i].client->pers.spectator)
+		for (auto &player : game.players)
+			if (player.inuse && player.client->pers.spectator)
 				numspec++;
 
 		if (numspec >= maxspectators->value)
@@ -1023,7 +1010,8 @@ qboolean ClientConnect (edict_t &ent, char *userinfo_string)
 	}
 
 	// they can connect
-	ent.client = game.clients + (&ent - g_edicts - 1);
+	ent.client = &game.clients[&ent - g_edicts - 1];
+
 	gclient_t &client = *ent.client;
 
 	// if there is already a body waiting for us (a loadgame), just
@@ -1039,7 +1027,7 @@ qboolean ClientConnect (edict_t &ent, char *userinfo_string)
 	client.pers.userinfo = std::move(userinfo);
 	ParseClientUserinfo (ent);
 
-	if (game.maxclients > 1)
+	if (game.clients.size() > 1)
 		gi.dprintf ("%s connected\n", client.pers.netname);
 
 	ent.svflags = SVF_NONE; // make sure we start with known default
@@ -1279,13 +1267,9 @@ void ClientThink (edict_t &ent, const usercmd_t &ucmd)
 	}
 
 	// update chase cam if being followed
-	for (size_t i = 1; i <= game.maxclients; i++)
-	{
-		edict_t &other = g_edicts[i];
-
+	for (auto &other : game.players)
 		if (other.inuse && other.client->chase_target == ent)
 			UpdateChaseCam(other);
-	}
 
 	if (ent.control)
 	{
