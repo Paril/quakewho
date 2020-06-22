@@ -244,68 +244,6 @@ void Cmd_Help_f (edict_t &ent)
 
 //=======================================================================
 
-/*static radar_t G_Radar(edict_t &ent)
-{
-	vec_t best_distance = FLT_MAX;
-
-	for (size_t i = game.maxclients + 1; i < globals.num_edicts; i++)
-	{
-		edict_t &e = g_edicts[i];
-
-		if (!e.inuse || !(e.svflags & SVF_MONSTER) || !e.control)
-			continue;
-
-		if (!gi.inPHS(ent.s.origin, e.s.origin))
-			continue;
-
-		vec_t dist = ent.s.origin.Distance(e.s.origin);
-
-		if (gi.trace(ent.s.origin, e.s.origin, MASK_SOLID).fraction < 1.0f)
-			dist *= 2;
-
-		best_distance = min(best_distance, dist);
-	}
-
-	if (best_distance < 512)
-		return RADAR_HOT;
-	else if (best_distance < 1024)
-		return RADAR_WARM;
-	return RADAR_COLD;
-}*/
-
-static const char *G_Radar(edict_t &ent)
-{
-	vec_t best_distance = FLT_MAX;
-	edict_ref best_ref;
-	
-	ent.client->SendSound(gi.soundindex("world/scan1.wav"));
-
-	for (auto &e : game.entities.range(game.clients.size() + 1))
-	{
-		if (!e.inuse || !(e.svflags & SVF_MONSTER) || !e.control)
-			continue;
-
-		if (!gi.inPHS(ent.s.origin, e.s.origin))
-			continue;
-
-		vec_t dist = ent.s.origin.Distance(e.s.origin);
-
-		if (gi.trace(ent.s.origin, e.s.origin, MASK_SOLID).fraction < 1.0f)
-			dist *= 2;
-
-		best_distance = min(best_distance, dist);
-		best_ref = e;
-	}
-
-	if (!best_ref)
-		return "No blips...";
-
-	best_ref->control->client->Print("Your monster type was disclosed via radar!\n");
-	best_ref->control->client->SendSound(gi.soundindex("world/scan1.wav"));
-
-	return best_ref->monsterinfo.name;
-}
-
 /*
 ===============
 G_SetStats
@@ -316,7 +254,7 @@ void G_SetStats (edict_t &ent)
 	gclient_t &client = *ent.client;
 
 	client.ps.stats[STAT_HUNTER] = client.ps.stats[STAT_HIDER] = 0;
-	client.ps.stats[STAT_CONTROL] = 0;
+	client.ps.stats[STAT_CONTROL] = client.ps.stats[STAT_RADAR] = 0;
 
 	if (roundlimit->value)
 	{
@@ -326,11 +264,11 @@ void G_SetStats (edict_t &ent)
 			const int32_t m = time_left / 60;
 			const int32_t s = time_left % 60;
 
-			gi.configstring(CS_GENERAL + 2, va("ROUND TIME: %02d:%02d", m, s));
+			gi.configstring(CS_ROUND_STATUS, va("ROUND TIME: %02d:%02d", m, s));
 		}
 		
 		if (level.state >= GAMESTATE_SPAWNING)
-			client.ps.stats[STAT_ROUND_TIMER] = CS_GENERAL + 2;
+			client.ps.stats[STAT_ROUND_TIMER] = CS_ROUND_STATUS;
 	}
 
 	if (!client.resp.spectator)
@@ -343,46 +281,61 @@ void G_SetStats (edict_t &ent)
 			if (level.control_delay > level.time)
 			{
 				client.last_num_jumps = 0;
-				gi.configstring(CS_GENERAL, va("You'll take control in %i...", static_cast<int32_t>(trunc(level.control_delay - level.time + 1))));
+				gi.configstring(CS_GAME_STATUS, va("You'll take control in %i...", static_cast<int32_t>(trunc(level.control_delay - level.time + 1))));
 			}
 			else
 			{
 				if (client.last_num_jumps != client.num_jumps)
 				{
 					gi.WriteByte(SVC_CONFIGSTRING);
-					gi.WriteShort(CS_GENERAL);
+					gi.WriteShort(CS_GAME_STATUS);
 					gi.WriteString(va("STROGG-SHIFTS LEFT: %i", client.num_jumps));
 					gi.unicast(ent, true);
 					client.last_num_jumps = client.num_jumps;
 				}
 			
-				client.ps.stats[STAT_CONTROL] = static_cast<int16_t>(CS_GENERAL);
+				client.ps.stats[STAT_CONTROL] = static_cast<int16_t>(CS_GAME_STATUS);
 			}
 
-			client.ps.stats[STAT_CONTROL] = static_cast<int16_t>(CS_GENERAL);
+			client.ps.stats[STAT_CONTROL] = static_cast<int16_t>(CS_GAME_STATUS);
 			break;
 		case TEAM_HUNTERS:
 			client.ps.stats[STAT_HUNTER] = 1;
 
 			if (level.time >= level.control_delay)
 			{
-				const int32_t radar_left = static_cast<int32_t>(trunc(level.radar_time - level.time + 1));
+				const int32_t radar_left = static_cast<int32_t>(trunc(level.radar_time - level.time) + 1);
 
-				if (level.radar_time <= level.time || !client.last_radar)
+				if (client.radar.last_status != client.radar.status || level.last_radar_left != radar_left)
 				{
-					client.last_radar = G_Radar(ent);
-					level.radar_time = level.time + 8;
-				}
+					const char *radar_status;
 
-				if (level.last_radar_left != radar_left)
-				{
 					gi.WriteByte(SVC_CONFIGSTRING);
-					gi.WriteShort(CS_GENERAL + 1);
-					gi.WriteString(va("RADAR: %s (ping in %i...)", client.last_radar, radar_left));
+					gi.WriteShort(CS_RADAR_STATUS);
+					switch (client.radar.status)
+					{
+					case RADAR_EMPTY:
+					default:
+						radar_status = "No signal";
+						break;
+					case RADAR_STAGE_1:
+						radar_status = "33% locked on...";
+						break;
+					case RADAR_STAGE_2:
+						radar_status = "66% locked on...";
+						break;
+					case RADAR_STAGE_3:
+						radar_status = va("Lock! %s", client.radar.entity->control ? client.radar.entity->control->monsterinfo.name : "Human");
+						break;
+					}
+					radar_status = va("%s (ping in %i...)", radar_status, radar_left);
+					level.last_radar_left = radar_left;
+					gi.WriteString(radar_status);
 					gi.unicast(ent, true);
+					client.radar.last_status = client.radar.status;
 				}
 
-				client.ps.stats[STAT_CONTROL] = static_cast<int16_t>(CS_GENERAL + 1);
+				client.ps.stats[STAT_RADAR] = static_cast<int16_t>(CS_RADAR_STATUS);
 			}
 			break;
 		case TEAM_NONE:

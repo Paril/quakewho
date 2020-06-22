@@ -961,9 +961,16 @@ static const std::string dm_statusbar = (std::stringstream() <<
 
 // control notice
 "if " << stat(STAT_CONTROL) << " " <<
- "yb -68 " <<
+ "yb -92 " <<
  "xv 0 " <<
  "stat_string " << stat(STAT_CONTROL) << " " <<
+"endif " <<
+
+// radar notice
+"if " << stat(STAT_RADAR) << " " <<
+ "yb -82 " <<
+ "xv 0 " <<
+ "stat_string " << stat(STAT_RADAR) << " " <<
 "endif " <<
 
 // chase camera
@@ -1002,7 +1009,7 @@ static const std::string dm_statusbar = (std::stringstream() <<
 
 "if " << stat(STAT_ROUND_TIMER) << " " <<
  "xr -138 " <<
- "yt 2 " <<
+ "yt 32 " <<
  "stat_string " << stat(STAT_ROUND_TIMER) << " " <<
 "endif "
 ).str();

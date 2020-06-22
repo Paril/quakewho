@@ -856,20 +856,18 @@ struct client_respawn_t
 	playerteam_t	team;
 };
 
-enum radar_t
+enum : uint8_t
 {
-	RADAR_INVALID,
-	RADAR_COLD,
-	RADAR_WARM,
-	RADAR_HOT
+	RADAR_EMPTY,
+
+	RADAR_STAGE_1,
+	RADAR_STAGE_2,
+	RADAR_STAGE_3,
+
+	RADAR_BAD
 };
 
-constexpr const char *radar_strings[] = {
-	"???",
-	"Cold",
-	"Warm",
-	"Hot"
-};
+using radar_status_t = uint8_t;
 
 // this structure is cleared on each PutClientInServer(),
 // except for 'client->pers'
@@ -931,7 +929,10 @@ struct gclient_t : gclient_server_t
 	bool				control_waitjump;
 	usercmd_t			cmd;
 	vec_t				jump_sound_debounce, regen_debounce;
-	const char			*last_radar;
+	struct {
+		edict_ref		entity;
+		radar_status_t	status, last_status = RADAR_BAD;
+	} radar;
 	bool				temp_spectator;
 	int32_t				num_jumps, last_num_jumps;
 

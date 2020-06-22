@@ -510,6 +510,85 @@ static void G_KillRandomMonster()
 	monster.die(monster, monster, monster, monster.health, vec3_origin);
 }
 
+static radar_status_t G_EntityWithinRadarRange(edict_t &from, edict_t &other)
+{
+	if (!gi.inPHS(other.s.origin, from.s.origin))
+		return RADAR_EMPTY;
+
+	if (!gi.inPVS(other.s.origin, from.s.origin))
+		return RADAR_STAGE_1;
+
+	vec_t dist = from.s.origin.Distance(other.s.origin);
+
+	if (gi.trace(from.s.origin, other.s.origin, MASK_SOLID).fraction < 1.0f)
+		dist *= 2;
+
+	if (dist >= 1024.f)
+		return RADAR_STAGE_2;
+
+	return RADAR_STAGE_3;
+}
+
+static void G_UpdateRadars()
+{
+	if (level.radar_time > level.time)
+		return;
+
+	// reset all hider radars
+	for (auto &player : game.players)
+		if (player.inuse && player.client->resp.team == TEAM_HIDERS)
+			player.client->radar.status = RADAR_EMPTY;
+
+	// check hunter radars
+	for (auto &player : game.players)
+	{
+		if (!player.inuse || player.client->resp.team != TEAM_HUNTERS || player.deadflag || player.client->resp.spectator)
+		{
+			if (player.client->radar.entity)
+				player.client->radar = {};
+
+			continue;
+		}
+
+		if (!player.client->radar.entity)
+		{
+			std::vector<edict_ref> radar_choices;
+
+			// find an entity
+			for (auto &other_player : game.players)
+				if (other_player.inuse && other_player.client->resp.team == TEAM_HIDERS && !other_player.client->resp.spectator &&
+					G_EntityWithinRadarRange(player, other_player.control ? static_cast<edict_t &>(other_player.control) : other_player) >= RADAR_STAGE_1)
+					radar_choices.push_back(other_player);
+
+			if (radar_choices.size())
+			{
+				player.client->radar.entity = radar_choices[random(radar_choices.size() - 1)];
+				player.client->radar.status = RADAR_STAGE_1;
+			}
+		}
+		else
+		{
+			const radar_status_t new_status = G_EntityWithinRadarRange(player, player.client->radar.entity);
+
+			if (player.client->radar.status < new_status)
+				player.client->radar.status++;
+			else if (player.client->radar.status > new_status)
+			{
+				player.client->radar.status--;
+
+				if (!player.client->radar.status)
+					player.client->radar.entity = nullptr;
+			}
+			
+			// update our enemy's radar status
+			if (player.client->radar.entity)
+				player.client->radar.entity->client->radar.status = player.client->radar.status;
+		}
+	}
+
+	level.radar_time = level.time + 5;
+}
+
 static void G_CheckForEnd()
 {
 	if (level.time < level.round_end)
@@ -582,6 +661,7 @@ static void CheckDMRules ()
 		break;
 	case GAMESTATE_PLAYING:
 		G_CheckForEnd();
+		G_UpdateRadars();
 		G_KillRandomMonster();
 		break;
 	case GAMESTATE_INTERMISSION:

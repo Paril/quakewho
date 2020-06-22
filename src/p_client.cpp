@@ -382,6 +382,11 @@ void player_die (edict_t &self, edict_t &inflictor, edict_t &attacker, const int
 
 	self.Link();
 
+	if (self.client->resp.team == TEAM_HIDERS)
+		for (auto &player : game.players)
+			if (player.inuse && player.client->resp.team == TEAM_HUNTERS && player.client->radar.entity == self)
+				player.client->radar = {};
+
 	if (!G_PlayersAliveOnTeam(self.client->resp.team))
 		G_TeamWins(self.client->resp.team == TEAM_HIDERS ? TEAM_HUNTERS : TEAM_HIDERS);
 	else
