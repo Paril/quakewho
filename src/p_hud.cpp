@@ -180,7 +180,7 @@ void DeathmatchScoreboardMessage (edict_t &client, const edict_ref &killer)
 		// send the layout
 		snprintf (entry, sizeof(entry),
 			"client %i %i %i %i %i %i ",
-			x, y, sorted[i] - 1, cl.resp.score, cl.ping, (level.framenum - cl.resp.enterframe) / 600);
+			x, y, sorted[i] - 1, cl.resp.score, cl.ping, static_cast<int32_t>((level.framenum - cl.resp.enterframe) / 600));
 
 		const size_t j = strlen(entry);
 		if (stringlength + j > 1024)
@@ -260,11 +260,11 @@ void G_SetStats (edict_t &ent)
 	{
 		if (level.state == GAMESTATE_PLAYING)
 		{
-			const int32_t time_left = static_cast<int32_t>(level.round_end - level.time);
-			const int32_t m = time_left / 60;
-			const int32_t s = time_left % 60;
-
-			gi.configstring(CS_ROUND_STATUS, va("ROUND TIME: %02d:%02d", m, s));
+			const gtime_t time_left = (level.round_end - level.time) / 1000;
+			const gtime_t m = time_left / 60;
+			const gtime_t s = time_left % 60;
+		
+			gi.configstring(CS_ROUND_STATUS, va("ROUND TIME: %02i:%02i", static_cast<int32_t>(m), static_cast<int32_t>(s)));
 		}
 		
 		if (level.state >= GAMESTATE_SPAWNING)
@@ -281,7 +281,7 @@ void G_SetStats (edict_t &ent)
 			if (level.control_delay > level.time)
 			{
 				client.last_num_jumps = 0;
-				gi.configstring(CS_GAME_STATUS, va("You'll take control in %i...", static_cast<int32_t>(trunc(level.control_delay - level.time + 1))));
+				gi.configstring(CS_GAME_STATUS, va("You'll take control in %i...", static_cast<int32_t>((level.control_delay - level.time) / 1000)));
 			}
 			else
 			{
@@ -304,7 +304,7 @@ void G_SetStats (edict_t &ent)
 
 			if (level.time >= level.control_delay)
 			{
-				const int32_t radar_left = static_cast<int32_t>(trunc(level.radar_time - level.time) + 1);
+				const gtime_t radar_left = min(5ull, (level.radar_time - level.time) / 1000);
 
 				if (client.radar.last_status != client.radar.status || level.last_radar_left != radar_left)
 				{
@@ -319,16 +319,16 @@ void G_SetStats (edict_t &ent)
 						radar_status = "No signal";
 						break;
 					case RADAR_STAGE_1:
-						radar_status = "33% locked on...";
+						radar_status = "33% signal strength...";
 						break;
 					case RADAR_STAGE_2:
-						radar_status = "66% locked on...";
+						radar_status = "66% signal strength...";
 						break;
 					case RADAR_STAGE_3:
 						radar_status = va("Lock! %s", client.radar.entity->control ? client.radar.entity->control->monsterinfo.name : "Human");
 						break;
 					}
-					radar_status = va("%s (ping in %i...)", radar_status, radar_left);
+					radar_status = va("%s (ping in %u...)", radar_status, static_cast<int32_t>(radar_left));
 					level.last_radar_left = radar_left;
 					gi.WriteString(radar_status);
 					gi.unicast(ent, true);

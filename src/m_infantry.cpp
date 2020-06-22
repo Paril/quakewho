@@ -244,7 +244,7 @@ static void infantry_pain (edict_t &self, edict_t &other, const vec_t &kick, con
 	if (level.time < self.pain_debounce_time)
 		return;
 
-	self.pain_debounce_time = level.time + 3;
+	self.pain_debounce_time = level.time + 3000;
 
 	const bool n = prandom(50);
 	if (n)
@@ -272,7 +272,6 @@ void SP_monster_infantry (edict_t &self)
 	self.maxs = { 16.f, 16.f, 32.f };
 
 	self.health = 100;
-	self.gib_health = -40;
 	self.mass = 200;
 
 	self.pain = infantry_pain;

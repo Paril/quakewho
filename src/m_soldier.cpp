@@ -275,7 +275,7 @@ static void soldier_pain (edict_t &self, edict_t &other, const vec_t &kick, cons
 	if (level.time < self.pain_debounce_time)
 		return;
 
-	self.pain_debounce_time = level.time + 3;
+	self.pain_debounce_time = level.time + 3000;
 
 	const int32_t n = self.s.skinnum | 1;
 	if (n == 1)
@@ -569,7 +569,6 @@ void SP_monster_soldier_light (edict_t &self)
 
 	self.s.skinnum = 0;
 	self.health = 20;
-	self.gib_health = -30;
 	self.monsterinfo.undamaged_skin = 0;
 	self.monsterinfo.damaged_skin = 1;
 
@@ -585,7 +584,6 @@ void SP_monster_soldier (edict_t &self)
 
 	self.s.skinnum = 2;
 	self.health = 30;
-	self.gib_health = -30;
 	self.monsterinfo.undamaged_skin = 2;
 	self.monsterinfo.damaged_skin = 3;
 
@@ -601,7 +599,6 @@ void SP_monster_soldier_ss (edict_t &self)
 
 	self.s.skinnum = 4;
 	self.health = 40;
-	self.gib_health = -30;
 	self.monsterinfo.undamaged_skin = 4;
 	self.monsterinfo.damaged_skin = 5;
 

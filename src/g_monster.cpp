@@ -94,26 +94,6 @@ void M_CatagorizePosition (edict_t &ent)
 
 static void M_WorldEffects (edict_t &ent)
 {
-	if (ent.health > 0)
-	{
-		// TODO
-		/*if (ent->waterlevel > WATER_NONE)
-		{
-			ent->air_finished = level.time + 9;
-		}
-		else if (ent->air_finished < level.time)
-		{	// suffocate!
-			if (ent->pain_debounce_time < level.time)
-			{
-				dmg = 2 + 2 * floor(level.time - ent->air_finished);
-				if (dmg > 15)
-					dmg = 15;
-				T_Damage (ent, world, world, vec3_origin, ent->s.origin, vec3_origin, dmg, 0, DAMAGE_NO_ARMOR);
-				ent->pain_debounce_time = level.time + 1;
-			}
-		}*/
-	}
-	
 	if (ent.waterlevel == WATER_NONE)
 	{
 		if (ent.flags & FL_INWATER)
@@ -129,7 +109,7 @@ static void M_WorldEffects (edict_t &ent)
 	{
 		if (ent.damage_debounce_time < level.time)
 		{
-			ent.damage_debounce_time = level.time + 0.2f;
+			ent.damage_debounce_time = level.time + 200;
 			T_Damage (ent, game.world(), game.world(), vec3_origin, ent.s.origin, vec3_origin, 10 * ent.waterlevel, 0, DAMAGE_NONE);
 		}
 	}
@@ -138,7 +118,7 @@ static void M_WorldEffects (edict_t &ent)
 	{
 		if (ent.damage_debounce_time < level.time)
 		{
-			ent.damage_debounce_time = level.time + 1;
+			ent.damage_debounce_time = level.time + 100;
 			T_Damage (ent, game.world(), game.world(), vec3_origin, ent.s.origin, vec3_origin, 4 * ent.waterlevel, 0, DAMAGE_NONE);
 		}
 	}
@@ -189,11 +169,11 @@ static void M_SetEffects (edict_t &ent)
 
 	if (ent.deadflag && !ent.control)
 	{
-		const vec_t left = ent.monsterinfo.death_time - level.time;
+		const gtime_t left = ent.monsterinfo.death_time - level.time;
 		
-		if (left < 5)
+		if (left < 500)
 			ent.s.effects |= EF_SPHERETRANS;
-		if (left < 10)
+		if (left < 1000)
 			ent.s.renderfx |= RF_TRANSLUCENT;
 	}
 }
@@ -201,7 +181,7 @@ static void M_SetEffects (edict_t &ent)
 static void M_MoveFrame (edict_t &self)
 {
 	const mmove_t *move = self.monsterinfo.currentmove;
-	self.nextthink = level.time + FRAMETIME;
+	self.nextthink = level.time + FRAME_MS;
 
 	if (self.monsterinfo.nextframe && (self.monsterinfo.nextframe >= move->firstframe) && (self.monsterinfo.nextframe <= move->lastframe))
 	{
@@ -266,7 +246,7 @@ void Unpossess(edict_t &player)
 	player.Link();
 
 	player.s.event = EV_PLAYER_TELEPORT;
-	player.client->jump_sound_debounce = level.time + 1;
+	player.client->jump_sound_debounce = level.time + 100;
 }
 
 static edict_ref G_FindEnemyToFollow(edict_t &self)
@@ -348,8 +328,8 @@ static void monster_think (edict_t &self)
 
 		if (level.time < self.monsterinfo.stubborn_check_time)
 		{
-			self.monsterinfo.stubborn_check_time = level.time + random(0, 16);
-			self.monsterinfo.stubborn_time = level.time + random(0, 8);
+			self.monsterinfo.stubborn_check_time = level.time + random(0, 16000);
+			self.monsterinfo.stubborn_time = level.time + random(0, 8000);
 		}
 
 		if (level.time < self.monsterinfo.follow_time)
@@ -359,7 +339,7 @@ static void monster_think (edict_t &self)
 				self.monsterinfo.follow_ent = nullptr;
 				self.monsterinfo.follow_time = 0;
 		
-				self.monsterinfo.follow_check = level.time + random(4, 24);
+				self.monsterinfo.follow_check = level.time + random(4000, 24000);
 			}
 		}
 		else
@@ -367,7 +347,7 @@ static void monster_think (edict_t &self)
 
 		if (!self.monsterinfo.follow_ent && self.monsterinfo.follow_check < level.time)
 		{
-			self.monsterinfo.follow_check = level.time + random(4, 24);
+			self.monsterinfo.follow_check = level.time + random(4000, 24000);
 
 			if (prandom(20))
 			{
@@ -376,10 +356,7 @@ static void monster_think (edict_t &self)
 				if (self.monsterinfo.follow_ent)
 				{
 					self.monsterinfo.follow_direction = prandom(50);
-					self.monsterinfo.follow_time = level.time + random(8, 48);
-					/*gi.dprintf("%s following %s for %u sec\n", self.monsterinfo.name,
-						self.monsterinfo.follow_ent->monsterinfo.name ? self.monsterinfo.follow_ent->monsterinfo.name : self.monsterinfo.follow_ent->client->pers.netname,
-						static_cast<uint32_t>(self.monsterinfo.follow_time - level.time));*/
+					self.monsterinfo.follow_time = level.time + random(8000, 48000);
 				}
 			}
 		}
@@ -434,7 +411,7 @@ static void monster_die(edict_t &self, edict_t &inflictor, edict_t &attacker, co
 	self.takedamage = false;
 	self.svflags |= SVF_DEADMONSTER;
 	self.solid = SOLID_NOT;
-	self.monsterinfo.death_time = level.time + random(30, 40);
+	self.monsterinfo.death_time = level.time + random(3000, 4000);
 
 	self.Link();
 
@@ -451,7 +428,7 @@ static void monster_touch (edict_t &self, edict_t &other, const cplane_t *plane,
 
 	const vec_t ratio = static_cast<vec_t>(other.mass) / self.mass;
 	const vec3_t v = self.s.origin - other.s.origin;
-	M_walkmove (self, v.ToYaw(), 20 * ratio * FRAMETIME);
+	M_walkmove (self, v.ToYaw(), 20 * ratio * FRAME_S);
 }
 
 static void monster_start (edict_t &self)
@@ -466,10 +443,10 @@ static void monster_start (edict_t &self)
 
 	self.Link();
 
-	self.nextthink = level.time + FRAMETIME;
+	self.nextthink = level.time + FRAME_MS;
 	self.svflags |= SVF_MONSTER;
 	self.takedamage = true;
-	self.air_finished = level.time + 12;
+	self.air_finished = level.time + 1200;
 	self.max_health = self.health;
 	self.clipmask = MASK_MONSTERSOLID;
 
@@ -503,7 +480,7 @@ static void monster_start_go (edict_t &self)
 
 	self.monsterinfo.stand (self);
 	self.think = monster_think;
-	self.nextthink = level.time + FRAMETIME;
+	self.nextthink = level.time + FRAME_MS;
 }
 
 static void walkmonster_start_go (edict_t &self)

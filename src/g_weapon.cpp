@@ -222,7 +222,7 @@ void fire_blaster (edict_t &self, const vec3_t &start, const vec3_t &dir, const 
 	bolt.s.sound = gi.soundindex ("misc/lasfly.wav");
 	bolt.owner = self;
 	bolt.touch = blaster_touch;
-	bolt.nextthink = level.time + 2;
+	bolt.nextthink = level.time + 2000;
 	bolt.think = G_FreeEdict;
 	bolt.dmg = damage;
 	bolt.classname = "bolt";
@@ -311,7 +311,7 @@ static void Grenade_Touch (edict_t &ent, edict_t &other, const cplane_t *plane, 
 	Grenade_Explode (ent);
 }
 
-void fire_grenade (edict_t &self, const vec3_t &start, const vec3_t &aimdir, const int32_t &damage, const int32_t &speed, const vec_t &timer, const vec_t &damage_radius)
+void fire_grenade (edict_t &self, const vec3_t &start, const vec3_t &aimdir, const int32_t &damage, const int32_t &speed, const gtime_t &timer, const vec_t &damage_radius)
 {
 	const auto &[ forward, right, up ] = aimdir.ToAngles().AngleVectors();
 

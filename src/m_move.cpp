@@ -335,7 +335,7 @@ static bool SV_StepDirection (edict_t &ent, vec_t yaw, const vec_t &dist)
 			if (M_GonnaHitSpecificThing(ent, game.world()))
 			{
 				ent.monsterinfo.follow_ent = nullptr;
-				ent.monsterinfo.follow_check = level.time + random(4, 24);
+				ent.monsterinfo.follow_check = level.time + random(4000, 24000);
 			}
 		}
 
@@ -395,7 +395,7 @@ void M_MoveToGoal (edict_t &ent, const vec_t &dist)
 	}
 	else if (level.time > ent.monsterinfo.should_stand_check && ent.monsterinfo.stubborn_time < level.time)
 	{
-		ent.monsterinfo.should_stand_check = level.time + random(1, 24);
+		ent.monsterinfo.should_stand_check = level.time + random(1000, 24000);
 
 		if (prandom(50))
 		{

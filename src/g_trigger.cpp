@@ -58,7 +58,7 @@ static void multi_trigger (edict_t &ent)
 	{	// we can't just remove (self) here, because this is a touch function
 		// called while looping through area links...
 		ent.touch = nullptr;
-		ent.nextthink = level.time + FRAMETIME;
+		ent.nextthink = level.time + FRAME_MS;
 		ent.think = G_FreeEdict;
 	}
 }
@@ -123,7 +123,7 @@ void SP_trigger_multiple (edict_t &ent)
 		ent.noise_index = gi.soundindex ("misc/trigger1.wav");
 	
 	if (!ent.wait)
-		ent.wait = 0.2;
+		ent.wait = 200;
 	
 	ent.touch = Touch_Multi;
 	ent.movetype = MOVETYPE_NONE;
@@ -257,7 +257,7 @@ This trigger will always fire.  It is activated by the world.
 void SP_trigger_always (edict_t &ent)
 {
 	// we must have some delay to make sure our use targets are present
-	ent.delay = max(ent.delay, 0.2f);
+	ent.delay = max(ent.delay, 200ull);
 
 	G_UseTargets(ent, ent);
 }
@@ -289,7 +289,7 @@ static void trigger_push_touch (edict_t &self, edict_t &other, const cplane_t *p
 
 			if (other.fly_sound_debounce_time < level.time)
 			{
-				other.fly_sound_debounce_time = level.time + 1.5f;
+				other.fly_sound_debounce_time = level.time + 1500;
 				other.PlaySound(windsound);
 			}
 		}
@@ -356,9 +356,9 @@ static void hurt_touch (edict_t &self, edict_t &other, const cplane_t *plane, co
 		return;
 
 	if (self.spawnflags & 16)
-		self.timestamp = level.time + 1;
+		self.timestamp = level.time + 1000;
 	else
-		self.timestamp = level.time + FRAMETIME;
+		self.timestamp = level.time + FRAME_MS;
 
 	if (!(self.spawnflags & 4))
 	{

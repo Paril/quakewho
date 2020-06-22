@@ -293,7 +293,7 @@ edict_t &G_Spawn ()
 	// the first couple seconds of server time can involve a lot of
 	// freeing and allocating, so relax the replacement policy
 	for (auto &e : game.entities.range(game.clients.size() + 1))
-		if (!e.inuse && (e.freetime < 2 || level.time - e.freetime > 0.5f ))
+		if (!e.inuse && (e.freetime < 2000 || level.time - e.freetime > 500))
 			return G_InitEdict(e);
 	
 	if (globals.entities.num == globals.entities.max)

@@ -311,7 +311,7 @@ void G_TeamWins(const playerteam_t &team)
 	gi.bprintf(PRINT_HIGH, "The %s win!\n", team == TEAM_HIDERS ? "hiders" : "hunters");
 	game.world().PlaySound(gi.soundindex ("misc/secret.wav"), CHAN_AUTO, ATTN_NONE);
 	level.state = GAMESTATE_INTERMISSION;
-	level.state_time = level.time + 5;
+	level.state_time = level.time + 5000;
 }
 
 /*
@@ -341,7 +341,7 @@ void player_die (edict_t &self, edict_t &inflictor, edict_t &attacker, const int
 
 	if (!self.deadflag)
 	{
-		self.client->respawn_time = level.time + 1.0f;
+		self.client->respawn_time = level.time + 1000;
 		LookAtKiller (self, inflictor, attacker);
 		self.client->ps.pmove.pm_type = PM_DEAD;
 		ClientObituary (self, inflictor, attacker);
@@ -820,7 +820,7 @@ void PutClientInServer (edict_t &ent)
 	ent.mass = 200;
 	ent.solid = SOLID_BBOX;
 	ent.deadflag = false;
-	ent.air_finished = level.time + 12;
+	ent.air_finished = level.time + 12000;
 	ent.clipmask = MASK_PLAYERSOLID;
 	ent.model = "players/male/tris.md2";
 	ent.die = player_die;
@@ -1112,7 +1112,7 @@ void ClientThink (edict_t &ent, const usercmd_t &ucmd)
 		client.ps.pmove.pm_type = PM_FREEZE;
 
 		// can exit intermission after five seconds
-		if (level.time > level.intermissiontime + 5.0f && (ucmd.buttons & BUTTON_ANY))
+		if (level.time > level.intermissiontime + 5000 && (ucmd.buttons & BUTTON_ANY))
 			level.exitintermission = true;
 
 		level.current_entity = nullptr;
@@ -1303,7 +1303,7 @@ void ClientBeginServerFrame (edict_t &ent)
 
 	// player wants to switch to spectator while already in a game
 	if (client.resp.team && client.pers.spectator != client.resp.spectator &&
-		(level.time - client.respawn_time) >= 5 && !client.temp_spectator)
+		(level.time - client.respawn_time) >= 5000 && !client.temp_spectator)
 	{
 		spectator_respawn(ent);
 		return;

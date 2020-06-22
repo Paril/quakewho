@@ -188,7 +188,7 @@ static void tank_pain (edict_t &self, edict_t &other, const vec_t &kick, const i
 	if (level.time < self.pain_debounce_time)
 		return;
 
-	self.pain_debounce_time = level.time + 3;
+	self.pain_debounce_time = level.time + 3000;
 	self.PlaySound(sound_pain, CHAN_VOICE);
 }
 
@@ -265,7 +265,6 @@ void SP_monster_tank (edict_t &self)
 	if (prandom(50))
 	{
 		self.health = 1000;
-		self.gib_health = -225;
 		self.s.skinnum = 2;
 		self.monsterinfo.undamaged_skin = 2;
 		self.monsterinfo.damaged_skin = 3;
@@ -273,7 +272,6 @@ void SP_monster_tank (edict_t &self)
 	else
 	{
 		self.health = 750;
-		self.gib_health = -200;
 		self.monsterinfo.undamaged_skin = 0;
 		self.monsterinfo.damaged_skin = 1;
 	}

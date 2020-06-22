@@ -115,7 +115,7 @@ static void gladiator_pain (edict_t &self, edict_t &other, const vec_t &kick, co
 	if (level.time < self.pain_debounce_time)
 		return;
 
-	self.pain_debounce_time = level.time + 3;
+	self.pain_debounce_time = level.time + 3000;
 
 	if (prandom(50))
 		self.PlaySound(sound_pain1, CHAN_VOICE);
@@ -175,7 +175,6 @@ void SP_monster_gladiator (edict_t &self)
 	self.maxs = { 32.f, 32.f, 64.f };
 
 	self.health = 400;
-	self.gib_health = -175;
 	self.mass = 400;
 
 	self.pain = gladiator_pain;

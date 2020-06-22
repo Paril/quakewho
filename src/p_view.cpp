@@ -26,7 +26,7 @@ static	gclient_t	*current_client;
 
 static vec3_t	v_forward, v_right, v_up;
 static vec_t	xyspeed;
-static vec_t	bobmove;
+static gtime_t	bobmove;
 static int32_t	bobcycle;		// odd cycles are right foot going forward
 static vec_t	bobfracsin;		// sin(bobfrac*M_PI)
 
@@ -107,7 +107,7 @@ static void P_DamageFeedback ()
 	if ((level.time > current_player->pain_debounce_time) && !(current_player->flags & FL_GODMODE))
 	{
 		const int32_t r = irandom(1, 2);
-		current_player->pain_debounce_time = level.time + 0.7f;
+		current_player->pain_debounce_time = level.time + 700;
 
 		int32_t l = 100;
 
@@ -194,24 +194,25 @@ static void SV_CalcViewOffset ()
 		angles = current_client->kick_angles;
 
 		// add angles based on damage kick
-		vec_t ratio = (current_client->v_dmg_time - level.time) / DAMAGE_TIME;
-
-		if (ratio < 0)
+		if (current_client->v_dmg_time > level.time)
 		{
-			ratio = 0;
+			const vec_t ratio = static_cast<vec_t>(current_client->v_dmg_time - level.time) / DAMAGE_TIME;
+			angles[PITCH] += ratio * current_client->v_dmg_pitch;
+			angles[ROLL] += ratio * current_client->v_dmg_roll;
+		}
+		else
+		{
 			current_client->v_dmg_pitch = 0;
 			current_client->v_dmg_roll = 0;
 		}
 
-		angles[PITCH] += ratio * current_client->v_dmg_pitch;
-		angles[ROLL] += ratio * current_client->v_dmg_roll;
-
 		// add pitch based on fall kick
 
-		ratio = (current_client->fall_time - level.time) / FALL_TIME;
-		if (ratio < 0)
-			ratio = 0;
-		angles[PITCH] += ratio * current_client->fall_value;
+		if (current_client->fall_time > level.time)
+		{
+			const vec_t ratio = static_cast<vec_t>(current_client->fall_time - level.time) / FALL_TIME;
+			angles[PITCH] += ratio * current_client->fall_value;
+		}
 
 		// add angles based on velocity
 
@@ -243,15 +244,15 @@ static void SV_CalcViewOffset ()
 	vec3_t v = { 0.f, 0.f, current_player->viewheight };
 
 	// add fall height
-
-	vec_t ratio = (current_client->fall_time - level.time) / FALL_TIME;
-	if (ratio < 0)
-		ratio = 0;
-	v[2] -= ratio * current_client->fall_value * 0.4f;
+	if (current_client->fall_time > level.time)
+	{
+		const vec_t ratio = static_cast<vec_t>(current_client->fall_time - level.time) / FALL_TIME;
+		v[2] -= ratio * current_client->fall_value * 0.4f;
+	}
 
 	// add bob height
 
-	vec_t bob = min(bobfracsin * xyspeed * bob_up->value, 6.f);
+	const vec_t bob = min(bobfracsin * xyspeed * bob_up->value, 6.f);
 
 	v[2] += bob;
 
@@ -336,7 +337,6 @@ inline void SV_AddBlend (const vec4_t &src, vec4_t &dst)
 constexpr vec4_t lava_blend = { 1.0f, 0.3f, 0.0f, 0.6f };
 constexpr vec4_t slime_blend = { 0.0f, 0.1f, 0.05f, 0.6f };
 constexpr vec4_t water_blend = { 0.5f, 0.3f, 0.2f, 0.4f };
-constexpr vec3_t bonus_blend = { 0.85f, 0.7f, 0.3f };
 
 /*
 =============
@@ -365,14 +365,8 @@ static void SV_CalcBlend ()
 	// add for damage
 	SV_AddBlend (current_client->damage_blend, current_client->ps.blend);
 
-	if (current_client->bonus_alpha > 0)
-		SV_AddBlend ({ bonus_blend[0], bonus_blend[1], bonus_blend[2], current_client->bonus_alpha }, current_client->ps.blend);
-
 	// drop the damage value
 	current_client->damage_blend[3] = max(0.0f, current_client->damage_blend[3] - 0.06f);
-
-	// drop the bonus value
-	current_client->bonus_alpha = max(0.0f, current_client->bonus_alpha - 0.1f);
 }
 
 
@@ -453,7 +447,7 @@ static void P_WorldEffects ()
 {
 	if (current_player->movetype == MOVETYPE_NOCLIP)
 	{
-		current_player->air_finished = level.time + 12;	// don't need air
+		current_player->air_finished = level.time + 12000;	// don't need air
 		return;
 	}
 
@@ -473,7 +467,7 @@ static void P_WorldEffects ()
 		current_player->flags |= FL_INWATER;
 
 		// clear damage_debounce, so the pain sound will play immediately
-		current_player->damage_debounce_time = level.time - 1;
+		current_player->damage_debounce_time = 0;
 	}
 
 	//
@@ -499,7 +493,7 @@ static void P_WorldEffects ()
 		if (current_player->air_finished < level.time)
 			// gasp for air
 			current_player->PlaySound(gi.soundindex("player/gasp1.wav"), CHAN_VOICE);
-		else  if (current_player->air_finished < level.time + 11)
+		else  if (current_player->air_finished < level.time + 11000)
 			// just break surface
 			current_player->PlaySound(gi.soundindex("player/gasp2.wav"), CHAN_VOICE);
 	}
@@ -514,7 +508,7 @@ static void P_WorldEffects ()
 		{	// drown!
 			if (current_client->next_drown_time < level.time && current_player->health > 0)
 			{
-				current_client->next_drown_time = level.time + 1;
+				current_client->next_drown_time = level.time + 1000;
 
 				// take more damage the longer underwater
 				current_player->dmg += 2;
@@ -537,7 +531,7 @@ static void P_WorldEffects ()
 	}
 	else
 	{
-		current_player->air_finished = level.time + 12;
+		current_player->air_finished = level.time + 12000;
 		current_player->dmg = 2;
 	}
 
@@ -555,7 +549,7 @@ static void P_WorldEffects ()
 					current_player->PlaySound(gi.soundindex("player/burn1.wav"), CHAN_VOICE);
 				else
 					current_player->PlaySound(gi.soundindex("player/burn2.wav"), CHAN_VOICE);
-				current_player->pain_debounce_time = level.time + 1;
+				current_player->pain_debounce_time = level.time + 1000;
 			}
 
 			T_Damage (current_player, game.world(), game.world(), vec3_origin, current_player->s.origin, vec3_origin, 3*waterlevel, 0, DAMAGE_NONE);
@@ -601,7 +595,7 @@ static void G_SetClientEvent ()
 
 	if (current_player->groundentity && xyspeed > 225)
 	{
-		if (static_cast<int32_t>(current_client->bobtime + bobmove) != bobcycle)
+		if (static_cast<int32_t>((current_client->bobtime + bobmove) / 1000.f) != bobcycle)
 			current_player->s.event = EV_FOOTSTEP;
 	}
 }
@@ -788,22 +782,23 @@ void ClientEndServerFrame (edict_t &ent)
 			current_client->bobtime = 0;	// start at beginning of cycle again
 		}
 		else if (ent.groundentity)
-		{	// so bobbing only cycles when on ground
+		{
+			// so bobbing only cycles when on ground
 			if (xyspeed > 210)
-				bobmove = 0.25;
+				bobmove = 250;
 			else if (xyspeed > 100)
-				bobmove = 0.125;
+				bobmove = 125;
 			else
-				bobmove = 0.0625;
+				bobmove = 62;
 		}
 	
-		vec_t bobtime = (current_client->bobtime += bobmove);
+		gtime_t bobtime = (current_client->bobtime += bobmove);
 
 		if (current_client->ps.pmove.pm_flags & PMF_DUCKED)
 			bobtime *= 4;
 
-		bobcycle = static_cast<int32_t>(bobtime);
-		bobfracsin = abs(sin(bobtime*M_PI));
+		bobcycle = static_cast<int32_t>(bobtime / 1000.f);
+		bobfracsin = abs(sin((bobtime / 1000.f) * M_PI));
 
 		// detect hitting the floor
 		P_FallingDamage ();

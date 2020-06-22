@@ -141,7 +141,7 @@ static void berserk_pain (edict_t &self, edict_t &other, const vec_t &kick, cons
 	if (level.time < self.pain_debounce_time)
 		return;
 
-	self.pain_debounce_time = level.time + 3;
+	self.pain_debounce_time = level.time + 3000;
 	self.PlaySound(sound_pain, CHAN_VOICE);
 }
 
@@ -207,7 +207,6 @@ void SP_monster_berserk (edict_t &self)
 	self.solid = SOLID_BBOX;
 
 	self.health = 240;
-	self.gib_health = -60;
 	self.mass = 250;
 
 	self.pain = berserk_pain;

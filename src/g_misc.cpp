@@ -208,7 +208,7 @@ void SP_func_object (edict_t &self)
 		self.solid = SOLID_BSP;
 		self.movetype = MOVETYPE_PUSH;
 		self.think = func_object_release;
-		self.nextthink = level.time + 2 * FRAMETIME;
+		self.nextthink = level.time + 200;
 	}
 	else
 	{
@@ -401,8 +401,8 @@ static void func_clock_think (edict_t &self)
 	self.enemy->message = self.message;
 	self.enemy->use (self.enemy, self, self);
 
-	if (((self.spawnflags & 1) && (self.health > self.wait)) ||
-		((self.spawnflags & 2) && (self.health < self.wait)))
+	if (((self.spawnflags & 1) && (static_cast<gtime_t>(self.health) > self.wait)) ||
+		((self.spawnflags & 2) && (static_cast<gtime_t>(self.health) < self.wait)))
 	{
 		if (self.pathtarget)
 		{
@@ -424,7 +424,7 @@ static void func_clock_think (edict_t &self)
 			return;
 	}
 
-	self.nextthink = level.time + 1;
+	self.nextthink = level.time + 100;
 }
 
 static void func_clock_use (edict_t &self, edict_t &other, edict_t &activator)
@@ -467,7 +467,7 @@ void SP_func_clock (edict_t &self)
 	if (self.spawnflags & 4)
 		self.use = func_clock_use;
 	else
-		self.nextthink = level.time + 1;
+		self.nextthink = level.time + 100;
 }
 
 //=================================================================================

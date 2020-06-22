@@ -421,7 +421,6 @@ struct pmove_state_t
 									// changed by spawns, rotating objects, and teleporters
 };
 
-
 //
 // button bits
 //
@@ -482,7 +481,6 @@ struct pmove_t
 	trace_t			(*trace) (const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end);
 	brushcontents_t	(*pointcontents) (const vec3_t &point);
 };
-
 
 // entity_state_t->effects
 // Effects are things handled on the client side (lights, particles, frame animations)

@@ -193,7 +193,7 @@ static void medic_pain (edict_t &self, edict_t &other, const vec_t &kick, const 
 	if (level.time < self.pain_debounce_time)
 		return;
 
-	self.pain_debounce_time = level.time + 3;
+	self.pain_debounce_time = level.time + 3000;
 
 	if (prandom(50))
 		self.PlaySound(sound_pain1, CHAN_VOICE);
@@ -261,7 +261,6 @@ void SP_monster_medic (edict_t &self)
 	self.maxs = { 24.f, 24.f, 32.f };
 
 	self.health = 300;
-	self.gib_health = -130;
 	self.mass = 400;
 
 	self.pain = medic_pain;

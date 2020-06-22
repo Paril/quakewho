@@ -211,7 +211,7 @@ static void parasite_pain (edict_t &self, edict_t &other, const vec_t &kick, con
 	if (level.time < self.pain_debounce_time)
 		return;
 
-	self.pain_debounce_time = level.time + 3;
+	self.pain_debounce_time = level.time + 3000;
 
 	if (prandom(50))
 		self.PlaySound(sound_pain1, CHAN_VOICE);
@@ -256,7 +256,6 @@ void SP_monster_parasite (edict_t &self)
 	self.solid = SOLID_BBOX;
 
 	self.health = 175;
-	self.gib_health = -50;
 	self.mass = 250;
 
 	self.pain = parasite_pain;

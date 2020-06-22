@@ -444,9 +444,9 @@ static void G_SpawnMonsters()
 
 	if (level.monsters.size() >= level.max_monsters)
 	{
-		level.control_delay = level.time + 5;
+		level.control_delay = level.time + 5000;
 		level.monster_die_time = level.time + level.monster_kill_time;
-		level.round_end = roundlimit->value + level.control_delay;
+		level.round_end = (roundlimit->value * 1000) + level.control_delay;
 		level.countdown_sound = false;
 
 		// spawn players
@@ -586,14 +586,14 @@ static void G_UpdateRadars()
 		}
 	}
 
-	level.radar_time = level.time + 5;
+	level.radar_time = level.time + 5000;
 }
 
 static void G_CheckForEnd()
 {
 	if (level.time < level.round_end)
 	{
-		if (level.round_end - level.time <= 11 && !level.countdown_sound)
+		if (level.round_end - level.time <= 1100 && !level.countdown_sound)
 		{
 			level.countdown_sound = true;
 			game.world().PlaySound(gi.soundindex("world/10_0.wav"), CHAN_AUTO, ATTN_NONE);
@@ -645,7 +645,7 @@ static void CheckDMRules ()
 	if (level.intermissiontime)
 		return;
 
-	if (timelimit->value && level.time >= timelimit->value * 60)
+	if (timelimit->value && level.time >= (timelimit->value * 60) * 1000)
 	{
 		gi.bprintf (PRINT_HIGH, "Timelimit hit.\n");
 		EndDMLevel ();
@@ -726,7 +726,7 @@ static void G_RunFrame ()
 	DrawPoints();
 
 	level.framenum++;
-	level.time = level.framenum*FRAMETIME;
+	level.time += FRAME_MS;
 
 	// exit intermissions
 

@@ -51,23 +51,6 @@ void ai_stand (edict_t &self, const vec_t &dist)
 	if (self.control && level.control_delay < level.time)
 	{
 		M_MoveToController (self, dist, false);
-
-		if (self.monsterinfo.idle && level.time > self.monsterinfo.idle_time)
-		{
-			bool ready_to_idle = ((self.control->client->latched_buttons | self.control->client->buttons) & BUTTON_ATTACK) && (level.time > self.monsterinfo.idle_time);
-		
-			if (ready_to_idle)
-			{
-				if (self.monsterinfo.idle_time)
-				{
-					self.monsterinfo.idle (self);
-					self.monsterinfo.idle_time = level.time + 1;
-				}
-				else
-					self.monsterinfo.idle_time = level.time + 1;
-			}
-		}
-
 		return;
 	}
 
@@ -81,10 +64,10 @@ void ai_stand (edict_t &self, const vec_t &dist)
 			if (self.monsterinfo.idle_time)
 			{
 				self.monsterinfo.idle (self);
-				self.monsterinfo.idle_time = level.time + random(15, 30);
+				self.monsterinfo.idle_time = level.time + random(1500, 3000);
 			}
 			else
-				self.monsterinfo.idle_time = level.time + random(15);
+				self.monsterinfo.idle_time = level.time + random(1500);
 		}
 	}
 
@@ -116,10 +99,10 @@ void ai_stand (edict_t &self, const vec_t &dist)
 			else
 				self.monsterinfo.walk(self);
 
-			self.monsterinfo.should_stand_check = level.time + random(1, 24);
+			self.monsterinfo.should_stand_check = level.time + random(100, 2400);
 		}
 
-		self.monsterinfo.next_runwalk_check = level.time + random(1, 24);
+		self.monsterinfo.next_runwalk_check = level.time + random(100, 2400);
 	}
 }
 
@@ -136,40 +119,10 @@ void ai_walk (edict_t &self, const vec_t &dist)
 	if (self.control && level.control_delay < level.time)
 	{
 		M_MoveToController (self, dist, true);
-
-		if (self.monsterinfo.search && level.time > self.monsterinfo.idle_time)
-		{
-			bool ready_to_idle = ((self.control->client->latched_buttons | self.control->client->buttons) & BUTTON_ATTACK) && (level.time > self.monsterinfo.idle_time);
-		
-			if (ready_to_idle)
-			{
-				if (self.monsterinfo.idle_time)
-				{
-					self.monsterinfo.search (self);
-					self.monsterinfo.idle_time = level.time + 1;
-				}
-				else
-					self.monsterinfo.idle_time = level.time + 1;
-			}
-		}
-
 		return;
 	}
 
 	M_MoveToGoal (self, dist);
-
-	if ((self.monsterinfo.search) && (level.time > self.monsterinfo.idle_time))
-	{
-		if (self.monsterinfo.idle_time)
-		{
-			self.monsterinfo.search (self);
-			self.monsterinfo.idle_time = level.time + random(15, 30);
-		}
-		else
-		{
-			self.monsterinfo.idle_time = level.time + random(15);
-		}
-	}
 }
 
 /*

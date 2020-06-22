@@ -60,10 +60,7 @@ static bool SV_RunThink (edict_t &ent)
 {
 	vec_t thinktime = ent.nextthink;
 	
-	if (thinktime <= 0)
-		return true;
-	
-	if (thinktime > level.time+0.001f)
+	if (!thinktime || thinktime > level.time)
 		return true;
 	
 	ent.nextthink = 0;
@@ -241,7 +238,7 @@ SV_AddGravity
 */
 inline void SV_AddGravity (edict_t &ent)
 {
-	ent.velocity[2] -= ent.gravity * sv_gravity->value * FRAMETIME;
+	ent.velocity[2] -= ent.gravity * sv_gravity->value * FRAME_S;
 }
 
 /*
@@ -470,8 +467,8 @@ static void SV_Physics_Pusher (edict_t &ent)
 		if (part->velocity[0] || part->velocity[1] || part->velocity[2] ||
 			part->avelocity[0] || part->avelocity[1] || part->avelocity[2])
 		{	// object is moving
-			const vec3_t move = (part->velocity * FRAMETIME).Apply(SV_ClampMove);
-			const vec3_t amove = part->avelocity * FRAMETIME;
+			const vec3_t move = (part->velocity * FRAME_S).Apply(SV_ClampMove);
+			const vec3_t amove = part->avelocity * FRAME_S;
 
 			if ((obstacle = SV_Push (part, move, amove)))
 				break;	// move was blocked
@@ -486,7 +483,7 @@ static void SV_Physics_Pusher (edict_t &ent)
 		// the move failed, bump all nextthink times and back out moves
 		for (edict_ref mv = ent; mv; mv = mv->teamchain)
 			if (mv->nextthink > 0)
-				mv->nextthink += FRAMETIME;
+				mv->nextthink += FRAME_MS;
 
 		// if the pusher has a "blocked" function, call it
 		// otherwise, just stay in place until the obstacle is gone
@@ -529,8 +526,8 @@ static void SV_Physics_Noclip (edict_t &ent)
 	if (!SV_RunThink (ent))
 		return;
 	
-	ent.s.angles += ent.avelocity * FRAMETIME;
-	ent.s.origin += ent.velocity * FRAMETIME;
+	ent.s.angles += ent.avelocity * FRAME_S;
+	ent.s.origin += ent.velocity * FRAME_S;
 
 	ent.Link();
 }
@@ -575,10 +572,10 @@ static void SV_Physics_Toss (edict_t &ent)
 		SV_AddGravity (ent);
 
 // move angles
-	ent.s.angles += ent.avelocity * FRAMETIME;
+	ent.s.angles += ent.avelocity * FRAME_S;
 
 // move origin
-	const vec3_t move = ent.velocity * FRAMETIME;
+	const vec3_t move = ent.velocity * FRAME_S;
 	const trace_t &trace = SV_PushEntity (ent, move);
 	if (!ent.inuse)
 		return;
@@ -652,9 +649,9 @@ constexpr vec_t sv_friction			= 6;
 
 static void SV_AddRotationalFriction (edict_t &ent)
 {
-	ent.s.angles += ent.avelocity * FRAMETIME;
+	ent.s.angles += ent.avelocity * FRAME_S;
 	
-	constexpr vec_t adjustment = FRAMETIME * sv_stopspeed * sv_friction;
+	constexpr vec_t adjustment = FRAME_S * sv_stopspeed * sv_friction;
 	
 	for (auto &v : ent.avelocity)
 	{
@@ -695,7 +692,7 @@ static void SV_Physics_Step (edict_t &ent)
 	{
 		const brushcontents_t mask = (ent.svflags & SVF_MONSTER) ? MASK_MONSTERSOLID : MASK_SOLID;
 
-		SV_FlyMove (ent, FRAMETIME, mask);
+		SV_FlyMove (ent, FRAME_S, mask);
 
 		ent.Link();
 

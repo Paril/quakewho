@@ -293,7 +293,7 @@ static void target_laser_think (edict_t &self)
 	}
 
 	self.s.old_origin = tr.endpos;
-	self.nextthink = level.time + FRAMETIME;
+	self.nextthink = level.time + FRAME_MS;
 }
 
 static void target_laser_on (edict_t &self)
@@ -379,7 +379,7 @@ void SP_target_laser (edict_t &self)
 {
 	// let everything else get spawned before we start firing
 	self.think = target_laser_start;
-	self.nextthink = level.time + 1;
+	self.nextthink = level.time + 100;
 }
 
 //==========================================================
@@ -395,7 +395,7 @@ static void target_earthquake_think (edict_t &self)
 	if (self.last_move_time < level.time)
 	{
 		self.PlayPositionedSound (self.noise_index, self.s.origin);
-		self.last_move_time = level.time + 0.5f;
+		self.last_move_time = level.time + 500;
 	}
 
 	for (auto &e : game.entities.range(1))
@@ -414,13 +414,13 @@ static void target_earthquake_think (edict_t &self)
 	}
 
 	if (level.time < self.timestamp)
-		self.nextthink = level.time + FRAMETIME;
+		self.nextthink = level.time + FRAME_MS;
 }
 
 static void target_earthquake_use (edict_t &self, edict_t &other, edict_t &activator)
 {
-	self.timestamp = level.time + self.count;
-	self.nextthink = level.time + FRAMETIME;
+	self.timestamp = level.time + (self.count * 1000);
+	self.nextthink = level.time + FRAME_MS;
 	self.activator = activator;
 	self.last_move_time = 0;
 }

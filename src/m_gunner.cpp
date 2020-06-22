@@ -209,7 +209,7 @@ static void gunner_pain (edict_t &self, edict_t &other, const vec_t &kick, const
 	if (level.time < self.pain_debounce_time)
 		return;
 
-	self.pain_debounce_time = level.time + 3;
+	self.pain_debounce_time = level.time + 3000;
 
 	if (prandom(50))
 		self.PlaySound(sound_pain, CHAN_VOICE);
@@ -259,7 +259,6 @@ void SP_monster_gunner (edict_t &self)
 	self.maxs = { 16.f, 16.f, 32.f };
 
 	self.health = 175;
-	self.gib_health = -70;
 	self.mass = 200;
 
 	self.pain = gunner_pain;

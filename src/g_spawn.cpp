@@ -192,6 +192,9 @@ static void ED_ParseField (const std::string_view &key, const std::string_view &
 			v = atof(value_str);
 			*reinterpret_cast<vec3_t *>(b + f.ofs) = { 0.f, v, 0.f };
 			break;
+		case F_TIME:
+			*reinterpret_cast<gtime_t *>(b + f.ofs) = strtoull(value_str, nullptr, 10) * 1000;
+			break;
 		case F_IGNORE:
 			break;
 		}
@@ -815,11 +818,11 @@ static void FindSpawnPoints()
 	level.end_max_monsters = level.max_monsters / 4;
 
 	if (roundlimit->value > 60)
-		level.monster_kill_time = (roundlimit->value - 60) / (level.max_monsters - level.end_max_monsters);
+		level.monster_kill_time = ((roundlimit->value - 60) / (level.max_monsters - level.end_max_monsters)) * 1000;
 	else
 		level.monster_kill_time = 0;
 
-	gi.dprintf("Found %u spawn points; %u monsters will spawn, down to %u, -1 every %u sec\n", grid.size(), level.max_monsters, level.end_max_monsters, static_cast<uint32_t>(level.monster_kill_time));
+	gi.dprintf("Found %u spawn points; %u monsters will spawn, down to %u, -1 every %u sec\n", grid.size(), level.max_monsters, level.end_max_monsters, static_cast<uint32_t>(level.monster_kill_time / 1000));
 }
 
 /*

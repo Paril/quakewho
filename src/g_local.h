@@ -22,10 +22,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "q_shared.h"
 
-// define GAME_INCLUDE so that game.h does not define the
-// int16_t, server-visible gclient_t and edict_t structures,
-// because we define the full size ones in this file
-#define	GAME_INCLUDE
 #include "game.h"
 
 extern	game_import_t	gi;
@@ -33,6 +29,9 @@ extern	game_export_t	globals;
 
 // the "gameversion" client command will print this plus compile date
 constexpr const char *GAMEVERSION = "quakewho";
+
+// time in milliseconds
+using gtime_t = uint64_t;
 
 // protocol bytes that can be directly added to messages
 enum
@@ -76,14 +75,14 @@ enum soundflags_t : uint8_t
 
 MAKE_BITFLAGS(soundflags_t);
 
-constexpr vec_t DEFAULT_SOUND_PACKET_VOLUME			= 1.0f;
+constexpr vec_t DEFAULT_SOUND_PACKET_VOLUME				= 1.0f;
 constexpr soundattn_t DEFAULT_SOUND_PACKET_ATTENUATION	= ATTN_NORM;
 
 //==================================================================
 
 // view pitching times
-constexpr vec_t DAMAGE_TIME		= 0.5f;
-constexpr vec_t FALL_TIME		= 0.3f;
+constexpr gtime_t DAMAGE_TIME		= 500u;
+constexpr gtime_t FALL_TIME			= 300u;
 
 // edict->flags
 enum edictflags_t : uint32_t
@@ -98,7 +97,8 @@ enum edictflags_t : uint32_t
 
 MAKE_BITFLAGS(edictflags_t);
 
-constexpr vec_t	FRAMETIME		= 0.1;
+constexpr gtime_t	FRAME_MS		= 100;
+constexpr vec_t		FRAME_S			= 0.1f;
 
 // memory tags to allow dynamic memory to be cleaned up
 constexpr int32_t TAG_GAME	= 765;		// clear when unloading the dll
@@ -245,15 +245,15 @@ enum gamestate_t
 //
 extern struct level_locals_t
 {
-	int32_t		framenum;
-	vec_t		time;
+	uint64_t	framenum;
+	gtime_t		time;
 
 	char		level_name[MAX_QPATH];	// the descriptive name (Outer Base, etc)
 	char		mapname[MAX_QPATH];		// the server name (base1, etc)
 	char		nextmap[MAX_QPATH];		// go here when fraglimit is hit
 
 	// intermission state
-	vec_t		intermissiontime;		// time the intermission was started
+	gtime_t		intermissiontime;		// time the intermission was started
 	char		*changemap;
 	int32_t		exitintermission;
 	vec3_t		intermission_origin;
@@ -265,16 +265,16 @@ extern struct level_locals_t
 	int32_t		body_que;			// dead bodies
 
 	gamestate_t state;
-	vec_t state_time;
+	gtime_t state_time;
 	std::unordered_set<struct nav_grid_node*> skip_points;
 	std::vector<edict_ref> monsters;
-	vec_t control_delay;
-	vec_t monster_die_time;
-	int32_t last_radar_left;
-	vec_t radar_time;
+	gtime_t control_delay;
+	gtime_t monster_die_time;
+	gtime_t last_radar_left;
+	gtime_t radar_time;
 	size_t max_monsters, end_max_monsters;
-	vec_t monster_kill_time;
-	vec_t round_end;
+	gtime_t monster_kill_time;
+	gtime_t round_end;
 	bool countdown_sound;
 } level;
 
@@ -294,7 +294,7 @@ extern struct spawn_temp_t
 	int32_t		distance;
 	int32_t		height;
 	char		*noise;
-	vec_t		pausetime;
+	gtime_t		pausetime;
 	char		*item;
 	char		*gravity;
 
@@ -329,7 +329,7 @@ struct moveinfo_t
 	vec_t		decel;
 	vec_t		distance;
 
-	vec_t		wait;
+	gtime_t		wait;
 
 	// state data
 	movestate_t	state;
@@ -372,22 +372,19 @@ struct monsterinfo_t
 	void			(*walk)(edict_t &self);
 	void			(*run)(edict_t &self);
 
-	vec3_t			saved_goal;
-	vec_t			search_time;
-	vec_t			trail_time;
 	vec_t			idle_time;
 	int32_t			linkcount;
 
-	vec_t			next_runwalk_check, should_stand_check;
+	gtime_t			next_runwalk_check, should_stand_check;
 	int32_t			undamaged_skin, damaged_skin;
-	vec_t			death_time;
+	gtime_t			death_time;
 
 	void			(*die)(edict_t &self);
 	const char		*name;
 
-	vec_t			stubborn_check_time, stubborn_time;
-	vec_t			slow_turn_check, slow_turn_time, slow_turn_speed;
-	vec_t			follow_check, follow_time;
+	gtime_t			stubborn_check_time, stubborn_time;
+	gtime_t			slow_turn_check, slow_turn_time, slow_turn_speed;
+	gtime_t			follow_check, follow_time;
 	edict_ref		follow_ent;
 	bool			follow_direction;
 	bool			hunter_visible;
@@ -434,15 +431,6 @@ extern	cvar_t		*sv_maplist;
 
 #define g_edicts	globals.entities.pool
 
-// item spawnflags
-const uint32_t ITEM_TRIGGER_SPAWN		= bit(0);
-const uint32_t ITEM_NO_TOUCH			= bit(1);
-// 6 bits reserved for editor flags
-// 8 bits used as power cube id bits for coop games
-const uint32_t DROPPED_ITEM				= bit(16);
-const uint32_t DROPPED_PLAYER_ITEM		= bit(17);
-const uint32_t ITEM_TARGETS_USED		= bit(18);
-
 // edict->spawnflags
 // these are set with checkboxes on each entity in the map editor
 const uint32_t	SPAWNFLAG_NOT_EASY			= bit(8);
@@ -470,6 +458,7 @@ enum fieldtype_t : uint8_t
 	F_LSTRING,			// string on disk, pointer in memory, TAG_LEVEL
 	F_VECTOR,
 	F_ANGLEHACK,
+	F_TIME,
 	F_IGNORE
 };
 
@@ -493,7 +482,7 @@ void Think_Weapon (edict_t &ent);
 //
 // g_utils.c
 //
-bool	KillBox (edict_t &ent);
+bool KillBox (edict_t &ent);
 
 constexpr vec3_t G_ProjectSource (const vec3_t &point, const vec3_t &distance, const vec3_t &forward, const vec3_t &right, const vec3_t &up)
 {
@@ -658,7 +647,7 @@ bool FacingIdeal(const edict_t &self);
 void fire_bullet (edict_t &self, const vec3_t &start, const vec3_t &aimdir, const int32_t &damage, const int32_t &kick, const int32_t &hspread, const int32_t &vspread);
 void fire_shotgun (edict_t &self, const vec3_t &start, const vec3_t &aimdir, const int32_t &damage, const int32_t &kick, const int32_t &hspread, const int32_t &vspread, const int32_t &count);
 void fire_blaster (edict_t &self, const vec3_t &start, const vec3_t &dir, const int32_t &damage, const int32_t &speed, const entity_effects_t &effect);
-void fire_grenade (edict_t &self, const vec3_t &start, const vec3_t &aimdir, const int32_t &damage, const int32_t &speed, const vec_t &timer, const vec_t &damage_radius);
+void fire_grenade (edict_t &self, const vec3_t &start, const vec3_t &aimdir, const int32_t &damage, const int32_t &speed, const gtime_t &timer, const vec_t &damage_radius);
 
 //
 // p_weapon.c
@@ -847,7 +836,7 @@ struct client_persistant_t
 // client data that stays across deathmatch respawns
 struct client_respawn_t
 {
-	int32_t			enterframe;			// level.framenum the client entered the game
+	uint64_t		enterframe;			// level.framenum the client entered the game
 	int32_t			score;				// frags, etc
 	vec3_t			cmd_angles;			// angles sent over in the last command
 
@@ -897,16 +886,17 @@ struct gclient_t : gclient_server_t
 	weaponstate_t		weaponstate;
 	vec3_t				kick_angles;	// weapon kicks
 	vec3_t				kick_origin;
-	vec_t				v_dmg_roll, v_dmg_pitch, v_dmg_time;	// damage kicks
-	vec_t				fall_time, fall_value;		// for view drop on fall
-	vec_t				bonus_alpha;
+	vec_t				v_dmg_roll, v_dmg_pitch;
+	gtime_t				v_dmg_time;					// damage kicks
+	gtime_t				fall_time;
+	vec_t				fall_value;		// for view drop on fall
 	vec4_t				damage_blend;
 	vec3_t				v_angle;			// aiming direction
-	vec_t				bobtime;			// so off-ground doesn't change it
+	gtime_t				bobtime;			// so off-ground doesn't change it
 	vec3_t				oldviewangles;
 	vec3_t				oldvelocity;
 
-	vec_t				next_drown_time;
+	gtime_t				next_drown_time;
 	waterlevel_t		old_waterlevel;
 
 	// animation vars
@@ -917,18 +907,18 @@ struct gclient_t : gclient_server_t
 
 	soundindex_t		weapon_sound;
 
-	vec_t				flood_locktill;		// locked from talking
-	vec_t				flood_when[10];		// when messages were said
+	gtime_t				flood_locktill;		// locked from talking
+	gtime_t				flood_when[10];		// when messages were said
 	int32_t				flood_whenhead;		// head pointer for when said
 
-	vec_t				respawn_time;		// can respawn when time > this
+	gtime_t				respawn_time;		// can respawn when time > this
 
 	edict_ref			chase_target;		// player we are chasing
 	bool				update_chase;		// need to update chase info?
 
 	bool				control_waitjump;
 	usercmd_t			cmd;
-	vec_t				jump_sound_debounce, regen_debounce;
+	gtime_t				jump_sound_debounce, regen_debounce;
 	struct {
 		edict_ref		entity;
 		radar_status_t	status, last_status = RADAR_BAD;
@@ -980,7 +970,7 @@ public:
 	edictflags_t	flags;
 
 	const char		*model;
-	vec_t			freetime;			// sv.time when the object was freed
+	gtime_t			freetime;			// sv.time when the object was freed
 	
 	//
 	// only used locally in game, not by server
@@ -989,7 +979,7 @@ public:
 	const char		*classname = "noclass";
 	uint32_t		spawnflags;
 
-	vec_t			timestamp;
+	gtime_t			timestamp;
 
 	vec_t			angle;			// set in qe3, -1 = up, -2 = down
 	char			*target;
@@ -1008,7 +998,7 @@ public:
 	vec3_t			velocity;
 	vec3_t			avelocity;
 	int32_t			mass;
-	vec_t			air_finished;
+	gtime_t			air_finished;
 	vec_t			gravity = 1.0f;		// per entity gravity multiplier (1.0 is normal)
 								// use for lowgrav artifact, flares
 
@@ -1017,7 +1007,7 @@ public:
 	vec_t			yaw_speed;
 	vec_t			ideal_yaw;
 
-	vec_t			nextthink;
+	gtime_t			nextthink;
 	void			(*prethink) (edict_t &ent);
 	void			(*think)(edict_t &self);
 	void			(*blocked)(edict_t &self, edict_t &other);	//move to moveinfo?
@@ -1026,19 +1016,15 @@ public:
 	void			(*pain)(edict_t &self, edict_t &other, const vec_t &kick, const int32_t &damage);
 	void			(*die)(edict_t &self, edict_t &inflictor, edict_t &attacker, const int32_t &damage, const vec3_t &point);
 
-	vec_t			touch_debounce_time;		// are all these legit?  do we need more/less of them?
-	vec_t			pain_debounce_time;
-	vec_t			damage_debounce_time;
-	vec_t			fly_sound_debounce_time;	//move to clientinfo
-	vec_t			last_move_time;
+	gtime_t			touch_debounce_time;		// are all these legit?  do we need more/less of them?
+	gtime_t			pain_debounce_time;
+	gtime_t			damage_debounce_time;
+	gtime_t			fly_sound_debounce_time;	//move to clientinfo
+	gtime_t			last_move_time;
 
 	int32_t			health;
 	int32_t			max_health;
-	int32_t			gib_health;
 	bool			deadflag;
-	vec_t			show_hostile;
-
-	vec_t			powerarmor_time;
 
 	char			*map;			// target_changelevel
 
@@ -1059,17 +1045,17 @@ public:
 	edict_ref		teamchain;
 	edict_ref		teammaster;
 
-	soundindex_t	 noise_index;
-	soundindex_t	 noise_index2;
+	soundindex_t	noise_index;
+	soundindex_t	noise_index2;
 	vec_t			volume;
 	vec_t			attenuation;
 
 	// timing variables
-	vec_t			wait;
-	vec_t			delay;			// before firing targets
-	vec_t			random;
+	gtime_t			wait;
+	gtime_t			delay;			// before firing targets
+	gtime_t			random;
 
-	vec_t			teleport_time;
+	gtime_t			teleport_time;
 
 	brushcontents_t	watertype;
 	waterlevel_t	waterlevel;

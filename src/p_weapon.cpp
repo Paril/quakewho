@@ -94,7 +94,7 @@ static void NoAmmoWeaponChange (edict_t &ent)
 	if (level.time >= ent.pain_debounce_time)
 	{
 		ent.PlaySound(gi.soundindex("weapons/noammo.wav"), CHAN_WEAPON);
-		ent.pain_debounce_time = level.time + 1;
+		ent.pain_debounce_time = level.time + 1000;
 	}
 
 	ent.client->newweapon = &g_weapons[WEAP_SHOTGUN];
@@ -138,7 +138,7 @@ void Possess(edict_t &player, edict_t &monster, const bool &clone)
 	player.movetype = MOVETYPE_NOCLIP;
 	player.solid = SOLID_NOT;
 	player.svflags |= SVF_NOCLIENT;
-	player.client->regen_debounce = level.time + 5;
+	player.client->regen_debounce = level.time + 5000;
 	player.Link();
 
 	edict_t &copy = clone ? G_Spawn() : monster;
@@ -231,7 +231,7 @@ static void Think_HidersWeapon(edict_t &ent)
 					ent.control->s.skinnum = ent.control->monsterinfo.undamaged_skin;
 			}
 
-			ent.client->regen_debounce = level.time + 1;
+			ent.client->regen_debounce = level.time + 1000;
 		}
 
 		if (ent.client->num_jumps && level.control_delay < level.time)
@@ -525,7 +525,7 @@ static void weapon_grenadelauncher_fire (edict_t &ent)
 	ent.client->kick_origin = forward * -2;
 	ent.client->kick_angles[0] = -1;
 
-	fire_grenade (ent, start, forward, damage, 600, 2.5, radius);
+	fire_grenade (ent, start, forward, damage, 600, 2500, radius);
 
 	gi.WriteByte (SVC_MUZZLEFLASH);
 	gi.WriteEntity (ent);

@@ -231,7 +231,7 @@ static void brain_pain (edict_t &self, edict_t &other, const vec_t &kick, const 
 	if (level.time < self.pain_debounce_time)
 		return;
 
-	self.pain_debounce_time = level.time + 3;
+	self.pain_debounce_time = level.time + 3000;
 
 	const int32_t r = irandom(2);
 	if (r == 0)
@@ -267,7 +267,6 @@ void SP_monster_brain (edict_t &self)
 	self.maxs = { 16.f, 16.f, 32.f };
 
 	self.health = 300;
-	self.gib_health = -150;
 	self.mass = 400;
 
 	self.pain = brain_pain;

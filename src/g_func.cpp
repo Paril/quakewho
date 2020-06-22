@@ -83,24 +83,24 @@ static void Move_Final (edict_t &ent)
 		return;
 	}
 
-	ent.velocity = ent.moveinfo.dir * (ent.moveinfo.remaining_distance / FRAMETIME);
+	ent.velocity = ent.moveinfo.dir * (ent.moveinfo.remaining_distance / FRAME_S);
 
 	ent.think = Move_Done;
-	ent.nextthink = level.time + FRAMETIME;
+	ent.nextthink = level.time + FRAME_MS;
 }
 
 static void Move_Begin (edict_t &ent)
 {
-	if ((ent.moveinfo.speed * FRAMETIME) >= ent.moveinfo.remaining_distance)
+	if ((ent.moveinfo.speed * FRAME_S) >= ent.moveinfo.remaining_distance)
 	{
 		Move_Final (ent);
 		return;
 	}
 
 	ent.velocity = ent.moveinfo.dir * ent.moveinfo.speed;
-	vec_t frames = floor((ent.moveinfo.remaining_distance / ent.moveinfo.speed) / FRAMETIME);
-	ent.moveinfo.remaining_distance -= frames * ent.moveinfo.speed * FRAMETIME;
-	ent.nextthink = level.time + (frames * FRAMETIME);
+	const vec_t frames = floor((ent.moveinfo.remaining_distance / ent.moveinfo.speed) / FRAME_S);
+	ent.moveinfo.remaining_distance -= frames * ent.moveinfo.speed * FRAME_S;
+	ent.nextthink = level.time + (frames * FRAME_MS);
 	ent.think = Move_Final;
 }
 
@@ -119,7 +119,7 @@ static void Move_Calc (edict_t &ent, const vec3_t &dest, void(*func)(edict_t&))
 			Move_Begin (ent);
 		else
 		{
-			ent.nextthink = level.time + FRAMETIME;
+			ent.nextthink = level.time + FRAME_MS;
 			ent.think = Move_Begin;
 		}
 	}
@@ -128,7 +128,7 @@ static void Move_Calc (edict_t &ent, const vec3_t &dest, void(*func)(edict_t&))
 		// accelerative
 		ent.moveinfo.current_speed = 0;
 		ent.think = Think_AccelMove;
-		ent.nextthink = level.time + FRAMETIME;
+		ent.nextthink = level.time + FRAME_MS;
 	}
 }
 
@@ -158,9 +158,9 @@ static void AngleMove_Final (edict_t &ent)
 		return;
 	}
 
-	ent.avelocity = move * (1.0f / FRAMETIME);
+	ent.avelocity = move * (1.0f / FRAME_S);
 	ent.think = AngleMove_Done;
-	ent.nextthink = level.time + FRAMETIME;
+	ent.nextthink = level.time + FRAME_MS;
 }
 
 static void AngleMove_Begin (edict_t &ent)
@@ -179,19 +179,19 @@ static void AngleMove_Begin (edict_t &ent)
 	// divide by speed to get time to reach dest
 	const vec_t traveltime = len / ent.moveinfo.speed;
 
-	if (traveltime < FRAMETIME)
+	if (traveltime < FRAME_S)
 	{
 		AngleMove_Final (ent);
 		return;
 	}
 
-	const vec_t frames = floor(traveltime / FRAMETIME);
+	const vec_t frames = floor(traveltime / FRAME_S);
 
 	// scale the destdelta vector by the time spent traveling to get velocity
 	ent.avelocity = destdelta * (1.0f / traveltime);
 
 	// set nextthink to trigger a think when dest is reached
-	ent.nextthink = level.time + frames * FRAMETIME;
+	ent.nextthink = level.time + frames * FRAME_S;
 	ent.think = AngleMove_Final;
 }
 
@@ -204,7 +204,7 @@ static void AngleMove_Calc (edict_t &ent, void(*func)(edict_t&))
 		AngleMove_Begin (ent);
 	else
 	{
-		ent.nextthink = level.time + FRAMETIME;
+		ent.nextthink = level.time + FRAME_MS;
 		ent.think = AngleMove_Begin;
 	}
 }
@@ -321,7 +321,7 @@ static void Think_AccelMove (edict_t &ent)
 	}
 
 	ent.velocity = ent.moveinfo.dir * (ent.moveinfo.current_speed * 10);
-	ent.nextthink = level.time + FRAMETIME;
+	ent.nextthink = level.time + FRAME_MS;
 	ent.think = Think_AccelMove;
 }
 
@@ -339,7 +339,7 @@ static void plat_hit_top (edict_t &ent)
 	ent.moveinfo.state = STATE_TOP;
 
 	ent.think = plat_go_down;
-	ent.nextthink = level.time + 3;
+	ent.nextthink = level.time + 300;
 }
 
 static void plat_hit_bottom (edict_t &ent)
@@ -416,7 +416,7 @@ static void Touch_Plat_Center (edict_t &ent, edict_t &other, const cplane_t *pla
 	if (platform.moveinfo.state == STATE_BOTTOM)
 		plat_go_up (platform);
 	else if (platform.moveinfo.state == STATE_TOP)
-		platform.nextthink = level.time + 1;	// the player is still on the plat, so delay going down
+		platform.nextthink = level.time + 100;	// the player is still on the plat, so delay going down
 }
 
 static void plat_spawn_inside_trigger (edict_t &ent)
@@ -686,7 +686,7 @@ static void button_wait (edict_t &self)
 
 	G_UseTargets (self, self.activator);
 	self.s.frame = 1;
-	if (self.moveinfo.wait >= 0)
+	if (self.moveinfo.wait != -1ull)
 	{
 		self.nextthink = level.time + self.moveinfo.wait;
 		self.think = button_return;
@@ -844,7 +844,7 @@ static void door_hit_top (edict_t &self)
 	if (self.spawnflags & DOOR_TOGGLE)
 		return;
 
-	if (self.moveinfo.wait >= 0)
+	if (self.moveinfo.wait != -1ull)
 	{
 		self.think = door_go_down;
 		self.nextthink = level.time + self.moveinfo.wait;
@@ -892,7 +892,7 @@ static void door_go_up (edict_t &self, edict_t &activator)
 
 	if (self.moveinfo.state == STATE_TOP)
 	{	// reset top wait time
-		if (self.moveinfo.wait >= 0)
+		if (self.moveinfo.wait != -1ull)
 			self.nextthink = level.time + self.moveinfo.wait;
 		return;
 	}
@@ -956,7 +956,7 @@ static void Touch_DoorTrigger (edict_t &self, edict_t &other, const cplane_t *pl
 	if (level.time < self.touch_debounce_time)
 		return;
 
-	self.touch_debounce_time = level.time + 1.0f;
+	self.touch_debounce_time = level.time + 100;
 
 	door_use (self.owner, other, other);
 }
@@ -1045,7 +1045,7 @@ static void door_blocked (edict_t &self, edict_t &other)
 
 // if a door has a negative wait, it would never come back if blocked,
 // so let it just squash the object to death real fast
-	if (self.moveinfo.wait < 0)
+	if (self.moveinfo.wait == -1ull)
 		return;
 
 	if (self.moveinfo.state == STATE_DOWN)
@@ -1082,7 +1082,7 @@ static void door_touch (edict_t &self, edict_t &other, const cplane_t *plane, co
 	if (level.time < self.touch_debounce_time)
 		return;
 
-	self.touch_debounce_time = level.time + 5.0f;
+	self.touch_debounce_time = level.time + 500;
 
 	if (other.client)
 		other.client->CenterPrint("%s", self.message);
@@ -1171,7 +1171,7 @@ void SP_func_door (edict_t &ent)
 
 	ent.Link();
 
-	ent.nextthink = level.time + FRAMETIME;
+	ent.nextthink = level.time + FRAME_MS;
 
 	if (ent.health || ent.targetname)
 		ent.think = Think_CalcMoveSpeed;
@@ -1304,7 +1304,7 @@ void SP_func_door_rotating (edict_t &ent)
 
 	ent.Link();
 
-	ent.nextthink = level.time + FRAMETIME;
+	ent.nextthink = level.time + FRAME_MS;
 	if (ent.health || ent.targetname)
 		ent.think = Think_CalcMoveSpeed;
 	else
@@ -1373,12 +1373,12 @@ void SP_func_water (edict_t &self)
 	self.moveinfo.accel = self.moveinfo.decel = self.moveinfo.speed = self.speed;
 
 	if (!self.wait)
-		self.wait = -1;
+		self.wait = -1ull;
 	self.moveinfo.wait = self.wait;
 
 	self.use = door_use;
 
-	if (self.wait == -1)
+	if (self.wait == -1ull)
 		self.spawnflags |= DOOR_TOGGLE;
 
 	self.classname = "func_door";
@@ -1420,7 +1420,7 @@ static void train_blocked (edict_t &self, edict_t &other)
 	if (!self.dmg)
 		return;
 
-	self.touch_debounce_time = level.time + 0.5f;
+	self.touch_debounce_time = level.time + 500;
 	T_Damage (other, self, self, vec3_origin, other.s.origin, vec3_origin, self.dmg, 1, DAMAGE_NONE);
 }
 
@@ -1558,7 +1558,7 @@ static void func_train_find (edict_t &self)
 
 	if (self.spawnflags & TRAIN_START_ON)
 	{
-		self.nextthink = level.time + FRAMETIME;
+		self.nextthink = level.time + FRAME_MS;
 		self.think = train_next;
 		self.activator = self;
 	}
@@ -1614,7 +1614,7 @@ void SP_func_train (edict_t &self)
 	{
 		// start trains on the second frame, to make sure their targets have had
 		// a chance to spawn
-		self.nextthink = level.time + FRAMETIME;
+		self.nextthink = level.time + FRAME_MS;
 		self.think = func_train_find;
 	}
 	else
@@ -1680,7 +1680,7 @@ static void trigger_elevator_init (edict_t &self)
 void SP_trigger_elevator (edict_t &self)
 {
 	self.think = trigger_elevator_init;
-	self.nextthink = level.time + FRAMETIME;
+	self.nextthink = level.time + FRAME_MS;
 }
 
 
@@ -1732,13 +1732,13 @@ void SP_func_timer (edict_t &self)
 
 	if (self.random >= self.wait)
 	{
-		self.random = self.wait - FRAMETIME;
+		self.random = self.wait - FRAME_MS;
 		gi.dprintf("func_timer at %s has random >= wait\n", vtos(self.s.origin));
 	}
 
 	if (self.spawnflags & 1)
 	{
-		self.nextthink = level.time + 1.0f + st.pausetime + self.delay + self.wait + crandom(self.random);
+		self.nextthink = level.time + 100 + st.pausetime + self.delay + self.wait + crandom(self.random);
 		self.activator = self;
 	}
 
@@ -1825,7 +1825,7 @@ static void door_secret_use (edict_t &self, edict_t &other, edict_t &activator)
 
 static void door_secret_move1 (edict_t &self)
 {
-	self.nextthink = level.time + 1.0f;
+	self.nextthink = level.time + 100;
 	self.think = door_secret_move2;
 }
 
@@ -1836,7 +1836,7 @@ static void door_secret_move2 (edict_t &self)
 
 static void door_secret_move3 (edict_t &self)
 {
-	if (self.wait == -1)
+	if (self.wait == -1ull)
 		return;
 	self.nextthink = level.time + self.wait;
 	self.think = door_secret_move4;
@@ -1849,7 +1849,7 @@ static void door_secret_move4 (edict_t &self)
 
 static void door_secret_move5 (edict_t &self)
 {
-	self.nextthink = level.time + 1.0f;
+	self.nextthink = level.time + 100;
 	self.think = door_secret_move6;
 }
 
@@ -1884,7 +1884,7 @@ static void door_secret_blocked (edict_t &self, edict_t &other)
 	if (level.time < self.touch_debounce_time)
 		return;
 
-	self.touch_debounce_time = level.time + 0.5f;
+	self.touch_debounce_time = level.time + 500;
 	T_Damage (other, self, self, vec3_origin, other.s.origin, vec3_origin, self.dmg, 1, DAMAGE_NONE);
 }
 

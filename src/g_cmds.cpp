@@ -206,7 +206,7 @@ Cmd_Kill_f
 */
 static void Cmd_Kill_f (edict_t &ent)
 {
-	if((level.time - ent.client->respawn_time) < 5)
+	if ((level.time - ent.client->respawn_time) < 500)
 		return;
 	ent.flags &= ~FL_GODMODE;
 	ent.health = 0;
@@ -345,15 +345,15 @@ static void Cmd_Say_f (edict_t &ent, const bool &team, const bool &arg0)
 		gclient_t *cl = ent.client;
 
         if (level.time < cl->flood_locktill) {
-			ent.client->Print("You can't talk for %d more seconds\n", static_cast<int32_t>(cl->flood_locktill - level.time));
+			ent.client->Print("You can't talk for %d more seconds\n", static_cast<int32_t>(cl->flood_locktill - level.time) / 1000);
             return;
         }
         int32_t i = cl->flood_whenhead - flood_msgs->value + 1;
         if (i < 0)
             i = static_cast<int32_t>(lengthof(cl->flood_when) + i);
 		if (cl->flood_when[i] && 
-			level.time - cl->flood_when[i] < flood_persecond->value) {
-			cl->flood_locktill = level.time + flood_waitdelay->value;
+			level.time - cl->flood_when[i] < (flood_persecond->value * 1000)) {
+			cl->flood_locktill = level.time + (flood_waitdelay->value * 1000);
 			ent.client->Print(PRINT_CHAT, "Flood protection: You can't talk for %d seconds.\n", static_cast<int32_t>(flood_waitdelay->value));
             return;
         }
@@ -389,8 +389,8 @@ static void Cmd_PlayerList_f(const edict_t &ent)
 			continue;
 
 		snprintf(str, sizeof(str), "%02d:%02d %4d %3d %s%s\n",
-			(level.framenum - e2.client->resp.enterframe) / 600,
-			((level.framenum - e2.client->resp.enterframe) % 600)/10,
+			static_cast<int32_t>((level.framenum - e2.client->resp.enterframe) / 600),
+			static_cast<int32_t>(((level.framenum - e2.client->resp.enterframe) % 600) / 10),
 			e2.client->ping,
 			e2.client->resp.score,
 			e2.client->pers.netname,
